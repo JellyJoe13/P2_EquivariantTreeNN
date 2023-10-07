@@ -1,4 +1,7 @@
 import typing
+from etnn.data import DEFAULT_DATA_PATH
+import json
+import os
 
 
 class TreeNode:
@@ -80,3 +83,49 @@ def load_tree_from_json(tree: typing.Dict[str, typing.Union[str, list]]) -> Tree
     tree.calc_num_elem()
     # return tree
     return tree
+
+
+def save_tree(
+        tree_node: TreeNode,
+        file_name: str,
+        folder_path: str = DEFAULT_DATA_PATH,
+        pretty_save: bool = True
+) -> None:
+    """
+    Save tree structure as a json file.
+
+    :param tree_node: tree to be saved
+    :type tree_node: TreeNode
+    :param file_name: file name
+    :type file_name: str
+    :param folder_path: folder path (absolute or relative)
+    :type folder_path: str, optional
+    :param pretty_save: whether it shall be saved in a formatted way or not, default: true
+    :type pretty_save: bool, optional
+    """
+    with open(os.path.join(folder_path, file_name), "w") as file:
+        json.dump(tree_node.to_json(), file, indent=4 if pretty_save else ...)
+
+
+def load_tree(
+        file_name: str,
+        folder_path: str = DEFAULT_DATA_PATH
+) -> TreeNode:
+    """
+    Load tree from json file.
+
+    :param file_name: name of the file
+    :type file_name: str
+    :param folder_path: folder path (relative or absolute)
+    :type folder_path: str, optional
+    :return: Tree constructed from json file
+    :rtype: TreeNode
+    """
+    loaded_dict = None
+    with open(os.path.join(folder_path, file_name), "r") as file:
+        loaded_dict = json.load(file)
+
+    if loaded_dict is None:
+        raise Exception("File cannot be loaded")
+
+    return load_tree_from_json(loaded_dict)
