@@ -48,7 +48,7 @@ def tree4_test():
 
 
 def tree5_test():
-    tree = TreeNode("C", [TreeNode("E", 3)])
+    tree = TreeNode("C", [TreeNode("E", 5)])
     tree.calc_num_elem()
     perms = permutation.generate_all_permutations(tree, np.arange(tree.num_elem))
     print(perms)

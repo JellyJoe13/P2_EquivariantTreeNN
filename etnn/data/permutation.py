@@ -142,12 +142,16 @@ def permutation_c(
             else:
                 ranges += [range(offset, offset + node.num_elem)]
             offset += node.num_elem
-        for subs_permutation in permutations(ranges):
+        secondary_order = ranges.copy()
+        for _ in range(len(ranges)):
+            first = secondary_order[0]
+            secondary_order[:-1] = secondary_order[1:]
+            secondary_order[-1] = first
             perms += [
                 permutation_q(
                     subtree,
                     element_subset[
-                        list(chain(*subs_permutation))
+                        list(chain(*secondary_order))
                     ],
                     group_order=order_idx
                 )
