@@ -1,6 +1,6 @@
 import typing
 
-from etnn.data.tree_structure import TreeNode
+from etnn.data.tree_structure import TreeNode, unroll_node
 import numpy as np
 from itertools import product, chain, permutations
 
@@ -26,11 +26,14 @@ def permutation_e(
 def permutation_s(
         subtree: TreeNode,
         element_subset: np.ndarray,
-        inverted: bool = False
+        inverted: bool = False,
+        group_order: np.ndarray[int] = None
 ):
     """
     Generate the permutation for a S-type node.
 
+    :param group_order: custom group order to traverse, default None
+    :type group_order: np.ndarray[int], optional
     :param subtree: tree to use for permutation generation
     :type subtree: TreeNode
     :param element_subset: set of elements to permute
@@ -41,10 +44,15 @@ def permutation_s(
     :rtype: typing.Union[typing.List[np.ndarray], np.ndarray]
     """
     assert subtree.num_elem == len(element_subset)
+
+    if group_order is not None:
+        assert len(group_order) == len(subtree.children)
+
     children_elements = []
 
     offset = 0
-    iteration_order = subtree.children[::-1] if inverted else subtree.children
+    iteration_order = [subtree.children[i] for i in group_order] if group_order is not None else subtree.children
+    iteration_order = iteration_order[::-1] if inverted else iteration_order
     for child in iteration_order:
         children_elements += [
             generate_all_permutations(child, element_subset[offset:(offset+child.num_elem)])
@@ -67,7 +75,8 @@ def permutation_s(
 
 def permutation_q(
         subtree: TreeNode,
-        element_subset: np.ndarray
+        element_subset: np.ndarray,
+        group_order: np.ndarray[int] = None
 ):
     """
     Generate the permutation for a Q-type node.
@@ -82,29 +91,26 @@ def permutation_q(
     perms = []
 
     # normal side
-    perms += permutation_s(subtree, element_subset)
+    perms += permutation_s(subtree, element_subset, group_order=group_order)
     # inverted side
-    perms += permutation_s(subtree, element_subset, inverted=True)
+    perms += permutation_s(subtree, element_subset, inverted=True, group_order=group_order)
 
     # INPUT REORDERING 1
     index = create_reverse_index(subtree)
     # normal side
-    perms += permutation_s(subtree, element_subset[index])
+    perms += permutation_s(subtree, element_subset[index], group_order=group_order)
     # inverted side
-    perms += permutation_s(subtree, element_subset[index], inverted=True)
+    perms += permutation_s(subtree, element_subset[index], inverted=True, group_order=group_order)
 
     # INPUT REORDERING 2
     index = create_reverse_index(subtree, invert=True)
     # normal side
-    perms += permutation_s(subtree, element_subset[index])
+    perms += permutation_s(subtree, element_subset[index], group_order=group_order)
     # inverted side
-    perms += permutation_s(subtree, element_subset[index], inverted=True)
+    perms += permutation_s(subtree, element_subset[index], inverted=True, group_order=group_order)
 
     # remove duplicates and return
-    return np.unique(
-        np.stack(perms),
-        axis=0
-    )
+    return fuze_permutations(perms)
 
 
 def permutation_c(
@@ -113,13 +119,16 @@ def permutation_c(
 ):
     perms = []
     # shiftin through possibilities and groups...
-    # todo
+    order_idx = list(range(len(subtree.children)))
     order = subtree.children.copy()
     for _ in range(len(order)):
         # shift
         first = order[0]
         order[:-1] = order[1:]
         order[-1] = first
+        first = order_idx[0]
+        order_idx[:-1] = order_idx[1:]
+        order_idx[-1] = first
 
         # do for all the permutations of elements
         ranges = []
@@ -135,17 +144,27 @@ def permutation_c(
             offset += node.num_elem
         for subs_permutation in permutations(ranges):
             perms += [
-                permutation_q(subtree, element_subset[
-                    list(chain(*subs_permutation))
-                ])
+                permutation_q(
+                    subtree,
+                    element_subset[
+                        list(chain(*subs_permutation))
+                    ],
+                    group_order=order_idx
+                )
             ]
 
+    return fuze_permutations(perms)
 
+
+def fuze_permutations(perms):
+    perms = np.stack(perms)
+    if len(perms.shape) != 2:
+        top_size = 1
+        for i in perms.shape[:-1]:
+            top_size *= i
+        perms = perms.reshape((top_size, perms.shape[-1]))
     # remove duplicates and return
-    return np.unique(
-        np.stack(perms),
-        axis=0
-    )
+    return np.unique(perms, axis=0)
 
 
 def permutation_p(
@@ -163,10 +182,11 @@ def permutation_p(
     :rtype: typing.Union[typing.List[np.ndarray], np.ndarray]
     """
     perms = []
-    for node_permutation in permutations(subtree.children):
+    for node_permutation in permutations(range(len(subtree.children))):
         ranges = []
         offset = 0
-        for node in node_permutation:
+        for node_idx in node_permutation:
+            node = subtree.children[node_idx]
             if node.node_type == "E":
                 ranges += [
                     [offset + i]
@@ -176,17 +196,16 @@ def permutation_p(
                 ranges += [range(offset, offset+node.num_elem)]
             offset += node.num_elem
         for subs_permutation in permutations(ranges):
-            perms += [
-                permutation_s(subtree, element_subset[
+            perms += permutation_s(
+                subtree,
+                element_subset[
                     list(chain(*subs_permutation))
-                ])
-            ]
+                ],
+                group_order=node_permutation
+            )
 
     # remove duplicates and return
-    return np.unique(
-        np.stack(perms),
-        axis=0
-    )
+    return fuze_permutations(perms)
 
 
 def create_reverse_index(
@@ -245,7 +264,10 @@ def generate_all_permutations(
     :return: permutations in list or array
     :rtype: typing.Union[typing.List[np.ndarray], np.ndarray]
     """
-    # fetch action to take for this node
-    action = perm_function_register[tree.node_type]
+    # unroll E nodes in tree for safety
+    work_tree = unroll_node(tree)
 
-    return action(tree, elements)
+    # fetch action to take for this node
+    action = perm_function_register[work_tree.node_type]
+
+    return action(work_tree, elements)

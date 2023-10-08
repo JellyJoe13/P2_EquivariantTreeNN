@@ -129,3 +129,26 @@ def load_tree(
         raise Exception("File cannot be loaded")
 
     return load_tree_from_json(loaded_dict)
+
+
+def unroll_node(
+        tree: TreeNode
+) -> TreeNode:
+    new_children = []
+
+    if tree.node_type == "E":
+        return tree
+
+    for child in tree.children:
+        if child.node_type == "E":
+            for _ in range(child.children):
+                new_children += [TreeNode("E", 1)]
+        else:
+            new_children += [child]
+
+    ret_tree = TreeNode(
+        node_type=tree.node_type,
+        children=new_children
+    )
+    ret_tree.calc_num_elem()
+    return ret_tree
