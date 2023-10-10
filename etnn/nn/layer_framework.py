@@ -1,5 +1,6 @@
 from torch.nn import Module, Linear, ReLU
 from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
+from etnn.nn.q.chiral_node import ChiralNodeNetworkTypeQ
 
 
 class LayerFramework(Module):
@@ -8,15 +9,22 @@ class LayerFramework(Module):
             in_dim: int,
             hidden_dim: int = 128,
             out_dim: int = 1,
-            k: int = 2
+            k: int = 2,
+            temp_node_control: str = "S"
     ):
         super().__init__()
         self.embedding_layer = Linear(in_dim, hidden_dim)
 
-        self.tree_layer = ChiralNodeNetworkTypeS(
-            hidden_dim=hidden_dim,
-            k=k
-        )
+        if temp_node_control == "S":
+            self.tree_layer = ChiralNodeNetworkTypeS(
+                hidden_dim=hidden_dim,
+                k=k
+            )
+        elif temp_node_control == "Q":
+            self.tree_layer = ChiralNodeNetworkTypeQ(
+                hidden_dim=hidden_dim,
+                k=k
+            )
 
         self.reduction_layers = [
             Linear(hidden_dim, hidden_dim // 2),

@@ -9,8 +9,15 @@ def simple_test1():
     data = torch.cat([data, data.flip(-2)])
     print(data)
 
+    print("S node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2)
+    layer = LayerFramework(in_dim=5, k=2, temp_node_control="S")
+
+    print(layer(data))
+
+    print("Q node type")
+    # pass through layer
+    layer = LayerFramework(in_dim=5, k=2, temp_node_control="Q")
 
     print(layer(data))
     pass
