@@ -1,6 +1,7 @@
 from torch.nn import Module, Linear, ReLU
 from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
 from etnn.nn.q.chiral_node import ChiralNodeNetworkTypeQ
+from etnn.nn.c.chiral_node import ChiralNodeNetworkTypeC
 
 
 class LayerFramework(Module):
@@ -22,6 +23,11 @@ class LayerFramework(Module):
             )
         elif temp_node_control == "Q":
             self.tree_layer = ChiralNodeNetworkTypeQ(
+                hidden_dim=hidden_dim,
+                k=k
+            )
+        elif temp_node_control == "C":
+            self.tree_layer = ChiralNodeNetworkTypeC(
                 hidden_dim=hidden_dim,
                 k=k
             )
