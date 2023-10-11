@@ -1,0 +1,23 @@
+{
+    "node_type": "P",
+    "children": [
+        {
+            "node_type": "S",
+            "children": [
+                {
+                    "node_type": "E",
+                    "children": 3
+                }
+            ]
+        },
+        {
+            "node_type": "Q",
+            "children": [
+                {
+                    "node_type": "E",
+                    "children": 3
+                }
+            ]
+        }
+    ]
+}
