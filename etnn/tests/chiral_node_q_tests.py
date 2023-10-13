@@ -1,4 +1,4 @@
-from etnn.nn.layer_framework import LayerFramework
+from etnn.nn.layer_framework import LayerFramework, TreeNode
 import torch
 import numpy as np
 
@@ -15,25 +15,25 @@ def simple_test1():
 
     print("S node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, temp_node_control="S")
+    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("S", None))
 
     print(layer(data))
 
     print("Q node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, temp_node_control="Q")
+    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("Q", None))
 
     print(layer(data))
 
     print("C node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, temp_node_control="C")
+    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("C", None))
 
     print(layer(data))
 
     print("P node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, temp_node_control="P")
+    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("P", None))
 
     print(layer(data))
     pass
