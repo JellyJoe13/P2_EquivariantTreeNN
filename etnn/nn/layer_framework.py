@@ -20,6 +20,7 @@ class LayerFramework(Module):
         self.embedding_layer = Linear(in_dim, hidden_dim)
 
         self.tree = tree
+        self.tree.calc_num_elem()
 
         # todo: maybe check if the layer type is needed or not to reduce model size
         self.tree_layer_s = ChiralNodeNetworkTypeS(
@@ -85,7 +86,37 @@ class LayerFramework(Module):
             embedded_x,
             tree: TreeNode
     ) -> torch.Tensor:
-        return self.tree_layer_s(embedded_x)
+        # init storage room
+        data = []
+
+        # init offset to index properly
+        offset = 0
+
+        # loop over children and add to data storage by either
+        # - directly adding part of the tensor
+        # - run a submodule part and reduce to one vector
+        for child in tree.children:
+
+            # if node is E then just add the part of tensor to data array
+            if child.node_type == "E":
+                data += [embedded_x[..., offset:offset+child.num_elem, :]]
+
+            # else run part of the array through the corresponding nn module
+            else:
+                data += [
+                    torch.unsqueeze(
+                        self.control_hub(embedded_x[..., offset:offset+child.num_elem, :], child),
+                        dim=-2
+                    )
+                ]
+
+            # increase offset for indexing
+            offset += child.num_elem
+
+        # stack data and turn it into tensor to run through this node's nn module
+        fuzed_data = torch.cat(data, dim=-2)
+
+        return self.tree_layer_s(fuzed_data)
 
     def handle_q(
             self,
