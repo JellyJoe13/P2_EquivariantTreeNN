@@ -124,7 +124,81 @@ class LayerFramework(Module):
             tree: TreeNode
     ) -> torch.Tensor:
         # todo: input permutation and layer wise calling (bottom tree up
-        return self.tree_layer_q(embedded_x)
+        # FIRST DIRECTION TREE NODE INTERPRETATION
+        # init storage room
+        data = []
+
+        # init offset to index properly
+        offset = 0
+
+        # loop over children and add to data storage by either
+        # - directly adding part of the tensor
+        # - run a submodule part and reduce to one vector
+        for child in tree.children:
+
+            # if node is E then just add the part of tensor to data array
+            if child.node_type == "E":
+                data += [embedded_x[..., offset:offset + child.num_elem, :]]
+
+            # else run part of the array through the corresponding nn module
+            else:
+                data += [
+                    torch.unsqueeze(
+                        self.control_hub(embedded_x[..., offset:offset + child.num_elem, :], child),
+                        dim=-2
+                    )
+                ]
+
+            # increase offset for indexing
+            offset += child.num_elem
+
+        # stack data and turn it into tensor to run through this node's nn module
+        fuzed_data = torch.cat(data, dim=-2)
+
+        # compute result of this node
+        first = self.tree_layer_q(fuzed_data)
+
+        # SECOND DIRECTION TREE NODE INTERPRETATION
+        # todo: add checks if this second part is required or can be left out (like: are all chilren E's or all nodes
+        #  of the same type and size)
+        # todo: decrease overhead/make more efficient
+        # init storage room
+        data = []
+
+        # init offset to index properly
+        offset = 0
+
+        # loop over children and add to data storage by either
+        # - directly adding part of the tensor
+        # - run a submodule part and reduce to one vector
+        for child in tree.children[::-1]:
+
+            # if node is E then just add the part of tensor to data array
+            if child.node_type == "E":
+                data += [embedded_x[..., offset:offset + child.num_elem, :]]
+
+            # else run part of the array through the corresponding nn module
+            else:
+                data += [
+                    torch.unsqueeze(
+                        self.control_hub(embedded_x[..., offset:offset + child.num_elem, :], child),
+                        dim=-2
+                    )
+                ]
+
+            # increase offset for indexing
+            offset += child.num_elem
+
+        # stack data and turn it into tensor to run through this node's nn module
+        fuzed_data = torch.cat(data, dim=-2)
+
+        second = self.tree_layer_q(fuzed_data)
+
+        # mean over first and second and return
+        return torch.mean(
+            torch.stack([first, second]),
+            dim=0
+        )
 
     def handle_c(
             self,
@@ -132,6 +206,7 @@ class LayerFramework(Module):
             tree: TreeNode
     ) -> torch.Tensor:
         # todo: input permutation and layer wise calling (bottom tree up
+        # todo: efficient way of doing this?
         return self.tree_layer_c(embedded_x)
 
     def handle_p(
@@ -140,4 +215,6 @@ class LayerFramework(Module):
             tree: TreeNode
     ) -> torch.Tensor:
         # todo: input permutation and layer wise calling (bottom tree up
+        # todo: efficient way of doing this? very inefficient otherwise or heavy logic to determine which permutations
+        #  are really necessary
         return self.tree_layer_p(embedded_x)
