@@ -30,6 +30,12 @@ def simple_test1():
     layer = LayerFramework(in_dim=5, k=2, temp_node_control="C")
 
     print(layer(data))
+
+    print("P node type")
+    # pass through layer
+    layer = LayerFramework(in_dim=5, k=2, temp_node_control="P")
+
+    print(layer(data))
     pass
 
 
