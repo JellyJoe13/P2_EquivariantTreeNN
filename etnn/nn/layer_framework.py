@@ -1,3 +1,5 @@
+import typing
+
 from torch.nn import Module, Linear, ReLU
 from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
 from etnn.nn.q.chiral_node import ChiralNodeNetworkTypeQ
@@ -72,20 +74,21 @@ class LayerFramework(Module):
     ) -> torch.Tensor:
         # node type switch to handle different nodes later on more easily
         if tree.node_type == "S":
-            return self.handle_s(embedded_x, tree)
+            return self.handle_s(embedded_x, tree.children)
         elif tree.node_type == "Q":
-            return self.handle_q(embedded_x, tree)
+            return self.handle_q(embedded_x, tree.children)
         elif tree.node_type == "C":
-            return self.handle_c(embedded_x, tree)
+            return self.handle_c(embedded_x, tree.children)
         elif tree.node_type == "P":
-            return self.handle_p(embedded_x, tree)
+            return self.handle_p(embedded_x, tree.children)
         raise NotImplementedError("not implemented yet")
 
-    def handle_s(
+    def ordered_tree_traversal(
             self,
             embedded_x,
-            tree: TreeNode
-    ) -> torch.Tensor:
+            children_list: typing.List[TreeNode],
+            node_module
+    ):
         # init storage room
         data = []
 
@@ -95,46 +98,7 @@ class LayerFramework(Module):
         # loop over children and add to data storage by either
         # - directly adding part of the tensor
         # - run a submodule part and reduce to one vector
-        for child in tree.children:
-
-            # if node is E then just add the part of tensor to data array
-            if child.node_type == "E":
-                data += [embedded_x[..., offset:offset+child.num_elem, :]]
-
-            # else run part of the array through the corresponding nn module
-            else:
-                data += [
-                    torch.unsqueeze(
-                        self.control_hub(embedded_x[..., offset:offset+child.num_elem, :], child),
-                        dim=-2
-                    )
-                ]
-
-            # increase offset for indexing
-            offset += child.num_elem
-
-        # stack data and turn it into tensor to run through this node's nn module
-        fuzed_data = torch.cat(data, dim=-2)
-
-        return self.tree_layer_s(fuzed_data)
-
-    def handle_q(
-            self,
-            embedded_x,
-            tree: TreeNode
-    ) -> torch.Tensor:
-        # todo: input permutation and layer wise calling (bottom tree up
-        # FIRST DIRECTION TREE NODE INTERPRETATION
-        # init storage room
-        data = []
-
-        # init offset to index properly
-        offset = 0
-
-        # loop over children and add to data storage by either
-        # - directly adding part of the tensor
-        # - run a submodule part and reduce to one vector
-        for child in tree.children:
+        for child in children_list:
 
             # if node is E then just add the part of tensor to data array
             if child.node_type == "E":
@@ -155,44 +119,41 @@ class LayerFramework(Module):
         # stack data and turn it into tensor to run through this node's nn module
         fuzed_data = torch.cat(data, dim=-2)
 
-        # compute result of this node
-        first = self.tree_layer_q(fuzed_data)
+        return node_module(fuzed_data)
+
+    def handle_s(
+            self,
+            embedded_x,
+            children_list: typing.List[TreeNode]
+    ) -> torch.Tensor:
+        return self.ordered_tree_traversal(
+            embedded_x,
+            children_list,
+            self.tree_layer_s
+        )
+
+    def handle_q(
+            self,
+            embedded_x,
+            children_list: typing.List[TreeNode]
+    ) -> torch.Tensor:
+        # todo: input permutation and layer wise calling (bottom tree up
+        # FIRST DIRECTION TREE NODE INTERPRETATION
+        first = self.ordered_tree_traversal(
+            embedded_x,
+            children_list,
+            self.tree_layer_q
+        )
 
         # SECOND DIRECTION TREE NODE INTERPRETATION
         # todo: add checks if this second part is required or can be left out (like: are all chilren E's or all nodes
         #  of the same type and size)
         # todo: decrease overhead/make more efficient
-        # init storage room
-        data = []
-
-        # init offset to index properly
-        offset = 0
-
-        # loop over children and add to data storage by either
-        # - directly adding part of the tensor
-        # - run a submodule part and reduce to one vector
-        for child in tree.children[::-1]:
-
-            # if node is E then just add the part of tensor to data array
-            if child.node_type == "E":
-                data += [embedded_x[..., offset:offset + child.num_elem, :]]
-
-            # else run part of the array through the corresponding nn module
-            else:
-                data += [
-                    torch.unsqueeze(
-                        self.control_hub(embedded_x[..., offset:offset + child.num_elem, :], child),
-                        dim=-2
-                    )
-                ]
-
-            # increase offset for indexing
-            offset += child.num_elem
-
-        # stack data and turn it into tensor to run through this node's nn module
-        fuzed_data = torch.cat(data, dim=-2)
-
-        second = self.tree_layer_q(fuzed_data)
+        second = self.ordered_tree_traversal(
+            embedded_x,
+            children_list[::-1],
+            self.tree_layer_q
+        )
 
         # mean over first and second and return
         return torch.mean(
@@ -203,16 +164,55 @@ class LayerFramework(Module):
     def handle_c(
             self,
             embedded_x,
-            tree: TreeNode
+            children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
         # todo: input permutation and layer wise calling (bottom tree up
         # todo: efficient way of doing this?
-        return self.tree_layer_c(embedded_x)
+
+        # init variables
+        n_c = len(children_list)
+
+        # copy children list
+        group_list = children_list.copy()
+
+        # init results storage
+        results_storage = []
+
+        # shift over input group wise and also invert
+        for _ in range(n_c):
+            # shift one position
+            first = group_list[0]
+            group_list[:-1] = group_list[1:]
+            group_list[-1] = first
+
+            # do q layer for arrangement basically
+            # FIRST
+            results_storage += [
+                self.ordered_tree_traversal(
+                    embedded_x=embedded_x,
+                    children_list=group_list,
+                    node_module=self.tree_layer_c
+                )
+            ]
+            # SECOND
+            results_storage += [
+                self.ordered_tree_traversal(
+                    embedded_x=embedded_x,
+                    children_list=group_list[::-1],
+                    node_module=self.tree_layer_c
+                )
+            ]
+
+        # mean over first and second and return
+        return torch.mean(
+            torch.stack(results_storage),
+            dim=0
+        )
 
     def handle_p(
             self,
             embedded_x,
-            tree: TreeNode
+            children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
         # todo: input permutation and layer wise calling (bottom tree up
         # todo: efficient way of doing this? very inefficient otherwise or heavy logic to determine which permutations
