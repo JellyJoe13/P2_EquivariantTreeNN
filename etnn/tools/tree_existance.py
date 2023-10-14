@@ -5,6 +5,15 @@ def contains_node_type(
         node_type: str,
         tree: TreeNode
 ) -> bool:
+    """
+    Function that determines if the tree contains a node with a certain type or not.
+    :param node_type: Node type to check if present or not
+    :type node_type: str
+    :param tree: Tree in which to search in
+    :type tree: TreeNode
+    :return: Boolean indicating if such a node type is present or not
+    :rtype: bool
+    """
     # if this is the node we are looking for then return True
     if node_type == tree.node_type:
         return True

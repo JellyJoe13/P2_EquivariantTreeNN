@@ -6,6 +6,14 @@ import numpy as np
 def is_inverting_required(
         group_list: typing.List[TreeNode]
 ) -> bool:
+    """
+    Function that determines whether the order of the groups is important and hence if the nn module should also invert
+    the order of the permutation nodes to cover all possible inputs.
+    :param group_list: List of tree nodes belonging to one parent node
+    :type group_list: typing.List[TreeNode]
+    :return: Boolean indicating the need to invert.
+    :rtype: bool
+    """
     if len(group_list) == 1:
         return False
 
@@ -26,7 +34,15 @@ def is_inverting_required(
 
 def is_permuting_required(
         group_list: typing.List[TreeNode]
-):
+) -> bool:
+    """
+    Function that determines whether permutations like C or P group list permutations need to be executed
+    or if they are sufficiently similar so that these permutations can be skipped.
+    :param group_list: List of tree nodes belonging to one parent node
+    :type group_list: typing.List[TreeNode]
+    :return: Boolean indicating the need to permute the inputted group list
+    :rtype: bool
+    """
     if len(group_list) == 1:
         return False
 

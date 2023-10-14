@@ -77,7 +77,7 @@ def permutation_q(
         subtree: TreeNode,
         element_subset: np.ndarray,
         group_order: np.ndarray[int] = None
-):
+) -> typing.Union[typing.List[np.ndarray], np.ndarray]:
     """
     Generate the permutation for a Q-type node.
 
@@ -85,6 +85,9 @@ def permutation_q(
     :type subtree: TreeNode
     :param element_subset: set of elements to permute
     :type element_subset: np.ndarray
+    :param group_order: Order of the children nodes of the node to be applied. Relevant when using this method for
+    non-default applications than the Q-permutation order. Array of indexes. Default: ``None`` (meaning default order)
+    :type group_order: np.ndarray[int]
     :return: permutations in list or array
     :rtype: typing.Union[typing.List[np.ndarray], np.ndarray]
     """
@@ -116,7 +119,17 @@ def permutation_q(
 def permutation_c(
         subtree: TreeNode,
         element_subset: np.ndarray
-):
+) -> typing.Union[typing.List[np.ndarray], np.ndarray]:
+    """
+    Generate the permutation for a C-type node.
+
+    :param subtree: tree to use for permutation generation
+    :type subtree: TreeNode
+    :param element_subset: set of elements to permute
+    :type element_subset: np.ndarray
+    :return: permutations in list or array
+    :rtype: typing.Union[typing.List[np.ndarray], np.ndarray]
+    """
     perms = []
     # shiftin through possibilities and groups...
     order_idx = list(range(len(subtree.children)))
@@ -160,7 +173,18 @@ def permutation_c(
     return fuze_permutations(perms)
 
 
-def fuze_permutations(perms):
+def fuze_permutations(
+        perms: typing.Union[np.ndarray, typing.List[np.ndarray]]
+) -> np.ndarray:
+    """
+    Function that fuzes permutations of nodes with other permutations into permutations of the parent node.
+
+    Example: [[[a,b,c]],[[d,e],[f,g]]] becomes [[a,b,c,d,e],[a,b,c,f,g]]
+    :param perms: List of lists containing permutations from children permutations.
+    :type perms: typing.Union[np.ndarray, typing.List[np.ndarray]]
+    :return: Fuzed permutations.
+    :rtype: np.ndarray
+    """
     perms = np.stack(perms)
     if len(perms.shape) != 2:
         top_size = 1

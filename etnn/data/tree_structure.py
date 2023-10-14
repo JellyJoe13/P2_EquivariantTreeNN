@@ -134,6 +134,16 @@ def load_tree(
 def unroll_node(
         tree: TreeNode
 ) -> TreeNode:
+    """
+    Function used to unroll a tree node, meaning that E-type children will be converted in several e-type children.
+    An E type node with children parameter 5 will become 5 nodes of type E with 1 as children value.
+
+    Serves to make some other functions dealing with permutation logic to be simpler.
+    :param tree: Tree which is to be unrolled
+    :type tree: TreeNode
+    :return: Unrolled tree
+    :rtype: TreeNode
+    """
     new_children = []
 
     if tree.node_type == "E":

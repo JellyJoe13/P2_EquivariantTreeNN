@@ -13,6 +13,16 @@ from itertools import permutations
 
 
 class ChiralLayerManagementFramework(Module):
+    """
+    Class that realises a layer for equivariant inputs according to a permutation definition through a permutation
+    tree.
+    Handles submodules of 'chiral' type that are heavily inspired by paper_.
+
+    ...
+    References & Footnotes
+    ======================
+    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
+    """
     def __init__(
             self,
             in_dim: int,
@@ -21,6 +31,21 @@ class ChiralLayerManagementFramework(Module):
             out_dim: int = 1,
             k: int = 2
     ):
+        """
+        Initializes `ChiralLayerManagementFramework`. Input to this layer is 3-dimensional:
+        (set, elements_in_set, dimension_element)
+
+        :param in_dim: Dimension of the input values - denotes the dimension of each element in the set input.
+        :type in_dim: int
+        :param tree: Tree determining which input to consider equal
+        :type tree: TreeNode
+        :param hidden_dim: Hidden dimension the elements in the sets are transferred to. Default: ``128``.
+        :type hidden_dim: int
+        :param out_dim: Dimension of the desired output. General dimension of output: ``(set, out_dim)``. Default: ``1``
+        :type out_dim: int
+        :param k: Value that determines how many elements in order to set into context with each other. Default: ``2``
+        :type k: int
+        """
         super().__init__()
         self.embedding_layer = Linear(in_dim, hidden_dim)
 
@@ -61,6 +86,19 @@ class ChiralLayerManagementFramework(Module):
         return
 
     def forward(self, x):
+        """
+        Forward function as used in most pytorch modules. Returns prediction of the input data element(s). Read more
+        about this in the official pytorch documentation: _pytorchModule.
+        :param x: Input data to predict.
+        :type x: torch.Tensor
+        :return: Prediction of the module
+        :rtype: torch.Tensor
+
+        ...
+        References & Footnotes
+        ======================
+        ..pytorchModule: https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.forward
+        """
         # embed the input through a linear layer
         embedded_x = self.embedding_layer(x)
 
@@ -78,6 +116,16 @@ class ChiralLayerManagementFramework(Module):
             embedded_x: torch.Tensor,
             tree: TreeNode
     ) -> torch.Tensor:
+        """
+        Function to act as a switch to abstract the choice of functionality for each node type. Used to call instead
+        of the actual node type for better readability and reuse of functionality.
+        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
+        :type embedded_x: torch.Tensor
+        :param tree: Tree containing the tree node for which to currently act upon.
+        :type tree: TreeNode
+        :return: prediction/result of a subcomponent used to derive the final result (=label)
+        :rtype: torch.Tensor
+        """
         # todo(potential): get rid of recursive calling with dynamic routines
         # todo(potential): increase efficiency
         # node type switch to handle different nodes later on more easily
@@ -93,10 +141,22 @@ class ChiralLayerManagementFramework(Module):
 
     def ordered_tree_traversal(
             self,
-            embedded_x,
+            embedded_x: torch.Tensor,
             children_list: typing.List[TreeNode],
-            node_module
-    ):
+            node_module: typing.Callable[[torch.Tensor], torch.Tensor]
+    ) -> torch.Tensor:
+        """
+        Function to traverse the tree nodes provided in the parameter in order to generate a prediction/label for the
+        input data at this node level. Uses the provided function as an indicator of what nodetype the current node is.
+        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
+        :type embedded_x: torch.Tensor
+        :param children_list: List of nodes that are children to the current node
+        :type children_list: typing.List[TreeNode]
+        :param node_module: Specifies which module to use for the current node type
+        :type node_module: typing.Callable[[torch.Tensor], torch.Tensor]
+        :return: prediction/result of a subcomponent used to derive the final result (=label)
+        :rtype: torch.Tensor
+        """
         # init storage room
         data = []
 
@@ -131,9 +191,18 @@ class ChiralLayerManagementFramework(Module):
 
     def handle_s(
             self,
-            embedded_x,
+            embedded_x: torch.Tensor,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
+        """
+        Function realising the functionality of a S type node.
+        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
+        :type embedded_x: torch.Tensor
+        :param children_list: Defining which components are contained in the current node
+        :type children_list: typing.List[TreeNode]
+        :return: prediction/result of a subcomponent used to derive the final result (=label)
+        :rtype: torch.Tensor
+        """
         return self.ordered_tree_traversal(
             embedded_x,
             children_list,
@@ -142,9 +211,18 @@ class ChiralLayerManagementFramework(Module):
 
     def handle_q(
             self,
-            embedded_x,
+            embedded_x: torch.Tensor,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
+        """
+        Function realising the functionality of a Q type node.
+        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
+        :type embedded_x: torch.Tensor
+        :param children_list: Defining which components are contained in the current node
+        :type children_list: typing.List[TreeNode]
+        :return: prediction/result of a subcomponent used to derive the final result (=label)
+        :rtype: torch.Tensor
+        """
         # FIRST DIRECTION TREE NODE INTERPRETATION
         first = self.ordered_tree_traversal(
             embedded_x,
@@ -170,9 +248,18 @@ class ChiralLayerManagementFramework(Module):
 
     def handle_c(
             self,
-            embedded_x,
+            embedded_x: torch.Tensor,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
+        """
+        Function realising the functionality of a C type node.
+        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
+        :type embedded_x: torch.Tensor
+        :param children_list: Defining which components are contained in the current node
+        :type children_list: typing.List[TreeNode]
+        :return: prediction/result of a subcomponent used to derive the final result (=label)
+        :rtype: torch.Tensor
+        """
         # init variables
         n_c = len(children_list)
 
@@ -222,9 +309,18 @@ class ChiralLayerManagementFramework(Module):
 
     def handle_p(
             self,
-            embedded_x,
+            embedded_x: torch.Tensor,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
+        """
+        Function realising the functionality of a P type node.
+        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
+        :type embedded_x: torch.Tensor
+        :param children_list: Defining which components are contained in the current node
+        :type children_list: typing.List[TreeNode]
+        :return: prediction/result of a subcomponent used to derive the final result (=label)
+        :rtype: torch.Tensor
+        """
         # init data storage
         data_storage = []
 

@@ -9,6 +9,16 @@ class ChiralNodeNetworkTypeC(Module):
             hidden_dim: int = 128,
             use_state: bool = False
     ):
+        """
+        Function to initialize `ChiralNodeNetworkTypeC`.
+        :param k: Determines how many ordered elements to set into context with each other. Default: ``2``.
+        :type k: int
+        :param hidden_dim: Hidden dimension - dimension to work with in the module. Default: ``128``.
+        :type hidden_dim: int
+        :param use_state: Determines whether an additional Parameter should be used as bias in the module. Default:
+        ``False``
+        :type use_state: bool
+        """
         super().__init__()
         self.k = k
         self.k_layers = [
