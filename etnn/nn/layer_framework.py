@@ -6,12 +6,13 @@ from etnn.nn.q.chiral_node import ChiralNodeNetworkTypeQ
 from etnn.nn.c.chiral_node import ChiralNodeNetworkTypeC
 from etnn.nn.p.chiral_node import ChiralNodeNetworkTypeP
 import etnn.tools.permutation_reordering as pr
+from etnn.tools.tree_existance import contains_node_type
 from etnn.data import TreeNode
 import torch
 from itertools import permutations
 
 
-class LayerFramework(Module):
+class ChiralLayerManagementFramework(Module):
     def __init__(
             self,
             in_dim: int,
@@ -26,26 +27,29 @@ class LayerFramework(Module):
         self.tree = tree
         self.tree.calc_num_elem()
 
-        # todo: maybe check if the layer type is needed or not to reduce model size
-        self.tree_layer_s = ChiralNodeNetworkTypeS(
-            hidden_dim=hidden_dim,
-            k=k
-        )
+        if contains_node_type("S", tree):
+            self.tree_layer_s = ChiralNodeNetworkTypeS(
+                hidden_dim=hidden_dim,
+                k=k
+            )
 
-        self.tree_layer_q = ChiralNodeNetworkTypeQ(
-            hidden_dim=hidden_dim,
-            k=k
-        )
+        if contains_node_type("Q", tree):
+            self.tree_layer_q = ChiralNodeNetworkTypeQ(
+                hidden_dim=hidden_dim,
+                k=k
+            )
 
-        self.tree_layer_c = ChiralNodeNetworkTypeC(
-            hidden_dim=hidden_dim,
-            k=k
-        )
+        if contains_node_type("C", tree):
+            self.tree_layer_c = ChiralNodeNetworkTypeC(
+                hidden_dim=hidden_dim,
+                k=k
+            )
 
-        self.tree_layer_p = ChiralNodeNetworkTypeP(
-            hidden_dim=hidden_dim,
-            k=k
-        )
+        if contains_node_type("P", tree):
+            self.tree_layer_p = ChiralNodeNetworkTypeP(
+                hidden_dim=hidden_dim,
+                k=k
+            )
 
         self.reduction_layers = [
             Linear(hidden_dim, hidden_dim // 2),

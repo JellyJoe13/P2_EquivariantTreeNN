@@ -1,4 +1,4 @@
-from etnn.nn.layer_framework import LayerFramework, TreeNode
+from etnn.nn.layer_framework import ChiralLayerManagementFramework, TreeNode
 import torch
 import numpy as np
 
@@ -15,25 +15,25 @@ def simple_test1():
 
     print("S node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("S", [TreeNode("E", data.shape[1])]))
+    layer = ChiralLayerManagementFramework(in_dim=5, k=2, tree=TreeNode("S", [TreeNode("E", data.shape[1])]))
 
     print(layer(data))
 
     print("Q node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("Q", [TreeNode("E", data.shape[1])]))
+    layer = ChiralLayerManagementFramework(in_dim=5, k=2, tree=TreeNode("Q", [TreeNode("E", data.shape[1])]))
 
     print(layer(data))
 
     print("C node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("C", [TreeNode("E", data.shape[1])]))
+    layer = ChiralLayerManagementFramework(in_dim=5, k=2, tree=TreeNode("C", [TreeNode("E", data.shape[1])]))
 
     print(layer(data))
 
     print("P node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("P", [TreeNode("E", data.shape[1])]))
+    layer = ChiralLayerManagementFramework(in_dim=5, k=2, tree=TreeNode("P", [TreeNode("E", data.shape[1])]))
 
     print(layer(data))
     pass
@@ -51,7 +51,7 @@ def tree_nn_test():
 
     print("S node type")
     # pass through layer
-    layer = LayerFramework(in_dim=5, k=2, tree=TreeNode("S", [
+    layer = ChiralLayerManagementFramework(in_dim=5, k=2, tree=TreeNode("S", [
         TreeNode("E", 2),
         TreeNode("S", [TreeNode("E", data.shape[1]-4)]),
         TreeNode("E", 2)
