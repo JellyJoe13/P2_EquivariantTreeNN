@@ -7,6 +7,7 @@ from etnn.nn.c.chiral_node import ChiralNodeNetworkTypeC
 from etnn.nn.p.chiral_node import ChiralNodeNetworkTypeP
 from etnn.data import TreeNode
 import torch
+from itertools import permutations
 
 
 class LayerFramework(Module):
@@ -72,6 +73,7 @@ class LayerFramework(Module):
             embedded_x: torch.Tensor,
             tree: TreeNode
     ) -> torch.Tensor:
+        # todo(potential): get rid of recursive calling with dynamic routines
         # node type switch to handle different nodes later on more easily
         if tree.node_type == "S":
             return self.handle_s(embedded_x, tree.children)
@@ -137,7 +139,7 @@ class LayerFramework(Module):
             embedded_x,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
-        # todo: input permutation and layer wise calling (bottom tree up
+        # todo: more efficient way?
         # FIRST DIRECTION TREE NODE INTERPRETATION
         first = self.ordered_tree_traversal(
             embedded_x,
@@ -166,7 +168,6 @@ class LayerFramework(Module):
             embedded_x,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
-        # todo: input permutation and layer wise calling (bottom tree up
         # todo: efficient way of doing this?
 
         # init variables
@@ -214,7 +215,23 @@ class LayerFramework(Module):
             embedded_x,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
-        # todo: input permutation and layer wise calling (bottom tree up
         # todo: efficient way of doing this? very inefficient otherwise or heavy logic to determine which permutations
         #  are really necessary
-        return self.tree_layer_p(embedded_x)
+
+        # init data storage
+        data_storage = []
+
+        # generate all permutations of this node
+        for node_perm in permutations(children_list):
+            data_storage += [
+                self.ordered_tree_traversal(
+                    embedded_x=embedded_x,
+                    children_list=node_perm,
+                    node_module=self.tree_layer_p
+                )
+            ]
+
+        return torch.mean(
+            torch.stack(data_storage),
+            dim=0
+        )
