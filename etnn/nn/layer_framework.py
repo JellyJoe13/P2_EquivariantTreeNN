@@ -5,6 +5,7 @@ from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
 from etnn.nn.q.chiral_node import ChiralNodeNetworkTypeQ
 from etnn.nn.c.chiral_node import ChiralNodeNetworkTypeC
 from etnn.nn.p.chiral_node import ChiralNodeNetworkTypeP
+import etnn.tools.permutation_reordering as pr
 from etnn.data import TreeNode
 import torch
 from itertools import permutations
@@ -74,6 +75,7 @@ class LayerFramework(Module):
             tree: TreeNode
     ) -> torch.Tensor:
         # todo(potential): get rid of recursive calling with dynamic routines
+        # todo(potential): increase efficiency
         # node type switch to handle different nodes later on more easily
         if tree.node_type == "S":
             return self.handle_s(embedded_x, tree.children)
@@ -139,7 +141,6 @@ class LayerFramework(Module):
             embedded_x,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
-        # todo: more efficient way?
         # FIRST DIRECTION TREE NODE INTERPRETATION
         first = self.ordered_tree_traversal(
             embedded_x,
@@ -148,9 +149,9 @@ class LayerFramework(Module):
         )
 
         # SECOND DIRECTION TREE NODE INTERPRETATION
-        # todo: add checks if this second part is required or can be left out (like: are all chilren E's or all nodes
-        #  of the same type and size)
-        # todo: decrease overhead/make more efficient
+        # check if inverting action is required
+        if not pr.is_inverting_required(children_list):
+            return first
         second = self.ordered_tree_traversal(
             embedded_x,
             children_list[::-1],
@@ -168,8 +169,6 @@ class LayerFramework(Module):
             embedded_x,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
-        # todo: efficient way of doing this?
-
         # init variables
         n_c = len(children_list)
 
@@ -179,13 +178,11 @@ class LayerFramework(Module):
         # init results storage
         results_storage = []
 
+        # check if cycling is required in the first place to avoid overhead
+        permutation_needed = pr.is_permuting_required(group_list)
+
         # shift over input group wise and also invert
         for _ in range(n_c):
-            # shift one position
-            first = group_list[0]
-            group_list[:-1] = group_list[1:]
-            group_list[-1] = first
-
             # do q layer for arrangement basically
             # FIRST
             results_storage += [
@@ -196,13 +193,22 @@ class LayerFramework(Module):
                 )
             ]
             # SECOND
-            results_storage += [
-                self.ordered_tree_traversal(
-                    embedded_x=embedded_x,
-                    children_list=group_list[::-1],
-                    node_module=self.tree_layer_c
-                )
-            ]
+            if pr.is_inverting_required(children_list):
+                results_storage += [
+                    self.ordered_tree_traversal(
+                        embedded_x=embedded_x,
+                        children_list=group_list[::-1],
+                        node_module=self.tree_layer_c
+                    )
+                ]
+
+            if not permutation_needed:
+                break
+
+            # shift one position
+            first = group_list[0]
+            group_list[:-1] = group_list[1:]
+            group_list[-1] = first
 
         # mean over first and second and return
         return torch.mean(
@@ -215,11 +221,11 @@ class LayerFramework(Module):
             embedded_x,
             children_list: typing.List[TreeNode]
     ) -> torch.Tensor:
-        # todo: efficient way of doing this? very inefficient otherwise or heavy logic to determine which permutations
-        #  are really necessary
-
         # init data storage
         data_storage = []
+
+        # evaluate if permuting in the first place is required or not
+        permuting_needed = pr.is_permuting_required(children_list)
 
         # generate all permutations of this node
         for node_perm in permutations(children_list):
@@ -230,6 +236,9 @@ class LayerFramework(Module):
                     node_module=self.tree_layer_p
                 )
             ]
+
+            if not permuting_needed:
+                break
 
         return torch.mean(
             torch.stack(data_storage),
