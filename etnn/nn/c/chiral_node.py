@@ -3,6 +3,13 @@ from torch.nn import Module, Linear, ReLU, ELU, Parameter
 
 
 class ChiralNodeNetworkTypeC(Module):
+    """
+    Class that realizes P type node using methods described in paper_.
+    ...
+    References & Footnotes
+    ======================
+    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
+    """
     def __init__(
             self,
             k: int = 2,

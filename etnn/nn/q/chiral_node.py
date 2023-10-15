@@ -4,6 +4,13 @@ from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
 
 
 class ChiralNodeNetworkTypeQ(Module):
+    """
+    Class that realizes Q type node using methods described in paper_.
+    ...
+    References & Footnotes
+    ======================
+    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
+    """
     def __init__(
             self,
             k: int = 2,
