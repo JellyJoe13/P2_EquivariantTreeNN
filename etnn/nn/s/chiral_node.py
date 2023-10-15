@@ -4,11 +4,7 @@ from torch.nn import Module, Linear, ELU, Parameter
 
 class ChiralNodeNetworkTypeS(Module):
     """
-    Class that realizes S type node using methods described in paper_.
-    ...
-    References & Footnotes
-    ======================
-    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
+    Class that realizes S type node using methods described in [Gainski2023]_.
     """
     def __init__(
             self,
@@ -18,6 +14,7 @@ class ChiralNodeNetworkTypeS(Module):
     ):
         """
         Function to initialize `ChiralNodeNetworkTypeS`.
+
         :param k: Determines how many ordered elements to set into context with each other. Default: ``2``.
         :type k: int
         :param hidden_dim: Hidden dimension - dimension to work with in the module. Default: ``128``.

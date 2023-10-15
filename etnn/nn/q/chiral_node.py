@@ -5,11 +5,7 @@ from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
 
 class ChiralNodeNetworkTypeQ(Module):
     """
-    Class that realizes Q type node using methods described in paper_.
-    ...
-    References & Footnotes
-    ======================
-    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
+    Class that realizes Q type node using methods described in [Gainski2023]_.
     """
     def __init__(
             self,
@@ -19,6 +15,7 @@ class ChiralNodeNetworkTypeQ(Module):
     ):
         """
         Function to initialize `ChiralNodeNetworkTypeQ`.
+
         :param k: Determines how many ordered elements to set into context with each other. Default: ``2``.
         :type k: int
         :param hidden_dim: Hidden dimension - dimension to work with in the module. Default: ``128``.

@@ -16,12 +16,8 @@ class ChiralLayerManagementFramework(Module):
     """
     Class that realises a layer for equivariant inputs according to a permutation definition through a permutation
     tree.
-    Handles submodules of 'chiral' type that are heavily inspired by paper_.
+    Handles submodules of 'chiral' type that are heavily inspired by [Gainski2023]_.
 
-    ...
-    References & Footnotes
-    ======================
-    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
     """
     def __init__(
             self,
@@ -88,16 +84,12 @@ class ChiralLayerManagementFramework(Module):
     def forward(self, x):
         """
         Forward function as used in most pytorch modules. Returns prediction of the input data element(s). Read more
-        about this in the official pytorch documentation: _pytorchModule.
+        about this in the official pytorch documentation: https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.forward.
+
         :param x: Input data to predict.
         :type x: torch.Tensor
         :return: Prediction of the module
         :rtype: torch.Tensor
-
-        ...
-        References & Footnotes
-        ======================
-        ..pytorchModule: https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.forward
         """
         # embed the input through a linear layer
         embedded_x = self.embedding_layer(x)
@@ -119,6 +111,7 @@ class ChiralLayerManagementFramework(Module):
         """
         Function to act as a switch to abstract the choice of functionality for each node type. Used to call instead
         of the actual node type for better readability and reuse of functionality.
+
         :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
         :type embedded_x: torch.Tensor
         :param tree: Tree containing the tree node for which to currently act upon.
@@ -148,6 +141,7 @@ class ChiralLayerManagementFramework(Module):
         """
         Function to traverse the tree nodes provided in the parameter in order to generate a prediction/label for the
         input data at this node level. Uses the provided function as an indicator of what nodetype the current node is.
+
         :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
         :type embedded_x: torch.Tensor
         :param children_list: List of nodes that are children to the current node
@@ -196,6 +190,7 @@ class ChiralLayerManagementFramework(Module):
     ) -> torch.Tensor:
         """
         Function realising the functionality of a S type node.
+
         :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
         :type embedded_x: torch.Tensor
         :param children_list: Defining which components are contained in the current node
@@ -216,6 +211,7 @@ class ChiralLayerManagementFramework(Module):
     ) -> torch.Tensor:
         """
         Function realising the functionality of a Q type node.
+
         :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
         :type embedded_x: torch.Tensor
         :param children_list: Defining which components are contained in the current node
@@ -253,6 +249,7 @@ class ChiralLayerManagementFramework(Module):
     ) -> torch.Tensor:
         """
         Function realising the functionality of a C type node.
+
         :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
         :type embedded_x: torch.Tensor
         :param children_list: Defining which components are contained in the current node
@@ -314,6 +311,7 @@ class ChiralLayerManagementFramework(Module):
     ) -> torch.Tensor:
         """
         Function realising the functionality of a P type node.
+
         :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.
         :type embedded_x: torch.Tensor
         :param children_list: Defining which components are contained in the current node

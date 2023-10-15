@@ -4,12 +4,8 @@ from torch.nn import Module, Linear, ELU, Parameter
 
 class ChiralNodeNetworkTypeP(Module):
     """
-    Class that realizes P type node using methods described in paper_. P type in this case mainly only has the same
-    number of parameters as other nodes but does not utilize presented techniques of the paper.
-    ...
-    References & Footnotes
-    ======================
-    ..paper: https://doi.org/10.1007/978-3-031-43418-1_3
+    Class that realizes P type node using methods described in [Gainski2023]_. P type in this case mainly only has the
+    same number of parameters as other nodes but does not utilize presented techniques of the paper.
     """
     def __init__(
             self,
@@ -19,6 +15,7 @@ class ChiralNodeNetworkTypeP(Module):
     ):
         """
         Function to initialize `ChiralNodeNetworkTypeP`.
+
         :param k: Determines how many ordered elements to set into context with each other. Default: ``2``.
         :type k: int
         :param hidden_dim: Hidden dimension - dimension to work with in the module. Default: ``128``.

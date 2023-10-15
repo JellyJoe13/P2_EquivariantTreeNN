@@ -86,7 +86,8 @@ def permutation_q(
     :param element_subset: set of elements to permute
     :type element_subset: np.ndarray
     :param group_order: Order of the children nodes of the node to be applied. Relevant when using this method for
-    non-default applications than the Q-permutation order. Array of indexes. Default: ``None`` (meaning default order)
+        non-default applications than the Q-permutation order. Array of indexes. Default: ``None`` (meaning default
+        order)
     :type group_order: np.ndarray[int]
     :return: permutations in list or array
     :rtype: typing.Union[typing.List[np.ndarray], np.ndarray]
@@ -178,8 +179,8 @@ def fuze_permutations(
 ) -> np.ndarray:
     """
     Function that fuzes permutations of nodes with other permutations into permutations of the parent node.
-
     Example: [[[a,b,c]],[[d,e],[f,g]]] becomes [[a,b,c,d,e],[a,b,c,f,g]]
+
     :param perms: List of lists containing permutations from children permutations.
     :type perms: typing.Union[np.ndarray, typing.List[np.ndarray]]
     :return: Fuzed permutations.

@@ -139,6 +139,7 @@ def unroll_node(
     An E type node with children parameter 5 will become 5 nodes of type E with 1 as children value.
 
     Serves to make some other functions dealing with permutation logic to be simpler.
+
     :param tree: Tree which is to be unrolled
     :type tree: TreeNode
     :return: Unrolled tree
