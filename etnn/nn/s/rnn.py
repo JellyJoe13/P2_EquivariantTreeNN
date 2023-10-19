@@ -10,7 +10,8 @@ class RnnNetworkTypeS(Module):
             self,
             k: int = 2,
             hidden_dim: int = 128,
-            use_state: bool = False
+            use_state: bool = False,
+            bidirectional: bool = False
     ):
         super().__init__()
         self.k = k
@@ -18,10 +19,13 @@ class RnnNetworkTypeS(Module):
             input_size=hidden_dim,
             hidden_size=hidden_dim,
             batch_first=True,
-            bidirectional=False
+            bidirectional=bidirectional
         )
         self.final_layer_elu = ELU()
-        self.final_layer_linear = Linear(hidden_dim, hidden_dim)
+        self.final_layer_linear = Linear(
+            2*hidden_dim if bidirectional else hidden_dim,
+            hidden_dim
+        )
         self.use_state = use_state
         if self.use_state:
             self.own_state = Parameter(torch.empty((1, hidden_dim)))
@@ -45,8 +49,10 @@ class RnnNetworkTypeS(Module):
         # throw away hidden representation, todo: maybe use in future somehow
         rnn_output, _ = self.rnn(reshaped_shift_stack)
 
+        print(rnn_output.shape)
+
         # shape back
-        rnn_output_reshaped = rnn_output.reshape(shift_stack.shape)
+        rnn_output_reshaped = rnn_output.reshape(*shift_stack.shape[:-1], -1)
 
         # use the last result of the rnn per sequence (RNN: many to one)
         rnn_selection = rnn_output_reshaped[..., -1, :]

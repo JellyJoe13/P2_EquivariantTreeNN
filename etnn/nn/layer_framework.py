@@ -5,6 +5,8 @@ from etnn.nn.s.chiral_node import ChiralNodeNetworkTypeS
 from etnn.nn.q.chiral_node import ChiralNodeNetworkTypeQ
 from etnn.nn.c.chiral_node import ChiralNodeNetworkTypeC
 from etnn.nn.p.chiral_node import ChiralNodeNetworkTypeP
+
+from etnn.nn.s.rnn import RnnNetworkTypeS
 import etnn.tools.permutation_reordering as pr
 from etnn.tools.tree_existance import contains_node_type
 from etnn.data import TreeNode
@@ -12,7 +14,7 @@ import torch
 from itertools import permutations
 
 
-class ChiralLayerManagementFramework(Module):
+class LayerManagementFramework(Module):
     """
     Class that realises a layer for equivariant inputs according to a permutation definition through a permutation
     tree.
@@ -25,10 +27,12 @@ class ChiralLayerManagementFramework(Module):
             tree: TreeNode,
             hidden_dim: int = 128,
             out_dim: int = 1,
-            k: int = 2
+            k: int = 2,
+            node_type: str = "chiral",
+            bidirectional: bool = False
     ):
         """
-        Initializes `ChiralLayerManagementFramework`. Input to this layer is 3-dimensional:
+        Initializes `LayerManagementFramework`. Input to this layer is 3-dimensional:
         (set, elements_in_set, dimension_element)
 
         :param in_dim: Dimension of the input values - denotes the dimension of each element in the set input.
@@ -41,6 +45,14 @@ class ChiralLayerManagementFramework(Module):
         :type out_dim: int
         :param k: Value that determines how many elements in order to set into context with each other. Default: ``2``
         :type k: int
+        :param node_type: Parameter determining which neural network modules are to be used to realize the tree
+            equivariance nodes. Possible options: ``'chiral'`` for original 2-MLP connection of entries as shown in
+            [Gainski2023]_ or ``'rnn'`` for a structure similar to that but using RNN's instead of MLP's to set
+            elements in context to each other. Default: ``'chiral'``
+        :type node_type: str
+        :param bidirectional: Parameter that controls for RNN related nodes if the RNN should be bidirectional or not.
+            Default: ``False``
+        :type bidirectional: bool
         """
         super().__init__()
         self.embedding_layer = Linear(in_dim, hidden_dim)
@@ -48,29 +60,40 @@ class ChiralLayerManagementFramework(Module):
         self.tree = tree
         self.tree.calc_num_elem()
 
-        if contains_node_type("S", tree):
-            self.tree_layer_s = ChiralNodeNetworkTypeS(
-                hidden_dim=hidden_dim,
-                k=k
-            )
+        if node_type == 'chiral':
+            if contains_node_type("S", tree):
+                self.tree_layer_s = ChiralNodeNetworkTypeS(
+                    hidden_dim=hidden_dim,
+                    k=k
+                )
 
-        if contains_node_type("Q", tree):
-            self.tree_layer_q = ChiralNodeNetworkTypeQ(
-                hidden_dim=hidden_dim,
-                k=k
-            )
+            if contains_node_type("Q", tree):
+                self.tree_layer_q = ChiralNodeNetworkTypeQ(
+                    hidden_dim=hidden_dim,
+                    k=k
+                )
 
-        if contains_node_type("C", tree):
-            self.tree_layer_c = ChiralNodeNetworkTypeC(
-                hidden_dim=hidden_dim,
-                k=k
-            )
+            if contains_node_type("C", tree):
+                self.tree_layer_c = ChiralNodeNetworkTypeC(
+                    hidden_dim=hidden_dim,
+                    k=k
+                )
 
-        if contains_node_type("P", tree):
-            self.tree_layer_p = ChiralNodeNetworkTypeP(
-                hidden_dim=hidden_dim,
-                k=k
-            )
+            if contains_node_type("P", tree):
+                self.tree_layer_p = ChiralNodeNetworkTypeP(
+                    hidden_dim=hidden_dim,
+                    k=k
+                )
+        elif node_type == 'rnn':
+            if contains_node_type("S", tree):
+                self.tree_layer_s = RnnNetworkTypeS(
+                    hidden_dim=hidden_dim,
+                    k=k,
+                    bidirectional=bidirectional
+                )
+        else:
+            raise NotImplementedError(f"Node type '{node_type}' not implemented. Use documentation to see available "
+                                      f"options.")
 
         self.reduction_layers = [
             Linear(hidden_dim, hidden_dim // 2),
