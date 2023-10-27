@@ -4,6 +4,7 @@ import os
 from etnn.data import DEFAULT_DATA_PATH
 from tqdm import tqdm
 from etnn.data.ferris_score_helpers import build_wheel_happyness
+import typing
 
 
 def prepare_1_ferris(
@@ -80,10 +81,18 @@ def generate_ferris_dataset(
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
         seed: int = 4651431
-) -> pd.DataFrame:
+) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
     # set seed if not none
     if seed is not None:
         np.random.seed(seed)
+
+    # load dataset which is the base of the data generation
+    df_health = prepare_1_ferris(
+        df_name_input=df_name_input,
+        dataset_path=dataset_path,
+        df_name_output=df_intermediate_output_name,
+        try_pregen=try_pregen
+    )
 
     # see if file already exists and load this
     # file name logic
@@ -91,19 +100,11 @@ def generate_ferris_dataset(
     file_path = os.path.join(dataset_path, file_name)
 
     if try_pregen and os.path.isfile(file_path):
-        return pd.read_csv(file_path, index_col=0)
+        return pd.read_csv(file_path, index_col=0), df_health
 
     # else generate it
-    # load dataset which is the base of the data generation
-    df = prepare_1_ferris(
-        df_name_input=df_name_input,
-        dataset_path=dataset_path,
-        df_name_output=df_intermediate_output_name,
-        try_pregen=try_pregen
-    )
-
     # init ordering array
-    random_order = np.arange(len(df))
+    random_order = np.arange(len(df_health))
     # initialize dataset storage
     dataset_storage = []
 
@@ -113,7 +114,7 @@ def generate_ferris_dataset(
         sample = random_order[:num_gondolas*num_part_pg].reshape(num_gondolas, num_part_pg)
 
         # calc label
-        label = build_wheel_happyness(df, sample)
+        label = build_wheel_happyness(df_health, sample)
 
         # add to storage
         dataset_storage.append(sample.flatten().tolist() + [label])
@@ -131,4 +132,4 @@ def generate_ferris_dataset(
     # save dataset
     df_generated.to_csv(file_path)
 
-    return df_generated
+    return df_generated, df_health
