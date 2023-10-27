@@ -78,14 +78,19 @@ def generate_ferris_dataset(
         df_name_input: str = "Sleep_health_and_lifestyle_dataset.csv",
         dataset_path: str = DEFAULT_DATA_PATH,
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
-        try_pregen: bool = True
-):
+        try_pregen: bool = True,
+        seed: int = None
+) -> pd.DataFrame:
+    # set seed if not none
+    if seed is not None:
+        np.random.seed(seed)
+
     # see if file already exists and load this
     # file name logic
-    file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}"
+    file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}.csv"
     file_path = os.path.join(dataset_path, file_name)
 
-    if os.path.isfile(file_path):
+    if try_pregen and os.path.isfile(file_path):
         return pd.read_csv(file_path, index_col=0)
 
     # else generate it
@@ -103,7 +108,7 @@ def generate_ferris_dataset(
     dataset_storage = []
 
     # produce a number of elements
-    for _ in range(tqdm(range(num_to_generate))):
+    for _ in tqdm(range(num_to_generate)):
         # generate sample element
         sample = random_order[:num_gondolas*num_part_pg].reshape(num_gondolas, num_part_pg)
 
