@@ -104,7 +104,7 @@ def generate_ferris_dataset(
 
     # else generate it
     # init ordering array
-    random_order = np.arange(len(df_health))
+    random_order = np.arange(len(df_health))+1
     # initialize dataset storage
     dataset_storage = []
 
