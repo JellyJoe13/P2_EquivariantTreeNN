@@ -111,6 +111,7 @@ def generate_ferris_dataset(
     # produce a number of elements
     for _ in tqdm(range(num_to_generate)):
         # generate sample element
+        np.random.shuffle(random_order)
         sample = random_order[:num_gondolas*num_part_pg].reshape(num_gondolas, num_part_pg)
 
         # calc label
