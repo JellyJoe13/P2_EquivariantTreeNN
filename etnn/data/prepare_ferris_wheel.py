@@ -79,7 +79,7 @@ def generate_ferris_dataset(
         dataset_path: str = DEFAULT_DATA_PATH,
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
-        seed: int = None
+        seed: int = 4651431
 ) -> pd.DataFrame:
     # set seed if not none
     if seed is not None:
@@ -87,7 +87,7 @@ def generate_ferris_dataset(
 
     # see if file already exists and load this
     # file name logic
-    file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}.csv"
+    file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}.csv"
     file_path = os.path.join(dataset_path, file_name)
 
     if try_pregen and os.path.isfile(file_path):
