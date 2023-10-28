@@ -40,3 +40,36 @@ def train_epoch(
     return torch.mean(
         torch.stack(loss_storage)
     )
+
+
+def eval_epoch(
+        model: torch.nn.Module,
+        eval_loader: torch.utils.data.dataloader.DataLoader,
+        device: str,
+        criterion: torch.nn.Module
+):
+    with torch.no_grad():
+        # init loss storage
+        loss_storage = []
+
+        # set model to evaluation mode
+        model.eval()
+
+        for batch_data, batch_label in eval_loader:
+            # put data to device
+            batch_data = batch_data.to(device)
+            batch_label = batch_label.to(device)
+
+            # put through model
+            prediction = model(batch_data).flatten()
+
+            # calculate loss
+            loss = criterion(prediction, batch_label)
+
+            # append loss
+            loss_storage += [loss.detach().cpu()]
+
+        # return averaged loss
+        return torch.mean(
+            torch.stack(loss_storage)
+        )
