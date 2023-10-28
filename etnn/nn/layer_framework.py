@@ -72,13 +72,13 @@ class ChiralLayerManagementFramework(Module):
                 k=k
             )
 
-        self.reduction_layers = [
+        self.reduction_layers = torch.nn.ModuleList([
             Linear(hidden_dim, hidden_dim // 2),
             ReLU(),
             Linear(hidden_dim // 2, hidden_dim // 4),
             ReLU(),
             Linear(hidden_dim // 4, out_dim)
-        ]
+        ])
         return
 
     def forward(self, x):
