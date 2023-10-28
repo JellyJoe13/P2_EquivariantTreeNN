@@ -23,7 +23,7 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         # Get the label from the last column of id_frame
         label = self.df_index.iloc[idx, -1]
 
-        return torch.tensor(data.to_numpy(float)), torch.tensor(label)
+        return torch.tensor(data.to_numpy(float), dtype=torch.float32), torch.tensor(label, dtype=torch.float32)
 
 
 def load_ferris_wheel_dataset(
