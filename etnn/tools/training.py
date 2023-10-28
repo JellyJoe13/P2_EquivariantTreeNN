@@ -1,4 +1,5 @@
 import torch
+import numpy as np
 
 
 def train_epoch(
@@ -73,3 +74,49 @@ def eval_epoch(
         return torch.mean(
             torch.stack(loss_storage)
         )
+
+
+class EpochControl:
+    def __init__(
+            self,
+            model_save_path: str,
+            verbose: bool = True
+    ):
+        self.model_save_path = model_save_path
+        self.current_best_eval = np.inf
+        self.verbose = verbose
+
+    def check_better(
+            self,
+            train_value: float,
+            eval_value: float
+    ):
+        if self.current_best_eval > eval_value:
+            self.current_best_eval = eval_value
+            if self.verbose:
+                print("++save++")
+            return True
+        else:
+            return False
+
+    def retain_best(
+            self,
+            model: torch.nn.Module,
+            train_value: torch.Tensor,
+            eval_value: torch.Tensor,
+            is_accuracy_score: bool = False
+    ):
+        # copy values
+        working_train = float(train_value)
+        working_eval = float(eval_value)
+
+        # if accuracy values - invert scores
+        if is_accuracy_score:
+            working_train *= (-1)
+            working_eval *= (-1)
+
+        # check if value is better, save model
+        if self.check_better(train_value, eval_value):
+            torch.save(model.state_dict(), self.model_save_path)
+
+        return
