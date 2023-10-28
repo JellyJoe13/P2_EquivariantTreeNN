@@ -134,3 +134,50 @@ def generate_ferris_dataset(
     df_generated.to_csv(file_path)
 
     return df_generated, df_health
+
+
+def add_valid_permutations(
+        num_add_equal_elem: int,
+        df_index: pd.DataFrame,
+        num_gondolas: int,
+        seed: int = 4354353
+) -> pd.DataFrame:
+    # create viable permutations of input and add them to dataset
+    # sample elements to perturb
+    df_sampled = df_index.sample(num_add_equal_elem, replace=True, random_state=seed)
+    if seed is not None:
+        np.random.seed(seed)
+
+    # for each randomly one of two things:
+    # - group order change
+    #   + shift groups
+    #   + invert group order (left out for now as easier this way)
+    # - permutate gondola people
+
+    # convert to numpy
+    df_t = df_sampled.to_numpy()[:, :-1]
+
+    # changing shape to make dimensions match ferris wheel structure
+    df_g = df_t.reshape(df_t.shape[0], num_gondolas, -1)
+
+    # create shifts and index
+    shifts = np.random.randint(0, num_gondolas, df_g.shape[0])
+    idx = np.arange(num_gondolas)
+
+    # perturbing elements in numpy array in manner of C and P
+    for i in tqdm(range(num_add_equal_elem)):
+        df_g[i] = df_g[i][(idx + shifts[i]) % num_gondolas]
+        for j in range(num_gondolas):
+            np.random.shuffle(df_g[i][j])
+
+    # create dataset out of perturbed elements
+    pd_new = pd.DataFrame(
+        np.c_[
+            df_t,
+            df_sampled.label.to_numpy()
+        ],
+        columns=df_sampled.columns
+    )
+
+    # concatenate and return
+    return pd.concat([df_index, pd_new], ignore_index=True)

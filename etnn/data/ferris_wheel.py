@@ -49,4 +49,3 @@ def load_pure_ferris_wheel_dataset(
     )
 
     return FerrisWheelDataset(df_health, df_index)
-
