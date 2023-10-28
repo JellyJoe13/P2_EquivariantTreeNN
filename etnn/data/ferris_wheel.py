@@ -26,7 +26,7 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         return torch.tensor(data.to_numpy(float), dtype=torch.float32), torch.tensor(label, dtype=torch.float32)
 
 
-def load_ferris_wheel_dataset(
+def load_pure_ferris_wheel_dataset(
         num_gondolas: int = 10,
         num_part_pg: int = 5,
         num_to_generate: int = 1_000,
