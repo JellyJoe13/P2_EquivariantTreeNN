@@ -115,7 +115,9 @@ class EpochControl:
     def __init__(
             self,
             model_save_path: str,
-            verbose: bool = True
+            tolerance: int = 5,
+            verbose: bool = True,
+            is_accuracy_score: bool = False
     ):
         """
         Init function of the EpochControl object
@@ -125,12 +127,19 @@ class EpochControl:
         :param verbose: determines whether prints to console concerning the progress shall be printed or not, default:
             ``True``
         :type verbose: bool
+        :param is_accuracy_score: Provides information whether the provided score is an accuracy score or not, default:
+            ``False``
+        :type is_accuracy_score: bool
         """
         self.model_save_path = model_save_path
-        self.current_best_eval = np.inf
+        self.current_best_save = np.inf
+        self.current_best_stop = np.inf
         self.verbose = verbose
+        self.num_epochs_not_better = 0
+        self.tolerance = tolerance
+        self.is_accuracy_score = is_accuracy_score
 
-    def check_better(
+    def check_better_save(
             self,
             train_value: float,
             eval_value: float
@@ -145,20 +154,40 @@ class EpochControl:
         :return: Whether this epoch's state is considered better
         :rtype: bool
         """
-        if self.current_best_eval > eval_value:
-            self.current_best_eval = eval_value
-            if self.verbose:
-                print("++save++")
+        if self.current_best_save > eval_value:
+            self.current_best_save = eval_value
             return True
         else:
             return False
+
+    def should_early_stop(
+            self,
+            train_value: float,
+            eval_value: float
+    ) -> bool:
+        """
+        Function determining whether the training should stop or not.
+
+        :param train_value: value coming from training
+        :type train_value: float
+        :param eval_value: value coming from validation/testing
+        :type eval_value: float
+        :return: whether to stop training or not
+        :rtype: bool
+        """
+        if self.current_best_stop > eval_value:
+            self.current_best_stop = eval_value
+            self.num_epochs_not_better = 0
+            return True
+        else:
+            self.num_epochs_not_better += 1
+            return self.num_epochs_not_better > self.tolerance
 
     def retain_best_and_stop(
             self,
             model: torch.nn.Module,
             train_value: torch.Tensor,
-            eval_value: torch.Tensor,
-            is_accuracy_score: bool = False
+            eval_value: torch.Tensor
     ) -> None:
         """
         Determines based on the provided train and eval values if the current state of the model is better and shall
@@ -170,8 +199,6 @@ class EpochControl:
         :type train_value: torch.Tensor
         :param eval_value: value score produced by either the valuation or test set
         :type train_value: torch.Tensor
-        :param is_accuracy_score: Provides information whether the provided score is an accuracy score or not, default:
-            ``False``
         :return: Truth value if training should be stopped or not.
         :rtype: bool
         """
@@ -180,13 +207,15 @@ class EpochControl:
         working_eval = float(eval_value)
 
         # if accuracy values - invert scores
-        if is_accuracy_score:
+        if self.is_accuracy_score:
             working_train *= (-1)
             working_eval *= (-1)
 
         # check if value is better, save model
-        if self.check_better(train_value, eval_value):
+        if self.check_better_save(train_value, eval_value):
+            if self.verbose:
+                print("++save++")
             torch.save(model.state_dict(), self.model_save_path)
 
-        # todo
-        return False
+        # return truth value if to stop or not
+        return self.should_early_stop(working_train, working_eval)
