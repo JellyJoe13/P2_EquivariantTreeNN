@@ -17,7 +17,7 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
     element ``df_index`` through column names. The tensor provided by this function however will not be in any
     specific order or structure that indicates which data is assigned to which gondola.
     """
-    def __init__(self, df_health, df_index):
+    def __init__(self, df_health, df_index, num_gondolas):
         """
         Init function of the pytorch FerrisWheelDataset, which inherits the pytorch Dataset object.
 
@@ -25,11 +25,14 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         :type df_health: pd.DataFrame
         :param df_index: Gondola dataset containing person ids and happyness score (=label)
         :type df_index: pd.DataFrame
+        :param num_gondolas: Number of gondolas in ferris wheel
+        :type num_gondolas: int
         """
         self.df_health = df_health
         self.df_index = df_index
 
         self.df_health.set_index('id', inplace=True)
+        self.num_gondolas = num_gondolas
 
     def __len__(self):
         """
@@ -61,6 +64,12 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         label = self.df_index.iloc[idx, -1]
 
         return torch.tensor(data.to_numpy(float), dtype=torch.float32), torch.tensor(label, dtype=torch.float32)
+
+    def to_classification(
+            self,
+            num_classes: int
+    ):
+        self.df_index.label = (self.df_index.label/(10*self.num_gondolas)*num_classes).round()
 
 
 def load_pure_ferris_wheel_dataset(
@@ -113,7 +122,7 @@ def load_pure_ferris_wheel_dataset(
         seed=seed
     )
 
-    return FerrisWheelDataset(df_health, df_index)
+    return FerrisWheelDataset(df_health, df_index, num_gondolas)
 
 
 def load_modified_ferris_wheel_dataset(
@@ -208,4 +217,4 @@ def load_modified_ferris_wheel_dataset(
     # save dataset
     df_index.to_csv(file_path)
 
-    return FerrisWheelDataset(df_health, df_index)
+    return FerrisWheelDataset(df_health, df_index, num_gondolas)
