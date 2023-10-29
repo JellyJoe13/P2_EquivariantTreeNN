@@ -1,5 +1,4 @@
 import os.path
-
 import numpy as np
 import pandas as pd
 import torch
@@ -8,16 +7,50 @@ from etnn.data.prepare_ferris_wheel import generate_ferris_dataset, add_valid_pe
 
 
 class FerrisWheelDataset(torch.utils.data.Dataset):
+    """
+    Pytorch dataset of the ferris wheel dataset concept. Each element in the dataset consists of data x and a label y.
+
+    y in this case is the happyness score calculated by the function ``build_wheel_happyness(...)``.
+
+    x consists of gondolas which contains a certain number of people, which is specified by the input dataset. The logic
+    how many gondolas and persons per gondolas are is not explicitly contained in this object but contained in the
+    element ``df_index`` through column names. The tensor provided by this function however will not be in any
+    specific order or structure that indicates which data is assigned to which gondola.
+    """
     def __init__(self, df_health, df_index):
+        """
+        Init function of the pytorch FerrisWheelDataset, which inherits the pytorch Dataset object.
+
+        :param df_health: Person health dataset
+        :type df_health: pd.DataFrame
+        :param df_index: Gondola dataset containing person ids and happyness score (=label)
+        :type df_index: pd.DataFrame
+        """
         self.df_health = df_health
         self.df_index = df_index
 
         self.df_health.set_index('id', inplace=True)
 
     def __len__(self):
+        """
+        Generic length function.
+
+        :return: The number of elements contained in the dataset.
+        :rtype: int
+        """
         return len(self.df_index)
 
     def __getitem__(self, idx):
+        """
+        Returns the item stored in the dataset at position idx.
+
+        :param idx: index of the item to return
+        :type idx: int
+        :return: Data and label of this index. Data has shape
+            ``(num_gondolas*num_persons_in_gondola, person_data_dim)``, label is a simple 1d tensor containing one
+            float value.
+        :rtype: typing.Tuple[torch.Tensor, torch.Tensor]
+        """
         # Get the ID from the id_frame
         p_ids = self.df_index.iloc[idx, :-1]
 
@@ -39,7 +72,35 @@ def load_pure_ferris_wheel_dataset(
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
         seed: int = 4651431
-):
+) -> FerrisWheelDataset:
+    """
+    Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
+    intermediate csv files). Loads a dataset that exactly follows the allowed permutations combined with the exact
+    calculated happyness scores.
+
+    :param num_gondolas: Number of gondolas the ferris wheel should have, default: ``15``
+    :type num_gondolas: int
+    :param num_part_pg: Number of persons in each gondola, default: ``5``. (by default no empty passengers/seats will be
+        generated)
+    :type num_part_pg: int
+    :param num_to_generate: Number of dataset entries to generate, default: ``1000``
+    :type num_to_generate: int
+    :param df_name_input: Name of the dataset to use as the input for the persons health data, default:
+        ``Sleep_health_and_lifestyle_dataset.csv``
+    :type df_name_input: str
+    :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``
+    :type dataset_path: str
+    :param df_intermediate_output_name: Name of the intermediate datasets output, default:
+        ``'health_dataset_preprocessed-1.csv'``. Intermediate dataset denotes the preprocessed health dataset.
+    :type df_intermediate_output_name: str
+    :param try_pregen: Controls whether pre-generated shall be loaded or new data should be generated hence overwriting
+        and updating previously generated data with the same parameters, default: ``True``
+    :type try_pregen: bool
+    :param seed: Seed to use for random generation
+    :type seed: int
+    :return: generated dataset
+    :rtype: FerrisWheelDataset
+    """
     # load the datasets
     df_index, df_health = generate_ferris_dataset(
         num_gondolas=num_gondolas,
@@ -67,6 +128,41 @@ def load_modified_ferris_wheel_dataset(
         try_pregen: bool = True,
         seed: int = 4651431
 ):
+    """
+    Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
+    intermediate csv files). Loads a dataset that not exactly follows the allowed permutations combined with the
+    exact calculated happyness scores. It contains these items in the beginning and then adds permutated pure
+    items to increase the potential benefit of equivariant nn's but afterwards adds label perturbed data.
+
+    :param num_gondolas: Number of gondolas the ferris wheel should have, default: ``15``
+    :type num_gondolas: int
+    :param num_part_pg: Number of persons in each gondola, default: ``5``. (by default no empty passengers/seats will be
+        generated)
+    :type num_part_pg: int
+    :param num_to_generate: Number of dataset entries to generate, default: ``1000``
+    :type num_to_generate: int
+    :param num_valid_to_add: Number of pure items to add which (permuted) already exist within the original dataset,
+        default: ``1000``
+    :type num_valid_to_add: int
+    :param num_invalid_to_add: Number of perturbed items to add to the previously pure data to challenge the neural
+        networks capability to react to falsified data, default: ``1000``
+    :type num_invalid_to_add: int
+    :param df_name_input: Name of the dataset to use as the input for the persons health data, default:
+        ``Sleep_health_and_lifestyle_dataset.csv``
+    :type df_name_input: str
+    :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``
+    :type dataset_path: str
+    :param df_intermediate_output_name: Name of the intermediate datasets output, default:
+        ``'health_dataset_preprocessed-1.csv'``. Intermediate dataset denotes the preprocessed health dataset.
+    :type df_intermediate_output_name: str
+    :param try_pregen: Controls whether pre-generated shall be loaded or new data should be generated hence overwriting
+        and updating previously generated data with the same parameters, default: ``True``
+    :type try_pregen: bool
+    :param seed: Seed to use for random generation
+    :type seed: int
+    :return: generated dataset
+    :rtype: FerrisWheelDataset
+    """
     # if pregenerated and parameter true, load dataset
     file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}_valid" \
                 f"-{num_valid_to_add}_invalid-{num_invalid_to_add}.csv"

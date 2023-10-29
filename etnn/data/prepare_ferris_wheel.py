@@ -13,6 +13,21 @@ def prepare_1_ferris(
         df_name_output: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True
 ) -> pd.DataFrame:
+    """
+    Function that preprocesses the person health dataset once in repsect to creating the ferris wheel dataset.
+
+    :param df_name_input: name of the dataframe to process, default: ``Sleep_health_and_lifestyle_dataset.csv``.
+    :type df_name_input: str
+    :param dataset_path: Path to the dataset folder, default: ``DEFAULT_DATA_PATH``
+    :type dataset_path: str
+    :param df_name_output: name of the file into which to save the preprocessed dataset, default:
+        ``health_dataset_preprocessed-1.csv``.
+    :type df_name_output: str
+    :param try_pregen: determines whether a pre-existing preprocessed data file should be used or not, default: ``True``
+    :type try_pregen: bool
+    :return: dataframe containing the preprocessed data
+    :rtype: pd.DataFrame
+    """
     # CHECK IF PRECOMPUTED
     if try_pregen and os.path.isfile(os.path.join(dataset_path, df_name_output)):
         return pd.read_csv(os.path.join(dataset_path, df_name_output))
@@ -82,6 +97,28 @@ def generate_ferris_dataset(
         try_pregen: bool = True,
         seed: int = 4651431
 ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Function that generates the ferris dataset's core dataset, the health dataset and the index dataset.
+
+    :param num_gondolas: number of gondolas the ferris wheel should have, default: ``10``
+    :type num_gondolas: int
+    :param num_part_pg: number of people in each gondola, default: ``5``
+    :type num_part_pg: int
+    :param num_to_generate: number of elements the core dataset should have, default: ``1000``
+    :type num_to_generate:  int
+    :param df_name_input: name of the dataset input, default: ``Sleep_health_and_lifestyle_dataset.csv``
+    :type df_name_input: str
+    :param dataset_path: path to dataset folder, default: ``DEFAULT_DATA_PATH´´
+    :type dataset_path: str
+    :param df_intermediate_output_name: name of intermediate dataset csv, default: ``health_dataset_preprocessed-1.csv``
+    :type df_intermediate_output_name: str
+    :param try_pregen: determines whether it shall be attempted to load the pre-generated csv files, default: ``True``
+    :type try_pregen: bool
+    :param seed: seed to be used for random generation procedures
+    :type seed: int
+    :return: health dataset and index dataset
+    :rtype: typing.Tuple[pd.DataFrame, pd.DataFrame]
+    """
     # set seed if not none
     if seed is not None:
         np.random.seed(seed)
@@ -142,6 +179,22 @@ def add_valid_permutations(
         num_gondolas: int,
         seed: int = 4354353
 ) -> pd.DataFrame:
+    """
+    Function that permutes some sampled elements in the index dataframe and adds them with the correct value to the
+    dataframe that is returned.
+
+    :param num_add_equal_elem: number of equivariant elements to add
+    :type num_add_equal_elem: int
+    :param df_index: dataframe from which to sample elements and which to enlarge with this operations newly permutated
+        elements
+    :type df_index: pd.DataFrame
+    :param num_gondolas: number of gondolas the ferris wheel has
+    :type num_gondolas: int
+    :param seed: seed to use for random permutation operations
+    :type seed: int
+    :return: the enlarged df_index dataset with correctly labeled elements
+    :rtype: pd.DataFrame
+    """
     # create viable permutations of input and add them to dataset
     # sample elements to perturb
     df_sampled = df_index.sample(num_add_equal_elem, replace=True, random_state=seed)
@@ -189,6 +242,22 @@ def add_invalid_permutations(
         num_gondolas: int,
         seed: int = 4354353
 ) -> pd.DataFrame:
+    """
+    Function that permutes some sampled elements in the index dataframe and adds them with the perturbed value to the
+    dataframe that is returned.
+
+    :param num_add_nequal_elem: number of equivariant elements to add (with perturbed label)
+    :type num_add_nequal_elem: int
+    :param df_index: dataframe from which to sample elements and which to enlarge with this operations newly permutated
+        elements
+    :type df_index: pd.DataFrame
+    :param num_gondolas: number of gondolas the ferris wheel has
+    :type num_gondolas: int
+    :param seed: seed to use for random permutation operations
+    :type seed: int
+    :return: the enlarged df_index dataset with falsely labeled elements
+    :rtype: pd.DataFrame
+    """
     # create viable permutations of input and add them to dataset
     # sample elements to perturb
     df_sampled = df_index.sample(num_add_nequal_elem, replace=True, random_state=seed)

@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+import typing
 
 
 """
@@ -21,8 +22,18 @@ Rule ideas:
 
 def age_composition_score(
         df_elements: pd.DataFrame,
-        id_list
+        id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
 ) -> float:
+    """
+    Function to calculate an age score of the group specified in the id list.
+
+    :param df_elements: Dataframe containing the health data of the persons provided in the id list
+    :type df_elements: pd.DataFrame
+    :param id_list: list of ids of the persons in this group (gondola)
+    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
+    :return: age score which is in [0, 1]
+    :rtype: float
+    """
     df_subset = df_elements[df_elements.id.isin(id_list)]
 
     score = 0
@@ -44,8 +55,18 @@ def age_composition_score(
 
 def gender_composition_score(
         df_elements: pd.DataFrame,
-        id_list
+        id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
 ) -> float:
+    """
+    Function to calculate a gender score of the group specified in the id list.
+
+    :param df_elements: Dataframe containing the health data of the persons provided in the id list
+    :type df_elements: pd.DataFrame
+    :param id_list: list of ids of the persons in this group (gondola)
+    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
+    :return: score which is in [0, 1]
+    :rtype: float
+    """
     df_sub = df_elements[df_elements.id.isin(id_list)]
     # other genders are considered neutral
     male = sum(df_sub.gender_male)
@@ -57,8 +78,18 @@ def gender_composition_score(
 
 def sleep_composition_score(
         df_elements: pd.DataFrame,
-        id_list
+        id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
 ) -> float:
+    """
+    Function to calculate a sleep score of the group specified in the id list.
+
+    :param df_elements: Dataframe containing the health data of the persons provided in the id list
+    :type df_elements: pd.DataFrame
+    :param id_list: list of ids of the persons in this group (gondola)
+    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
+    :return: score which is in [0, 1]
+    :rtype: float
+    """
     df_sub = df_elements[df_elements.id.isin(id_list)]
 
     sleep_d_mean = df_sub.sleep_duration.mean()
@@ -69,8 +100,18 @@ def sleep_composition_score(
 
 def bmi_composition_score(
         df_elements: pd.DataFrame,
-        id_list
+        id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
 ) -> float:
+    """
+    Function to calculate a bmi score of the group specified in the id list.
+
+    :param df_elements: Dataframe containing the health data of the persons provided in the id list
+    :type df_elements: pd.DataFrame
+    :param id_list: list of ids of the persons in this group (gondola)
+    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
+    :return: score which is in [0, 1]
+    :rtype: float
+    """
     df_sub = df_elements[df_elements.id.isin(id_list)]
 
     bmi = df_sub.bmi.to_numpy()
@@ -82,8 +123,18 @@ def bmi_composition_score(
 
 def fear_composition_score(
         df_elements: pd.DataFrame,
-        id_list
+        id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
 ) -> float:
+    """
+    Function to calculate a fear/heartrate score of the group specified in the id list.
+
+    :param df_elements: Dataframe containing the health data of the persons provided in the id list
+    :type df_elements: pd.DataFrame
+    :param id_list: list of ids of the persons in this group (gondola)
+    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
+    :return: score which is in [0, 1]
+    :rtype: float
+    """
     df_sub = df_elements[df_elements.id.isin(id_list)]
 
     blood_value = (df_sub.blood_pressure1 * df_sub.blood_pressure2 * df_sub.heart_rate).max()
@@ -98,8 +149,19 @@ def fear_composition_score(
 
 def build_gondola_score(
         df_elements: pd.DataFrame,
-        id_list
+        id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
 ) -> float:
+    """
+    Function to calculate a score of the group specified in the id list. This score is a weighted sum of the age,
+    gender, sleep, bmi and fear scores introduced beforehand.
+
+    :param df_elements: Dataframe containing the health data of the persons provided in the id list
+    :type df_elements: pd.DataFrame
+    :param id_list: list of ids of the persons in this group (gondola)
+    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]
+    :return: score which is in [0, 10]
+    :rtype: float
+    """
     age_score = age_composition_score(df_elements, id_list)
     gender_score = gender_composition_score(df_elements, id_list)
     sleep_score = sleep_composition_score(df_elements, id_list)
@@ -111,8 +173,20 @@ def build_gondola_score(
 
 def build_wheel_happyness(
         df_elements: pd.DataFrame,
-        wheel
+        wheel: np.ndarray[int]
 ) -> float:
+    """
+    Function that calculates the overall happyness of the ferris wheel which is to become a label to be predicted. Uses
+    gondola wise scoring using function ``build_gondola_score(...)`` of own gondola, neighboring gondolas and age
+    statistics of the neighboring gondolas to derive a new gondola happyness score which is summed up.
+
+    :param df_elements: dataframe containing the person health data
+    :type df_elements: pd.DataFrame
+    :param wheel: numpy array containing the ids of the persons in the gondolas. Has shape
+        ``(num_gondolas, num_persons_per_gondola)``
+    :return: score of the ferris wheel, [0, num_gondolas * 10]
+    :rtype: float
+    """
 
     individual_scores = [
         build_gondola_score(df_elements, wheel[i])
