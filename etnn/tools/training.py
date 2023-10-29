@@ -178,7 +178,7 @@ class EpochControl:
         if self.current_best_stop > eval_value:
             self.current_best_stop = eval_value
             self.num_epochs_not_better = 0
-            return True
+            return False
         else:
             self.num_epochs_not_better += 1
             return self.num_epochs_not_better > self.tolerance
