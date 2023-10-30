@@ -20,6 +20,20 @@ etnn.data.dataset\_generation module
    :undoc-members:
    :show-inheritance:
 
+etnn.data.ferris\_score\_helpers
+--------------------------------
+.. automodule:: etnn.data.ferris_score_helpers
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+etnn.data.ferris\_wheel
+-----------------------
+.. automodule:: etnn.data.ferris_wheel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 etnn.data.permutation module
 ----------------------------
 
