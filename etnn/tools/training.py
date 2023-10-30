@@ -22,14 +22,18 @@ def train_epoch(
     :type device: str
     :param criterion: criterion to calculate the loss
     :type criterion: torch.nn.Module
-    :return: tensor containing the averaged loss over the batches
-    :rtype: torch.Tensor
+    :return: 3 tensors containing the averaged loss over the batches, the true labels and the predicted labels
+    :rtype: typing.Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
     # set model to training mode
     model.train()
 
     # loss storage
     loss_storage = []
+
+    # container for returning true labels and predicted labels
+    true_container = []
+    pred_container = []
 
     for batch_data, batch_label in train_loader:
         # optimizer zero grad
@@ -41,6 +45,10 @@ def train_epoch(
 
         # put through model
         prediction = model(batch_data).flatten()
+
+        # put y into list to return it together with loss
+        true_container += [batch_label.detach().cpu()]
+        pred_container += [prediction.detach().cpu()]
 
         # calculate loss
         loss = criterion(prediction, batch_label)
@@ -54,8 +62,12 @@ def train_epoch(
         # save loss
         loss_storage += [loss.detach().cpu()]
 
-    return torch.mean(
-        torch.stack(loss_storage)
+    return (
+        torch.mean(
+            torch.stack(loss_storage)
+        ),
+        torch.cat(true_container),
+        torch.cat(pred_container)
     )
 
 
@@ -77,8 +89,8 @@ def eval_epoch(
     :type device: str
     :param criterion: criterion to calculate the loss
     :type criterion: torch.nn.Module
-    :return: tensor containing the averaged loss over the batches
-    :rtype: torch.Tensor
+    :return: 3 tensors containing the averaged loss over the batches, the true labels and the predicted labels
+    :rtype: typing.Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
     with torch.no_grad():
         # init loss storage
@@ -86,6 +98,10 @@ def eval_epoch(
 
         # set model to evaluation mode
         model.eval()
+
+        # container for returning true labels and predicted labels
+        true_container = []
+        pred_container = []
 
         for batch_data, batch_label in eval_loader:
             # put data to device
@@ -95,6 +111,10 @@ def eval_epoch(
             # put through model
             prediction = model(batch_data).flatten()
 
+            # put y into list to return it together with loss
+            true_container += [batch_label.detach().cpu()]
+            pred_container += [prediction.detach().cpu()]
+
             # calculate loss
             loss = criterion(prediction, batch_label)
 
@@ -102,8 +122,12 @@ def eval_epoch(
             loss_storage += [loss.detach().cpu()]
 
         # return averaged loss
-        return torch.mean(
-            torch.stack(loss_storage)
+        return (
+            torch.mean(
+                torch.stack(loss_storage)
+            ),
+            torch.cat(true_container),
+            torch.cat(pred_container)
         )
 
 

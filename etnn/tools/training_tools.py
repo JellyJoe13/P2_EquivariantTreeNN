@@ -208,32 +208,86 @@ class AccuracyManager:
             "recall": recall_score
         }
 
+        self.mode_order = ["train", "val", "test"]
+
         # open file and write header
         with open(self.storage_total_path, "w") as file:
+            # write header for id and epoch
             file.write("config_id, epoch")
-            for regression_score_name in self.regression_metrics.keys():
-                file.write(f", {regression_score_name}")
-            # if classification
-            if self.is_classification:
-                for classification_score_name in self.classification_metrics.keys():
-                    file.write(f", {classification_score_name}")
+
+            # write losses
+            file.write(", train_loss, val_loss, test_loss")
+
+            # write scores for train, val and test
+            for mode in self.mode_order:
+                # write headers for regression scores
+                for regression_score_name in self.regression_metrics.keys():
+                    file.write(f", {mode}_{regression_score_name}")
+
+                # if classification, write classification scores
+                if self.is_classification:
+                    for classification_score_name in self.classification_metrics.keys():
+                        file.write(f", {mode}_{classification_score_name}")
             file.write("\n")
 
     def calc_and_collect(
             self,
-            y_true: torch.Tensor,
-            y_pred: torch.Tensor,
             config_id: str,
-            epoch: int
+            epoch: int,
+            train_y_true: torch.Tensor,
+            train_y_pred: torch.Tensor,
+            train_loss: torch.Tensor = None,
+            val_y_true: torch.Tensor = None,
+            val_y_pred: torch.Tensor = None,
+            val_loss: torch.Tensor = None,
+            test_y_true: torch.Tensor = None,
+            test_y_pred: torch.Tensor = None,
+            test_loss: torch.Tensor = None,
     ):
+        # conver the id to string if it is not one already
         config_id = str(config_id)
 
+        # ease latter logic
+        y_true = {
+            "train": train_y_true,
+            "val": val_y_true,
+            "test": test_y_true
+        }
+        y_pred = {
+            "train": train_y_pred,
+            "val": val_y_pred,
+            "test": test_y_pred
+        }
+
+        # append to file
         with open(self.storage_total_path, "a") as file:
+            # write the config id and epoch to csv file
             file.write(f"{config_id}, {epoch}")
-            for score in self.regression_metrics.values():
-                file.write(f", {score(y_true=y_true, y_pred=y_pred)}")
-            if self.is_classification:
-                for score in self.classification_metrics.values():
-                    file.write(f", {score(y_true=y_true, y_pred=y_pred)}")
+
+            # write losses
+            for loss in [train_loss, val_loss, test_loss]:
+                if loss is not None:
+                    file.write(f", {float(loss)}")
+                else:
+                    file.write(", 0.")
+
+            # create scores for each mode
+            for mode in self.mode_order:
+
+                # in case the mode did not receive values
+                if y_true[mode] is None or y_pred[mode] is None:
+                    num_zeros = len(self.regression_metrics) + self.is_classification*len(self.classification_metrics)
+                    for _ in range(num_zeros):
+                        file.write(", 0.")
+                    continue
+
+                # write the regression scores
+                for score in self.regression_metrics.values():
+                    file.write(f", {score(y_true=y_true[mode], y_pred=y_pred[mode])}")
+
+                # write the classification scores if the problem is a classification problem
+                if self.is_classification:
+                    for score in self.classification_metrics.values():
+                        file.write(f", {score(y_true=y_true[mode], y_pred=y_pred[mode])}")
             file.write("\n")
         pass
