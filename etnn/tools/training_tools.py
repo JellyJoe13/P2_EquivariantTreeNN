@@ -189,14 +189,39 @@ class EpochControl:
 
 
 class AccuracyManager:
+    """
+    Class that computes regression and classification scores and saves computed data to csv file at each step so that
+    no data is lost.
+    """
     def __init__(
             self,
             storage_name: str,
             storage_path: str = "results",
-            is_classification: bool = False
+            is_classification: bool = False,
+            num_classes: int = 10,
+            average: str = "micro"
     ):
+        """
+        Init function of the AccountManager class.
+
+        :param storage_name: name of the file into which to store the scores
+        :type storage_name: str
+        :param storage_path: path to the folder where the file is to be created, default: ``results``
+        :type storage_path: str
+        :param is_classification: bool indicating whether classification or only regression is currently executed,
+            default: ``False``.
+        :type is_classification: bool
+        :param num_classes: number of classes if classification is set tot true in the conditions, default: ``10``
+        :type num_classes: int
+        :param average: average parameter to use for the sklearn score function for parameter average as most likely
+            multi-class classification will be used. Not needed for regression. Default: ``micro``.
+        :type average: str
+        """
         self.storage_total_path = os.path.join(storage_path, storage_name)
         self.is_classification = is_classification
+        self.num_classes = num_classes
+        self.class_range = np.arange(num_classes)
+        self.average = average
 
         self.regression_metrics = {
             "mse": mean_squared_error,
@@ -244,6 +269,47 @@ class AccuracyManager:
             test_y_pred: torch.Tensor = None,
             test_loss: torch.Tensor = None,
     ):
+        """
+        This function calculates and collects various metrics for a given configuration and epoch. It writes the results
+        to a CSV file specified by the attribute storage_total_path.
+
+        The function uses the attributes regression_metrics, classification_metrics, and mode_order to determine which
+        metrics to calculate and in which order. It also uses the attribute is_classification to check if the problem is
+        a classification or a regression problem.
+
+        The function appends a new row to the CSV file with the following format:
+        config_id, epoch, train_loss, val_loss, test_loss, train_regression_scores, val_regression_scores,
+        test_regression_scores, train_classification_scores, val_classification_scores, test_classification_scores.
+
+        If any of the values are missing or None, they will be written as 0. If any of the modes are not provided, they
+        will be skipped and filled with 0s.
+
+        :param config_id: The identifier of the configuration.
+        :type config_id: str
+        :param epoch: The number of the epoch.
+        :type epoch: int
+        :param train_y_true: The true labels for the training set.
+        :type train_y_true: torch.Tensor
+        :param train_y_pred: The predicted labels for the training set.
+        :type train_y_pred: torch.Tensor
+        :param train_loss: The loss value for the training set. If None, it will be written as 0.
+        :type train_loss: torch.Tensor
+        :param val_y_true: The true labels for the validation set.
+        :type val_y_true: torch.Tensor
+        :param val_y_pred: The predicted labels for the validation set.
+        :type val_y_pred: torch.Tensor
+        :param val_loss: The loss value for the validation set. If None, it will be written as 0.
+        :type val_loss: torch.Tensor
+        :param test_y_true: The true labels for the test set.
+        :type test_y_true: torch.Tensor
+        :param test_y_pred: The predicted labels for the test set.
+        :type test_y_pred: torch.Tensor
+        :param test_loss: The loss value for the test set. If None, it will be written as 0.
+        :type test_loss: torch.Tensor
+
+        :return: Nothing currently
+        :rtype: None
+        """
         # conver the id to string if it is not one already
         config_id = str(config_id)
 
@@ -288,6 +354,13 @@ class AccuracyManager:
                 # write the classification scores if the problem is a classification problem
                 if self.is_classification:
                     for score in self.classification_metrics.values():
-                        file.write(f", {score(y_true=y_true[mode], y_pred=y_pred[mode])}")
+                        temp_score = score(
+                            y_true=y_true[mode],
+                            y_pred=y_pred[mode],
+                            labels=self.class_range,
+                            zero_division=0.,
+                            average=self.average
+                        )
+                        file.write(f", {temp_score}")
             file.write("\n")
-        pass
+        return
