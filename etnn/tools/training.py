@@ -114,7 +114,9 @@ class EpochControl:
     """
     def __init__(
             self,
-            model_save_path: str,
+            model_save_name: str = "model.pt",
+            config_save_name: str = "config.json",
+            saving_folder_path: str = ".",
             tolerance: int = 5,
             verbose: bool = True,
             is_accuracy_score: bool = False
@@ -122,8 +124,12 @@ class EpochControl:
         """
         Init function of the EpochControl object
 
-        :param model_save_path: specifies where the model parameters shall be saved
-        :type model_save_path: str
+        :param model_save_name: specifies under which name to save the model
+        :type model_save_name: str
+        :param config_save_name: specifies under which name to save the config, default: ``config.json``
+        :type config_save_name: str
+        :param saving_folder_path: folder in which to save config and model files, default: ``.``
+        :type saving_folder_path: str
         :param verbose: determines whether prints to console concerning the progress shall be printed or not, default:
             ``True``
         :type verbose: bool
@@ -131,7 +137,8 @@ class EpochControl:
             ``False``
         :type is_accuracy_score: bool
         """
-        self.model_save_path = model_save_path
+        self.model_save_path = os.path.join(saving_folder_path, model_save_name)
+        self.config_save_path = os.path.join(saving_folder_path, config_save_name)
         self.current_best_save = np.inf
         self.current_best_stop = np.inf
         self.verbose = verbose
