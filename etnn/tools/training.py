@@ -1,6 +1,7 @@
 import json
 import os
 
+from sklearn.metrics import mean_squared_error, mean_absolute_error, precision_score, recall_score
 import torch
 import numpy as np
 
@@ -291,3 +292,54 @@ class EpochControl:
 
         # return truth value if to stop or not
         return self.should_early_stop(working_train, working_eval)
+
+
+class AccuracyManager:
+    def __init__(
+            self,
+            storage_name: str,
+            storage_path: str = "results",
+            is_classification: bool = False
+    ):
+        self.storage_total_path = os.path.join(storage_path, storage_name)
+        self.is_classification = is_classification
+
+        self.regression_metrics = {
+            "mse": mean_squared_error,
+            "msa": mean_absolute_error
+        }
+
+        self.classification_metrics = {
+            "precision": precision_score,
+            "recall": recall_score
+        }
+
+        # open file and write header
+        with open(self.storage_total_path, "w") as file:
+            file.write("config_id, epoch")
+            for regression_score_name in self.regression_metrics.keys():
+                file.write(f", {regression_score_name}")
+            # if classification
+            if self.is_classification:
+                for classification_score_name in self.classification_metrics.keys():
+                    file.write(f", {classification_score_name}")
+            file.write("\n")
+
+    def calc_and_collect(
+            self,
+            y_true: torch.Tensor,
+            y_pred: torch.Tensor,
+            config_id: str,
+            epoch: int
+    ):
+        config_id = str(config_id)
+
+        with open(self.storage_total_path, "a") as file:
+            file.write(f"{config_id}, {epoch}")
+            for score in self.regression_metrics.values():
+                file.write(f", {score(y_true=y_true, y_pred=y_pred)}")
+            if self.is_classification:
+                for score in self.classification_metrics.values():
+                    file.write(f", {score(y_true=y_true, y_pred=y_pred)}")
+            file.write("\n")
+        pass
