@@ -69,6 +69,14 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
             self,
             num_classes: int
     ):
+        """
+        Converts the regression type dataset into a classification type dataset by dividing the continuous labels
+        through their maximum amount and and multiplying them with the desired number of classes - then round.
+
+        :param num_classes: number of classes for the new classification dataset
+        :type num_classes: int
+        :return: Nothing
+        """
         self.df_index.label = (self.df_index.label/(10*self.num_gondolas)*num_classes).round()
 
 
