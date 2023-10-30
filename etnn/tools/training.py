@@ -1,3 +1,6 @@
+import json
+import os
+
 import torch
 import numpy as np
 
@@ -108,6 +111,62 @@ def eval_epoch(
         )
 
 
+class ConfigStore:
+    """
+    Class for storing configuration which can be saved and loaded to/from a json file
+    """
+    def __init__(
+            self,
+            in_dim: int,
+            hidden_dim: int,
+            out_dim: int,
+            k: int,
+            is_accuracy_score: bool,
+            which_score: str,
+            loss_name: str,
+            optimizer_name: str,
+            num_max_epochs: int = 20,
+            learning_rate: float = 0.001,
+            batch_size: int = 32,
+            early_stop_tol: int = 5,
+            is_classification: bool = False,
+    ):
+        self.in_dim = in_dim
+        self.hidden_dim = hidden_dim
+        self.out_dim = out_dim
+        self.k = k
+
+        self.is_accuracy_score = is_accuracy_score
+        self.is_classification = is_classification
+        self.which_score = which_score
+
+        self.loss_name = loss_name
+        self.optimizer_name = optimizer_name
+
+        self.num_max_epochs = num_max_epochs
+        self.learning_rate = learning_rate
+        self.batch_size = batch_size
+        self.early_stop_tol = early_stop_tol
+
+
+def config_to_json(
+        config: ConfigStore,
+        saving_path: str
+):
+    with open(saving_path, 'w') as file:
+        json.dump(vars(config), file, indent=4)
+    return
+
+
+def load_config(
+        file_path: str
+) -> ConfigStore:
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+        return ConfigStore(**data)
+    return None
+
+
 class EpochControl:
     """
     Tool for saving model states and later on maybe also for tracking loss data and early stopping control.
@@ -194,7 +253,8 @@ class EpochControl:
             self,
             model: torch.nn.Module,
             train_value: torch.Tensor,
-            eval_value: torch.Tensor
+            eval_value: torch.Tensor,
+            config: ConfigStore = None
     ) -> None:
         """
         Determines based on the provided train and eval values if the current state of the model is better and shall
@@ -206,6 +266,9 @@ class EpochControl:
         :type train_value: torch.Tensor
         :param eval_value: value score produced by either the valuation or test set
         :type train_value: torch.Tensor
+        :param config: Config container that will be saved if model is saved to know which model parameters to use
+            when restoring model/setup, default: ``None`` meaning nothing will be saved, although not recommended.
+        :type config: ConfigStore
         :return: Truth value if training should be stopped or not.
         :rtype: bool
         """
@@ -223,6 +286,8 @@ class EpochControl:
             if self.verbose:
                 print("++save++")
             torch.save(model.state_dict(), self.model_save_path)
+            if config is not None:
+                config_to_json(config, self.config_save_path)
 
         # return truth value if to stop or not
         return self.should_early_stop(working_train, working_eval)
