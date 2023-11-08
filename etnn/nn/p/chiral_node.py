@@ -26,10 +26,10 @@ class ChiralNodeNetworkTypeP(Module):
         """
         super().__init__()
         self.k = k
-        self.k_layers = [
+        self.k_layers = torch.nn.ModuleList([
             Linear(hidden_dim, hidden_dim)
             for _ in range(self.k)
-        ]
+        ])
         self.final_layer_elu = ELU()
         self.final_layer_linear = Linear(hidden_dim, hidden_dim)
 

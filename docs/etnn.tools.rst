@@ -12,6 +12,20 @@ etnn.tools.permutation\_reordering module
    :undoc-members:
    :show-inheritance:
 
+etnn.tools.training
+-------------------
+.. automodule:: etnn.tools.training
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+etnn.tools.training\_tools
+--------------------------
+.. automodule:: etnn.tools.training_tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 etnn.tools.tree\_existance module
 ---------------------------------
 
