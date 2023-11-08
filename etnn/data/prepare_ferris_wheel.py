@@ -35,7 +35,7 @@ def prepare_1_ferris(
 
     # LOADING
     # join path
-    df_path = os.path.joing(dataset_path, df_name_input)
+    df_path = os.path.join(dataset_path, df_name_input)
 
     # define column names (old ones unsuitable for d.col_name usage)
     columns = [
