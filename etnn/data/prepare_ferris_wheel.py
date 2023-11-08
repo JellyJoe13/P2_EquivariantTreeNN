@@ -142,14 +142,20 @@ def generate_ferris_dataset(
     # else generate it
     # init ordering array
     random_order = np.arange(len(df_health))+1
+
     # initialize dataset storage
     dataset_storage = []
+    data_store = []
 
     # produce a number of elements
     for _ in tqdm(range(num_to_generate)):
         # generate sample element
         np.random.shuffle(random_order)
         sample = random_order[:num_gondolas*num_part_pg].reshape(num_gondolas, num_part_pg)
+
+        data_store += [sample.copy()]
+
+    for sample in tqdm(data_store):
 
         # calc label
         label = build_wheel_happyness(df_health, sample)
@@ -161,10 +167,10 @@ def generate_ferris_dataset(
     df_generated = pd.DataFrame(
         dataset_storage,
         columns=[
-            f"g-{i}_p-{j}"
-            for i in range(num_gondolas)
-            for j in range(num_part_pg)
-        ] + ['label']
+                    f"g-{i}_p-{j}"
+                    for i in range(num_gondolas)
+                    for j in range(num_part_pg)
+                ] + ['label']
     )
 
     # save dataset
