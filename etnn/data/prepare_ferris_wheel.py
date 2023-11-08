@@ -195,9 +195,43 @@ def add_valid_permutations(
     :return: the enlarged df_index dataset with correctly labeled elements
     :rtype: pd.DataFrame
     """
+    if seed is not None:
+        np.random.seed(seed)
+
+    merged = df_index
+
+    remaining_to_generate = num_add_equal_elem
+
+    while True:
+        pd_new = sample_new_permutations(
+            df_index=merged,
+            num_elem=remaining_to_generate,
+            num_gondolas=num_gondolas,
+            seed=np.random.randint(0, 2 ** 30)
+        )
+
+        # concatenate and return
+        merged = df_index.merge(pd_new, how='outer', indicator=True)
+
+        remaining_to_generate = sum(merged['_merge'] == 'both')
+        merged = merged.drop('_merge', axis=1)
+
+        if remaining_to_generate == 0:
+            break
+
+    return pd.concat([df_index, pd_new], ignore_index=True)
+
+
+def sample_new_permutations(
+        df_index: pd.DataFrame,
+        num_elem: int,
+        num_gondolas: int,
+        seed: int = None,
+        merge_check: bool = False
+) -> pd.DataFrame:
     # create viable permutations of input and add them to dataset
     # sample elements to perturb
-    df_sampled = df_index.sample(num_add_equal_elem, replace=True, random_state=seed)
+    df_sampled = df_index.sample(num_elem, replace=True, random_state=seed)
     if seed is not None:
         np.random.seed(seed)
 
@@ -218,7 +252,7 @@ def add_valid_permutations(
     idx = np.arange(num_gondolas)
 
     # perturbing elements in numpy array in manner of C and P
-    for i in tqdm(range(num_add_equal_elem)):
+    for i in tqdm(range(num_elem)):
         df_g[i] = df_g[i][(idx + shifts[i]) % num_gondolas]
         for j in range(num_gondolas):
             np.random.shuffle(df_g[i][j])
@@ -230,8 +264,29 @@ def add_valid_permutations(
     )
     pd_new[df_sampled.columns[-1]] = df_sampled.label.to_numpy()
 
-    # concatenate and return
-    return pd.concat([df_index, pd_new], ignore_index=True)
+    if merge_check:
+        merge_checked = pd_new.merge(df_index, how='outer', indicator=True)
+        num_duplicate = sum(merge_checked['_merge'] == 'both')
+
+        good_samples = merge_checked[merge_checked['_merge'] == 'left_only'].copy()
+        good_samples = good_samples.drop('_merge', axis=1)
+        merge_checked = merge_checked.drop('_merge', axis=1)
+
+        if num_duplicate == 0:
+            return good_samples
+
+        # get replacements for the duplicates
+        new_samples = sample_new_permutations(
+            df_index=merge_checked,
+            num_elem=num_duplicate,
+            num_gondolas=num_gondolas,
+            seed=np.random.randint(0, 2 ** 30),
+            merge_check=True
+        )
+
+        return good_samples.merge(new_samples, how='outer')
+
+    return pd_new
 
 
 def add_invalid_permutations(
