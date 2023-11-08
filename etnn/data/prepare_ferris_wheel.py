@@ -5,6 +5,7 @@ from etnn.data import DEFAULT_DATA_PATH
 from tqdm import tqdm
 from etnn.data.ferris_score_helpers import build_wheel_happyness
 import typing
+from multiprocess.pool import Pool
 
 
 def prepare_1_ferris(
@@ -155,13 +156,11 @@ def generate_ferris_dataset(
 
         data_store += [sample.copy()]
 
-    for sample in tqdm(data_store):
+    # calc label
+    func = lambda x: x.flatten().tolist() + [build_wheel_happyness(df_health, sample)]
 
-        # calc label
-        label = build_wheel_happyness(df_health, sample)
-
-        # add to storage
-        dataset_storage.append(sample.flatten().tolist() + [label])
+    with Pool(processes=os.cpu_count()) as p:
+        dataset_storage = list(p.imap(func, tqdm(data_store)))
 
     # fuze dataset
     df_generated = pd.DataFrame(
