@@ -208,7 +208,7 @@ def add_valid_permutations(
     # - permutate gondola people
 
     # convert to numpy
-    df_t = df_sampled.to_numpy()[:, :-1]
+    df_t = df_sampled.to_numpy(int)[:, :-1]
 
     # changing shape to make dimensions match ferris wheel structure
     df_g = df_t.reshape(df_t.shape[0], num_gondolas, -1)
@@ -225,12 +225,10 @@ def add_valid_permutations(
 
     # create dataset out of perturbed elements
     pd_new = pd.DataFrame(
-        np.c_[
-            df_t,
-            df_sampled.label.to_numpy()
-        ],
-        columns=df_sampled.columns
+        df_t,
+        columns=df_sampled.columns[:-1]
     )
+    pd_new[df_sampled.columns[-1]] = df_sampled.label.to_numpy()
 
     # concatenate and return
     return pd.concat([df_index, pd_new], ignore_index=True)
