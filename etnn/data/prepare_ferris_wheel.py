@@ -157,7 +157,7 @@ def generate_ferris_dataset(
         data_store += [sample.copy()]
 
     # calc label
-    func = lambda x: x.flatten().tolist() + [build_wheel_happyness(df_health, sample)]
+    func = lambda x: x.flatten().tolist() + [build_wheel_happyness(df_health, x)]
 
     with Pool(processes=os.cpu_count()) as p:
         dataset_storage = list(p.imap(func, tqdm(data_store)))
