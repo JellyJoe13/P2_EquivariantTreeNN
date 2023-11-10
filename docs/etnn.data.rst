@@ -42,6 +42,14 @@ etnn.data.permutation module
    :undoc-members:
    :show-inheritance:
 
+etnn.data.prepare\_ferris\_wheel module
+---------------------------------------
+
+.. automodule:: etnn.data.prepare_ferris_wheel
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 etnn.data.tree\_structure module
 --------------------------------
 

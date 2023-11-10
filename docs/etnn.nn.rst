@@ -15,6 +15,14 @@ Subpackages
 Submodules
 ----------
 
+etnn.nn.baseline module
+-----------------------
+
+.. automodule:: etnn.nn.baseline
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 etnn.nn.layer\_framework module
 -------------------------------
 

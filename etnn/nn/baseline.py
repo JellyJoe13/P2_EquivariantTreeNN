@@ -109,7 +109,7 @@ def calc_params(
     Small function calculating the total number of parameters of a model.
 
     :param model: Model for which to count the parameters for
-    :type: torch.nn.Module
+    :type model: torch.nn.Module
     :return: Number of parameters
     :rtype: int
     """

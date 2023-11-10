@@ -15,7 +15,7 @@ def prepare_1_ferris(
         try_pregen: bool = True
 ) -> pd.DataFrame:
     """
-    Function that preprocesses the person health dataset once in repsect to creating the ferris wheel dataset.
+    Function that preprocesses the person health dataset once in respect to creating the ferris wheel dataset.
 
     :param df_name_input: name of the dataframe to process, default: ``Sleep_health_and_lifestyle_dataset.csv``.
     :type df_name_input: str
@@ -109,7 +109,7 @@ def generate_ferris_dataset(
     :type num_to_generate:  int
     :param df_name_input: name of the dataset input, default: ``Sleep_health_and_lifestyle_dataset.csv``
     :type df_name_input: str
-    :param dataset_path: path to dataset folder, default: ``DEFAULT_DATA_PATH´´
+    :param dataset_path: path to dataset folder, default: ``DEFAULT_DATA_PATH``
     :type dataset_path: str
     :param df_intermediate_output_name: name of intermediate dataset csv, default: ``health_dataset_preprocessed-1.csv``
     :type df_intermediate_output_name: str

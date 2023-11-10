@@ -4,6 +4,14 @@ etnn.tools
 Submodules
 ----------
 
+etnn.tools.loader
+-----------------
+
+.. automodule:: etnn.tools.loader
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 etnn.tools.permutation\_reordering module
 -----------------------------------------
 
