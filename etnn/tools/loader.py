@@ -1,5 +1,4 @@
 import pandas as pd
-import torch
 from torch.utils.data import WeightedRandomSampler, Subset
 
 
@@ -7,6 +6,18 @@ def create_sampler(
         df_index: pd.DataFrame,
         dataset: Subset = None
 ) -> WeightedRandomSampler:
+    """
+    Create a pytorch sampler that smooths uneven distribution.
+
+    :param df_index: dataset for which to create the sampler for
+    :type df_index: pd.DataFrame
+    :param dataset: dataset of the split original dataset if applicable - else ``None``. This provides the information
+        which element (by index) belongs to the current dataset and in which order the elements are contained in the
+        subset.
+    :type dataset: Subset
+    :return: Random Sampler that randomly samples elements with repetition
+    :rtype: WeightedRandomSampler
+    """
     # change name to working df
     working_df = df_index.copy()
 

@@ -234,6 +234,24 @@ def sample_new_permutations(
         seed: int = None,
         merge_check: bool = False
 ) -> pd.DataFrame:
+    """
+    Function to create permutations to the ferris wheel dataset and returning it as a pandas DataFrame.
+
+    :param df_index: dataframe which elements to sample and randomly permute
+    :type df_index: pd.DataFrame
+    :param num_elem: number of elements to create
+    :type num_elem: int
+    :param num_gondolas: number of gondolas the dataset has. can be also read from the dataframe by the column names
+        but not used in this method
+    :type num_gondolas: int
+    :param seed: seed to use to control randomness, default: ``None``
+    :type seed: int
+    :param merge_check: boolean parameters controlling whether a merge check should be performed. A merge check contains
+        whether it should be checked if the random permutation produced an element which is already in df_index
+    :type merge_check: bool
+    :return: pandas dataframe containing the newly created elements
+    :rtype: pd.DataFrame
+    """
     # create viable permutations of input and add them to dataset
     # sample elements to perturb
     df_sampled = df_index.sample(num_elem, replace=True, random_state=seed)
