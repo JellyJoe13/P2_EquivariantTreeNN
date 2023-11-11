@@ -236,3 +236,42 @@ def load_modified_ferris_wheel_dataset(
     df_index.to_csv(file_path)
 
     return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index
+
+
+def prepare_pure_test_dataset(
+        df_index: pd.DataFrame,
+        train_indices,
+        num_gondolas: int,
+        num_to_generate: int = 1_000,
+        df_name_input: str = "Sleep_health_and_lifestyle_dataset.csv",
+        dataset_path: str = DEFAULT_DATA_PATH,
+        df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
+        try_pregen: bool = True,
+        seed: int = 4651431
+) -> FerrisWheelDataset:
+    # get health dataset
+    df_health = prepare_1_ferris(
+        df_name_input=df_name_input,
+        dataset_path=dataset_path,
+        df_name_output=df_intermediate_output_name,
+        try_pregen=try_pregen
+    )
+
+    # filter out training index if it differs
+    if train_indices is not None:
+        df_index_train = df_index[df_index.index.isin(train_indices)]
+    else:
+        df_index_train = df_index
+
+    # generate valid(pure) permutations
+    df_index_test = add_valid_permutations(
+        num_add_equal_elem=num_to_generate,
+        df_index=df_index_train,
+        num_gondolas=num_gondolas,
+        seed=seed
+    )
+    return FerrisWheelDataset(
+        df_health,
+        df_index_test,
+        num_gondolas
+    ), df_index_test
