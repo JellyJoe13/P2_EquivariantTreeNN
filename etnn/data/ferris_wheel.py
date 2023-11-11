@@ -1,9 +1,12 @@
 import os.path
+import typing
+
 import numpy as np
 import pandas as pd
 import torch
 from etnn.data import DEFAULT_DATA_PATH
-from etnn.data.prepare_ferris_wheel import generate_ferris_dataset, add_valid_permutations, add_invalid_permutations
+from etnn.data.prepare_ferris_wheel import generate_ferris_dataset, add_valid_permutations, add_invalid_permutations, \
+    prepare_1_ferris
 
 
 class FerrisWheelDataset(torch.utils.data.Dataset):
@@ -89,7 +92,7 @@ def load_pure_ferris_wheel_dataset(
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
         seed: int = 4651431
-) -> FerrisWheelDataset:
+) -> typing.Tuple[FerrisWheelDataset, pd.DataFrame]:
     """
     Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
     intermediate csv files). Loads a dataset that exactly follows the allowed permutations combined with the exact
@@ -115,8 +118,8 @@ def load_pure_ferris_wheel_dataset(
     :type try_pregen: bool
     :param seed: Seed to use for random generation
     :type seed: int
-    :return: generated dataset
-    :rtype: FerrisWheelDataset
+    :return: generated dataset and index dataframe for data loading purposes
+    :rtype: typing.Tuple[FerrisWheelDataset, pd.DataFrame]
     """
     # load the datasets
     df_index, df_health = generate_ferris_dataset(
@@ -130,7 +133,7 @@ def load_pure_ferris_wheel_dataset(
         seed=seed
     )
 
-    return FerrisWheelDataset(df_health, df_index, num_gondolas)
+    return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index
 
 
 def load_modified_ferris_wheel_dataset(
@@ -144,7 +147,7 @@ def load_modified_ferris_wheel_dataset(
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
         seed: int = 4651431
-):
+) -> typing.Tuple[FerrisWheelDataset, pd.DataFrame]:
     """
     Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
     intermediate csv files). Loads a dataset that not exactly follows the allowed permutations combined with the
@@ -177,15 +180,22 @@ def load_modified_ferris_wheel_dataset(
     :type try_pregen: bool
     :param seed: Seed to use for random generation
     :type seed: int
-    :return: generated dataset
-    :rtype: FerrisWheelDataset
+    :return: generated dataset and index dataframe for data loading purposes
+    :rtype: typing.Tuple[FerrisWheelDataset, pd.DataFrame]
     """
     # if pregenerated and parameter true, load dataset
     file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}_valid" \
                 f"-{num_valid_to_add}_invalid-{num_invalid_to_add}.csv"
     file_path = os.path.join(dataset_path, file_name)
     if try_pregen and os.path.isfile(file_path):
-        return pd.read_csv(file_path)
+        df_health = prepare_1_ferris(
+            df_name_input=df_name_input,
+            dataset_path=dataset_path,
+            df_name_output=df_intermediate_output_name,
+            try_pregen=try_pregen
+        )
+        df_index = pd.read_csv(file_path)
+        return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index
 
     # seed randomness
     if seed is not None:
@@ -225,4 +235,4 @@ def load_modified_ferris_wheel_dataset(
     # save dataset
     df_index.to_csv(file_path)
 
-    return FerrisWheelDataset(df_health, df_index, num_gondolas)
+    return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index

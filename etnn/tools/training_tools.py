@@ -47,6 +47,7 @@ class ConfigStore:
             batch_size: int = 32,
             early_stop_tol: int = 5,
             is_classification: bool = False,
+            use_equal_batcher: bool = False,
     ):
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
@@ -64,6 +65,7 @@ class ConfigStore:
         self.learning_rate = learning_rate
         self.batch_size = batch_size
         self.early_stop_tol = early_stop_tol
+        self.use_equal_batcher = use_equal_batcher
 
 
 def config_to_json(
