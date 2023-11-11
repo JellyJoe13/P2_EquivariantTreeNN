@@ -72,7 +72,7 @@ def create_baseline_model(
             break
 
     # create the layers
-    layers = []
+    layers = [torch.nn.Flatten()]
     for idx in range(n_layer):
 
         # create a pseudo-index
