@@ -82,7 +82,7 @@ class LayerManagementFramework(Module):
             if contains_node_type("P", tree):
                 self.tree_layer_p = ChiralNodeNetworkTypeP(
                     hidden_dim=hidden_dim,
-                    k=k
+                    k=1  # originally k but meaningless as the effective parameters do not change x*p_1 + x*p_2 = x*p
                 )
         elif node_type == 'rnn':
             if contains_node_type("S", tree):
