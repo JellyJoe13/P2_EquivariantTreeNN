@@ -1,10 +1,31 @@
 import json
 import os
-
+import random
 import numpy as np
 import torch
 from sklearn.metrics import mean_squared_error, mean_absolute_error, precision_score, recall_score, f1_score, \
     jaccard_score, explained_variance_score, r2_score
+
+
+def seeding_all(
+        seed: int = 420
+) -> None:
+    """
+    Seeds torch, numpy and random so that results are exactly reproducible.
+
+    :param seed: seed to be set
+    :type seed: int
+    :return: Nothing
+    :rtype: None
+    """
+    # Set the random seed for reproducibility
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
 
 class ConfigStore:
