@@ -240,7 +240,7 @@ def load_modified_ferris_wheel_dataset(
 
 def prepare_pure_test_dataset(
         df_index: pd.DataFrame,
-        train_indices,
+        train_indices: typing.Iterable[int],
         num_gondolas: int,
         num_to_generate: int = 1_000,
         df_name_input: str = "Sleep_health_and_lifestyle_dataset.csv",
@@ -248,7 +248,34 @@ def prepare_pure_test_dataset(
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
         seed: int = 4651431
-) -> FerrisWheelDataset:
+) -> typing.Tuple[FerrisWheelDataset, pd.DataFrame]:
+    """
+    Function that creates 'pure' dataset based on training set. Hence has already been learned in the ETNN.
+
+    :param df_index: Dataframe that describes the ferris wheel guests with an id
+    :type df_index: pd.DataFrame
+    :param train_indices: Indices of the split dataset or sub-dataset corresponding to the training dataset
+    :type train_indices: typing.Iterable[int]
+    :param num_gondolas: Number of gondolas the ferris wheel should have, default: ``15``
+    :type num_gondolas: int
+    :param num_to_generate: Number of dataset entries to generate, default: ``1000``
+    :type num_to_generate: int
+    :param df_name_input: Name of the dataset to use as the input for the persons health data, default:
+        ``Sleep_health_and_lifestyle_dataset.csv``
+    :type df_name_input: str
+    :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``
+    :type dataset_path: str
+    :param df_intermediate_output_name: Name of the intermediate datasets output, default:
+        ``'health_dataset_preprocessed-1.csv'``. Intermediate dataset denotes the preprocessed health dataset.
+    :type df_intermediate_output_name: str
+    :param try_pregen: Controls whether pre-generated shall be loaded or new data should be generated hence overwriting
+        and updating previously generated data with the same parameters, default: ``True``
+    :type try_pregen: bool
+    :param seed: Seed to use for random generation
+    :type seed: int
+    :return: generated dataset and index dataframe for data loading purposes
+    :rtype: typing.Tuple[FerrisWheelDataset, pd.DataFrame]
+    """
     # get health dataset
     df_health = prepare_1_ferris(
         df_name_input=df_name_input,
