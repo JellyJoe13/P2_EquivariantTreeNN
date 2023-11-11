@@ -38,25 +38,27 @@ class ConfigStore:
             hidden_dim: int,
             out_dim: int,
             k: int,
-            is_accuracy_score: bool,
-            which_score: str,
+            dataset: int,
+            ds_size: int,
+            num_gondolas: int,
+            num_part_pg: int,
             loss_name: str,
             optimizer_name: str,
             num_max_epochs: int = 20,
             learning_rate: float = 0.001,
             batch_size: int = 32,
             early_stop_tol: int = 5,
-            is_classification: bool = False,
             use_equal_batcher: bool = False,
+            seed: int = 420,
     ):
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
         self.out_dim = out_dim
         self.k = k
-
-        self.is_accuracy_score = is_accuracy_score
-        self.is_classification = is_classification
-        self.which_score = which_score
+        self.dataset = dataset
+        self.ds_size = ds_size
+        self.num_gondolas = num_gondolas
+        self.num_part_pg = num_part_pg
 
         self.loss_name = loss_name
         self.optimizer_name = optimizer_name
@@ -66,6 +68,7 @@ class ConfigStore:
         self.batch_size = batch_size
         self.early_stop_tol = early_stop_tol
         self.use_equal_batcher = use_equal_batcher
+        self.seed = seed
 
 
 def config_to_json(
