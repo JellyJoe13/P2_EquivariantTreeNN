@@ -142,8 +142,15 @@ class EpochControl:
         :return: Whether this epoch's state is considered better
         :rtype: bool
         """
-        if self.current_best_save > eval_value:
-            self.current_best_save = eval_value
+        # copy values
+        working_eval = float(eval_value)
+
+        # if accuracy values - invert scores
+        if self.is_accuracy_score:
+            working_eval *= (-1)
+
+        if self.current_best_save > working_eval:
+            self.current_best_save = working_eval
             return True
         else:
             return False
@@ -163,8 +170,13 @@ class EpochControl:
         :return: whether to stop training or not
         :rtype: bool
         """
-        if self.current_best_stop > eval_value:
-            self.current_best_stop = eval_value
+        # copy values
+        working_eval = float(eval_value)
+        if self.is_accuracy_score:
+            working_eval *= (-1)
+
+        if self.current_best_stop > working_eval:
+            self.current_best_stop = working_eval
             self.num_epochs_not_better = 0
             return False
         else:
@@ -194,15 +206,6 @@ class EpochControl:
         :return: Truth value if training should be stopped or not.
         :rtype: bool
         """
-        # copy values
-        working_train = float(train_value)
-        working_eval = float(eval_value)
-
-        # if accuracy values - invert scores
-        if self.is_accuracy_score:
-            working_train *= (-1)
-            working_eval *= (-1)
-
         # check if value is better, save model
         if self.check_better_save(train_value, eval_value):
             if self.verbose:
@@ -212,7 +215,7 @@ class EpochControl:
                 config_to_json(config, self.config_save_path)
 
         # return truth value if to stop or not
-        return self.should_early_stop(working_train, working_eval)
+        return self.should_early_stop(train_value, eval_value)
 
 
 class AccuracyManager:
