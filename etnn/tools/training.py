@@ -92,12 +92,12 @@ def eval_epoch(
     :return: 3 tensors containing the averaged loss over the batches, the true labels and the predicted labels
     :rtype: typing.Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
     """
+    # set model to evaluation mode
+    model.eval()
+
     with torch.no_grad():
         # init loss storage
         loss_storage = []
-
-        # set model to evaluation mode
-        model.eval()
 
         # container for returning true labels and predicted labels
         true_container = []
