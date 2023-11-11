@@ -3,7 +3,8 @@ import os
 
 import numpy as np
 import torch
-from sklearn.metrics import mean_squared_error, mean_absolute_error, precision_score, recall_score
+from sklearn.metrics import mean_squared_error, mean_absolute_error, precision_score, recall_score, f1_score, \
+    jaccard_score, explained_variance_score, r2_score
 
 
 class ConfigStore:
@@ -225,12 +226,16 @@ class AccuracyManager:
 
         self.regression_metrics = {
             "mse": mean_squared_error,
-            "msa": mean_absolute_error
+            "msa": mean_absolute_error,
+            "explained_variance": explained_variance_score,
+            "r2": r2_score,
         }
 
         self.classification_metrics = {
             "precision": precision_score,
-            "recall": recall_score
+            "recall": recall_score,
+            "f1": f1_score,
+            "jaccard": jaccard_score,
         }
 
         self.mode_order = ["train", "val", "test"]
@@ -238,21 +243,21 @@ class AccuracyManager:
         # open file and write header
         with open(self.storage_total_path, "w") as file:
             # write header for id and epoch
-            file.write("config_id, epoch")
+            file.write("config_id,epoch")
 
             # write losses
-            file.write(", train_loss, val_loss, test_loss")
+            file.write(",train_loss,val_loss,test_loss")
 
             # write scores for train, val and test
             for mode in self.mode_order:
                 # write headers for regression scores
                 for regression_score_name in self.regression_metrics.keys():
-                    file.write(f", {mode}_{regression_score_name}")
+                    file.write(f",{mode}_{regression_score_name}")
 
                 # if classification, write classification scores
                 if self.is_classification:
                     for classification_score_name in self.classification_metrics.keys():
-                        file.write(f", {mode}_{classification_score_name}")
+                        file.write(f",{mode}_{classification_score_name}")
             file.write("\n")
 
     def calc_and_collect(
@@ -328,14 +333,14 @@ class AccuracyManager:
         # append to file
         with open(self.storage_total_path, "a") as file:
             # write the config id and epoch to csv file
-            file.write(f"{config_id}, {epoch}")
+            file.write(f"{config_id},{epoch}")
 
             # write losses
             for loss in [train_loss, val_loss, test_loss]:
                 if loss is not None:
-                    file.write(f", {float(loss)}")
+                    file.write(f",{float(loss)}")
                 else:
-                    file.write(", 0.")
+                    file.write(",0.")
 
             # create scores for each mode
             for mode in self.mode_order:
@@ -344,12 +349,12 @@ class AccuracyManager:
                 if y_true[mode] is None or y_pred[mode] is None:
                     num_zeros = len(self.regression_metrics) + self.is_classification*len(self.classification_metrics)
                     for _ in range(num_zeros):
-                        file.write(", 0.")
+                        file.write(",0.")
                     continue
 
                 # write the regression scores
                 for score in self.regression_metrics.values():
-                    file.write(f", {score(y_true=y_true[mode], y_pred=y_pred[mode])}")
+                    file.write(f",{score(y_true=y_true[mode], y_pred=y_pred[mode])}")
 
                 # write the classification scores if the problem is a classification problem
                 if self.is_classification:
@@ -361,6 +366,6 @@ class AccuracyManager:
                             zero_division=0.,
                             average=self.average
                         )
-                        file.write(f", {temp_score}")
+                        file.write(f",{temp_score}")
             file.write("\n")
         return
