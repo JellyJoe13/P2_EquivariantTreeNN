@@ -3,7 +3,7 @@ from torch.utils.data import random_split, DataLoader
 from tqdm import tqdm
 
 from etnn import TreeNode
-from etnn.data.ferris_wheel import load_pure_ferris_wheel_dataset
+from etnn.data.ferris_wheel import load_pure_ferris_wheel_dataset, load_modified_ferris_wheel_dataset
 from etnn.nn.layer_framework import LayerManagementFramework
 from etnn.tools.loader import create_sampler
 from etnn.tools.training import train_epoch, eval_epoch
@@ -72,6 +72,26 @@ def run_config(
             num_part_pg=config.num_part_pg,
             num_to_generate=config.ds_size,
             dataset_path=dataset_path
+        )
+    elif config.dataset == 1:
+        dataset, df_index = load_modified_ferris_wheel_dataset(
+            num_gondolas=config.num_gondolas,
+            num_part_pg=config.num_part_pg,
+            num_to_generate=int(config.ds_size * 0.8),
+            num_valid_to_add=int(config.ds_size * 0.2),
+            num_invalid_to_add=0,
+            dataset_path=dataset_path,
+            try_pregen=True
+        )
+    elif config.dataset == 2:
+        dataset, df_index = load_modified_ferris_wheel_dataset(
+            num_gondolas=config.num_gondolas,
+            num_part_pg=config.num_part_pg,
+            num_to_generate=int(config.ds_size * 0.6),
+            num_valid_to_add=int(config.ds_size * 0.2),
+            num_invalid_to_add=int(config.ds_size * 0.2),
+            dataset_path=dataset_path,
+            try_pregen=True
         )
     else:
         raise Exception("wrong selection")
