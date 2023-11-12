@@ -9,6 +9,7 @@ Subpackages
 
    etnn.data
    etnn.nn
+   etnn.routines
    etnn.tests
    etnn.tools
 
