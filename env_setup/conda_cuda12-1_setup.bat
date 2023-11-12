@@ -23,7 +23,10 @@ echo + Installing basic libraries...
 call conda install -y numpy pandas
 
 echo + Installing pytorch...
-call conda install -y pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+call conda install -y pytorch=2.1.0 torchvision=0.16.0 torchaudio=2.1.0 pytorch-cuda=12.1 -c pytorch -c nvidia
 
 echo + Installing advanced libraries...
-call conda install -y matplotlib scikit-learn jupyterlab
+call conda install -y matplotlib=3.7.2 scikit-learn=1.3.0 jupyterlab=3.6.3 multiprocess=0.70.15
+
+echo + Installing libraries for documentation generation
+call conda install -y sphinx=7.2.6 sphinx-rtd-theme=1.3.0
