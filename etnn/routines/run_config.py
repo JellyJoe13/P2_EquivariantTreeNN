@@ -1,5 +1,7 @@
+import typing
+
 import torch
-from torch.utils.data import random_split, DataLoader
+from torch.utils.data import random_split, DataLoader, Dataset, Subset
 from tqdm import tqdm
 
 from etnn import TreeNode
@@ -18,6 +20,17 @@ def run_config(
         dataset_path: str = "./datasets",
         results_folder: str = "./results"
 ):
+    """
+    Function that runs the experiment(s) for one config. Automatically and continuously saves results.
+
+    :param config: config to execute
+    :type config: ConfigStore
+    :param dataset_path: path to dataset folder.
+    :type dataset_path: str
+    :param results_folder: path to results folder. function will subsequently create this folder if it does not exist.
+    :type results_folder: str
+    :return: None
+    """
     # definition of constants
     val_perc = 0.3
     model_saving_name = "model.pt"
@@ -205,7 +218,26 @@ def run_config(
     pass
 
 
-def choice_trainloader(config, df_index, train_ds):
+def choice_trainloader(
+        config: ConfigStore,
+        df_index: pd.DataFrame,
+        train_ds: typing.Union[Subset, None]
+) -> DataLoader:
+    """
+    Function realizing the choice of whether to use a weighted random sampler to even distribution issues or not
+    controlled by the parameter ``use_equal_batcher``.
+
+    :param config: config containing the parameter ``loss_name`` which contains string values that control which loss
+        to use.
+    :type config: ConfigStore
+    :param df_index: data index framework to use for the creation of weighted random sampler
+    :type df_index: pd.DataFrame
+    :param train_ds: Train dataset (if subset - split) to get indices representing which entries of ``df_index`` are
+        to be in the training dataloader
+    :type train_ds: typing.Union[Subset, None]
+    :return: training dataloader
+    :rtype: DataLoader
+    """
     if config.use_equal_batcher:
         sampler = create_sampler(df_index=df_index, dataset=train_ds)
         train_loader = DataLoader(train_ds, batch_size=config.batch_size, sampler=sampler)
@@ -214,7 +246,21 @@ def choice_trainloader(config, df_index, train_ds):
     return train_loader
 
 
-def choice_optim(config, model):
+def choice_optim(
+        config: ConfigStore,
+        model: torch.nn.Module
+) -> torch.optim.Optimizer:
+    """
+    Function realizing the choice of optimizer possible in the config parameters.
+
+    :param config: config containing the parameter ``optimizer_name`` which contains string values that control which
+        loss to use.
+    :type config: ConfigStore
+    :param model: Model which parameters to use for the optimizer initialization
+    :type model: torch.nn.Module
+    :return: torch optimizer
+    :rtype: torch.optim.Optimizer
+    """
     if config.optimizer_name == 'adam':
         optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
     elif config.optimizer_name == 'sgd':
@@ -224,7 +270,17 @@ def choice_optim(config, model):
     return optimizer
 
 
-def choice_loss(config):
+def choice_loss(
+        config: ConfigStore
+):
+    """
+    Function realizing the choice of loss function possible in the config parameters.
+
+    :param config: config containing the parameter ``loss_name`` which contains string values that control which loss
+        to use.
+    :type config: ConfigStore
+    :return: torch loss function
+    """
     if config.loss_name == 'mse':
         criterion = torch.nn.MSELoss()
     elif config.loss_name == 'mae':
@@ -236,7 +292,21 @@ def choice_loss(config):
     return criterion
 
 
-def choice_dataset(config, dataset_path):
+def choice_dataset(
+        config: ConfigStore,
+        dataset_path: str
+) -> typing.Tuple[Dataset, pd.DataFrame]:
+    """
+    Function realizing the choice of dataset initialization possible in the config parameters.
+
+    :param config: config containing the parameter ``dataset`` which contains integer values that control which dataset
+        to generate.
+    :type config: ConfigStore
+    :param dataset_path: path to the folder where the dataset csv's are located
+    :type dataset_path: str
+    :return: dataset and index dataframe describing dataset
+    :rtype: typing.Tuple[Dataset, pd.DataFrame]
+    """
     if config.dataset == 0:
         dataset, df_index = load_pure_ferris_wheel_dataset(
             num_gondolas=config.num_gondolas,
@@ -269,8 +339,25 @@ def choice_dataset(config, dataset_path):
     return dataset, df_index
 
 
-def acquire_config_idx(config, config_index_name, results_folder):
-    # aquire saving path
+def acquire_config_idx(
+        config: ConfigStore,
+        config_index_name: str,
+        results_folder: str
+) -> int:
+    """
+    Realizes acquisition of config ids which is used to determine where to store the config and the measurements/model.
+
+    :param config: config containing all exchangeable parameters
+    :type config: ConfigStore
+    :param config_index_name: Name of the config index file
+    :type config_index_name: str
+    :param results_folder: path to the folder where the results are to be stored (not to be confused with the actual
+        saving path of the metrics, model parameters and configs, this is a subfolder of this)
+    :type results_folder: str
+    :return: config index
+    :rtype: int
+    """
+    # acquire saving path
     if not os.path.exists(results_folder):
         os.mkdir(results_folder)
     # create path where the config idx file should be located
@@ -301,6 +388,8 @@ def acquire_config_idx(config, config_index_name, results_folder):
 
 
 def run_with_params(
+        dataset_path: str = "./datasets",
+        results_folder: str = "./results",
         in_dim: int = 15,
         hidden_dim: int = 128,
         out_dim: int = 1,
@@ -318,8 +407,18 @@ def run_with_params(
         use_equal_batcher: bool = False,
         seed: int = 420
 ):
+    """
+    Function that runs the experiment(s) for one config. Automatically and continuously saves results.
+
+    :param dataset_path: path to dataset folder.
+    :type dataset_path: str
+    :param results_folder: path to results folder. function will subsequently create this folder if it does not exist.
+    :type results_folder: str
+    :param other_parameters: Other parameters in correspondence with config settings.
+    :return: None
+    """
     return run_config(
-        ConfigStore(
+        config=ConfigStore(
             in_dim=in_dim,
             hidden_dim=hidden_dim,
             out_dim=out_dim,
@@ -336,5 +435,7 @@ def run_with_params(
             early_stop_tol=early_stop_tol,
             use_equal_batcher=use_equal_batcher,
             seed=seed
-        )
+        ),
+        dataset_path=dataset_path,
+        results_folder=results_folder
     )
