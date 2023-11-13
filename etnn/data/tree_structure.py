@@ -29,6 +29,7 @@ class TreeNode:
 
         # statistical elements/elements to make future computations easier
         self.num_elem = 0
+        self.calc_num_elem()
 
     def to_json(self) -> dict:
         """
