@@ -1,2 +1,3 @@
 config_idx,in_dim,hidden_dim,out_dim,k,dataset,ds_size,num_gondolas,num_part_pg,loss_name,optimizer_name,num_max_epochs,learning_rate,batch_size,early_stop_tol,use_equal_batcher,seed,label_type,final_label_factor
 0,15,128,1,2,0,10000,10,5,mse,adam,100,0.001,1024,5,False,420,default,0.001
+1,15,128,1,2,0,10000,10,5,mse,adam,100,0.001,1024,5,False,420,tree,0.001
