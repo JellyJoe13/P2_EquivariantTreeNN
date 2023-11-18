@@ -1,9 +1,11 @@
 import pandas as pd
 import numpy as np
 import os
+
+from etnn import TreeNode
 from etnn.data import DEFAULT_DATA_PATH
 from tqdm import tqdm
-from etnn.data.ferris_score_helpers import build_wheel_happyness
+from etnn.data.ferris_score_helpers import build_wheel_happyness, build_generative_label, build_label_tree
 import typing
 from multiprocess.pool import Pool
 
@@ -96,7 +98,9 @@ def generate_ferris_dataset(
         dataset_path: str = DEFAULT_DATA_PATH,
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
-        seed: int = 4651431
+        seed: int = 4651431,
+        label_type: str = "default",
+        final_label_factor: float = 1/1000
 ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Function that generates the ferris dataset's core dataset, the health dataset and the index dataset.
@@ -134,7 +138,10 @@ def generate_ferris_dataset(
 
     # see if file already exists and load this
     # file name logic
-    file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}.csv"
+    file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}_label-{label_type}"
+    if label_type == "tree":
+        file_name += f"-{final_label_factor}"
+    file_name += f".csv"
     file_path = os.path.join(dataset_path, file_name)
 
     if try_pregen and os.path.isfile(file_path):
@@ -152,15 +159,29 @@ def generate_ferris_dataset(
     for _ in tqdm(range(num_to_generate)):
         # generate sample element
         np.random.shuffle(random_order)
-        sample = random_order[:num_gondolas*num_part_pg].reshape(num_gondolas, num_part_pg)
+        sample = random_order[:num_gondolas*num_part_pg]
+        if label_type == "default":
+            sample = sample.reshape(num_gondolas, num_part_pg)
 
         data_store += [sample.copy()]
 
     # calc label
-    func = lambda x: x.flatten().tolist() + [build_wheel_happyness(df_health, x)]
+    if label_type == "tree":
+        func = lambda x: x.flatten().tolist() + [build_label_tree(
+            df_health=df_health,
+            map_element=x,
+            num_gondolas=num_gondolas,
+            num_part_pg=num_part_pg,
+            final_label_factor=final_label_factor
+        )]
+        pass
+    else:
+        func = lambda x: x.flatten().tolist() + [build_wheel_happyness(df_health, x)]
 
     with Pool(processes=os.cpu_count()) as p:
         dataset_storage = list(p.imap(func, tqdm(data_store)))
+
+    # dataset_storage = list(map(func, tqdm(data_store)))
 
     # fuze dataset
     df_generated = pd.DataFrame(

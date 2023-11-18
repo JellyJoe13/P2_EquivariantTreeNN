@@ -31,10 +31,9 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         :param num_gondolas: Number of gondolas in ferris wheel
         :type num_gondolas: int
         """
-        self.df_health = df_health
+        self.df_health = df_health.set_index('id', inplace=False) if 'id' in df_health else df_health
         self.df_index = df_index
 
-        self.df_health.set_index('id', inplace=True)
         self.num_gondolas = num_gondolas
 
     def __len__(self):
@@ -91,7 +90,9 @@ def load_pure_ferris_wheel_dataset(
         dataset_path: str = DEFAULT_DATA_PATH,
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
-        seed: int = 4651431
+        seed: int = 4651431,
+        label_type: str = "default",
+        final_label_factor: float = 1/1000
 ) -> typing.Tuple[FerrisWheelDataset, pd.DataFrame]:
     """
     Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
@@ -130,7 +131,9 @@ def load_pure_ferris_wheel_dataset(
         df_intermediate_output_name=df_intermediate_output_name,
         df_name_input=df_name_input,
         try_pregen=try_pregen,
-        seed=seed
+        seed=seed,
+        label_type=label_type,
+        final_label_factor=final_label_factor
     )
 
     return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index
@@ -146,7 +149,9 @@ def load_modified_ferris_wheel_dataset(
         dataset_path: str = DEFAULT_DATA_PATH,
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv',
         try_pregen: bool = True,
-        seed: int = 4651431
+        seed: int = 4651431,
+        label_type: str = "default",
+        final_label_factor: float = 1/1000
 ) -> typing.Tuple[FerrisWheelDataset, pd.DataFrame]:
     """
     Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
@@ -185,7 +190,12 @@ def load_modified_ferris_wheel_dataset(
     """
     # if pregenerated and parameter true, load dataset
     file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}_valid" \
-                f"-{num_valid_to_add}_invalid-{num_invalid_to_add}.csv"
+                f"-{num_valid_to_add}_invalid-{num_invalid_to_add}_label-{label_type}"
+
+    if label_type == "tree":
+        file_name += f"-{final_label_factor}"
+
+    file_name += f".csv"
     file_path = os.path.join(dataset_path, file_name)
     if try_pregen and os.path.isfile(file_path):
         df_health = prepare_1_ferris(
@@ -194,7 +204,7 @@ def load_modified_ferris_wheel_dataset(
             df_name_output=df_intermediate_output_name,
             try_pregen=try_pregen
         )
-        df_index = pd.read_csv(file_path)
+        df_index = pd.read_csv(file_path, index_col=0)
         return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index
 
     # seed randomness
@@ -210,7 +220,9 @@ def load_modified_ferris_wheel_dataset(
         df_intermediate_output_name=df_intermediate_output_name,
         df_name_input=df_name_input,
         try_pregen=try_pregen,
-        seed=seed
+        seed=seed,
+        label_type=label_type,
+        final_label_factor=final_label_factor
     )
 
     result_of_randomly_hitting_keyboard = 656658998
