@@ -14,5 +14,7 @@
     "batch_size": 1024,
     "early_stop_tol": 5,
     "use_equal_batcher": false,
-    "seed": 420
+    "seed": 420,
+    "label_type": "default",
+    "final_label_factor": 0.001
 }
