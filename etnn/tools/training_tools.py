@@ -50,6 +50,8 @@ class ConfigStore:
             early_stop_tol: int = 5,
             use_equal_batcher: bool = False,
             seed: int = 420,
+            label_type: str = "default",  # tree
+            final_label_factor: float = 1/1000
     ):
         self.in_dim = in_dim
         self.hidden_dim = hidden_dim
@@ -69,6 +71,9 @@ class ConfigStore:
         self.early_stop_tol = early_stop_tol
         self.use_equal_batcher = use_equal_batcher
         self.seed = seed
+
+        self.label_type = label_type
+        self.final_label_factor = final_label_factor
 
 
 def config_to_json(
