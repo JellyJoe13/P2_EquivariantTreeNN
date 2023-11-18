@@ -183,13 +183,43 @@ class EpochControl:
             self.num_epochs_not_better += 1
             return self.num_epochs_not_better > self.tolerance
 
-    def retain_best_and_stop(
+    def retain_best(
             self,
             model: torch.nn.Module,
             train_value: torch.Tensor,
             eval_value: torch.Tensor,
             config: ConfigStore = None
     ) -> None:
+        """
+        Determines based on the provided train and eval values if the current state of the model is better and shall
+        be saved.
+
+        :param model: model which parameters to be saved
+        :type model: torch.nn.Module
+        :param train_value: value score produced by the train set
+        :type train_value: torch.Tensor
+        :param eval_value: value score produced by either the valuation or test set
+        :type train_value: torch.Tensor
+        :param config: Config container that will be saved if model is saved to know which model parameters to use
+            when restoring model/setup, default: ``None`` meaning nothing will be saved, although not recommended.
+        :type config: ConfigStore
+        """
+        # check if value is better, save model
+        if self.check_better_save(train_value, eval_value):
+            if self.verbose:
+                print("++save++")
+            torch.save(model.state_dict(), self.model_save_path)
+            if config is not None:
+                config_to_json(config, self.config_save_path)
+        return
+
+    def retain_best_and_stop(
+            self,
+            model: torch.nn.Module,
+            train_value: torch.Tensor,
+            eval_value: torch.Tensor,
+            config: ConfigStore = None
+    ) -> bool:
         """
         Determines based on the provided train and eval values if the current state of the model is better and shall
         be saved. Returns a truth value if training should be stopped or not.
@@ -206,13 +236,7 @@ class EpochControl:
         :return: Truth value if training should be stopped or not.
         :rtype: bool
         """
-        # check if value is better, save model
-        if self.check_better_save(train_value, eval_value):
-            if self.verbose:
-                print("++save++")
-            torch.save(model.state_dict(), self.model_save_path)
-            if config is not None:
-                config_to_json(config, self.config_save_path)
+        self.retain_best(model, train_value, eval_value, config)
 
         # return truth value if to stop or not
         return self.should_early_stop(train_value, eval_value)
