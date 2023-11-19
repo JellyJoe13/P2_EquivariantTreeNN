@@ -19,7 +19,8 @@ def run_config(
         config: ConfigStore,
         dataset_path: str = "./datasets",
         results_folder: str = "./results",
-        check_duplicate: bool = True
+        check_duplicate: bool = True,
+        verbose: bool = True
 ):
     """
     Function that runs the experiment(s) for one config. Automatically and continuously saves results.
@@ -116,7 +117,11 @@ def run_config(
     )
     # %%
     # train for N epochs
-    for epoch in tqdm(range(config.num_max_epochs)):
+    iterating = range(config.num_max_epochs)
+    if verbose:
+        iterating = tqdm(iterating)
+
+    for epoch in iterating:
         train_mean_loss, train_true_y, train_pred_y = train_epoch(
             model,
             train_loader,
@@ -183,7 +188,10 @@ def run_config(
     )
     # %%
     # train for N epochs
-    for epoch in tqdm(range(config.num_max_epochs)):
+    iterating = range(config.num_max_epochs)
+    if verbose:
+        iterating = tqdm(iterating)
+    for epoch in iterating:
         train_mean_loss, train_true_y, train_pred_y = train_epoch(
             model,
             train_loader,
