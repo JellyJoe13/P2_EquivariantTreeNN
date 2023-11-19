@@ -111,7 +111,8 @@ def run_config(
         config_save_name=config_saving_name,
         saving_folder_path=storage_folder,
         tolerance=config.early_stop_tol,
-        is_accuracy_score=False
+        is_accuracy_score=False,
+        verbose=False
     )
     # %%
     # train for N epochs
