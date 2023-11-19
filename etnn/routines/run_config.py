@@ -18,7 +18,8 @@ import pandas as pd
 def run_config(
         config: ConfigStore,
         dataset_path: str = "./datasets",
-        results_folder: str = "./results"
+        results_folder: str = "./results",
+        check_duplicate: bool = True
 ):
     """
     Function that runs the experiment(s) for one config. Automatically and continuously saves results.
@@ -39,7 +40,9 @@ def run_config(
     config_index_name = "config_index.csv"
 
     # DEALING WITH SAVING PATH
-    config_idx = acquire_config_idx(config, config_index_name, results_folder)
+    config_idx, already_present = acquire_config_idx(config, config_index_name, results_folder)
+    if check_duplicate and already_present:
+        return
 
     # DEALING WITH STORAGE PATH CREATION AND CHECKS
     # if not present create the folder for this run
@@ -345,7 +348,7 @@ def acquire_config_idx(
         config: ConfigStore,
         config_index_name: str,
         results_folder: str
-) -> int:
+) -> typing.Tuple[int, bool]:
     """
     Realizes acquisition of config ids which is used to determine where to store the config and the measurements/model.
 
@@ -356,8 +359,8 @@ def acquire_config_idx(
     :param results_folder: path to the folder where the results are to be stored (not to be confused with the actual
         saving path of the metrics, model parameters and configs, this is a subfolder of this)
     :type results_folder: str
-    :return: config index
-    :rtype: int
+    :return: config index, bool whether this config already exists
+    :rtype: typing.Tuple[int, bool]
     """
     # acquire saving path
     if not os.path.exists(results_folder):
@@ -384,9 +387,11 @@ def acquire_config_idx(
         # add this config to idx table
         new_entry['config_idx'] = config_idx
         pd.concat([config_table, new_entry]).to_csv(config_idx_path, index=False)
+
+        return config_idx, False
     else:
         config_idx = merge.iloc[0]['config_idx']
-    return config_idx
+        return config_idx, True
 
 
 def run_with_params(
