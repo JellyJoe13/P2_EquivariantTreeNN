@@ -15,6 +15,6 @@
     "early_stop_tol": 5,
     "use_equal_batcher": false,
     "seed": 420,
-    "label_type": "default",
+    "label_type": "tree",
     "final_label_factor": 0.001
 }

@@ -154,7 +154,7 @@ def run_config(
 
         # check if model is better and save it
         # todo: probably not required to write config over and over again
-        if epoch_control.retain_best_and_stop(model, train_mean_loss, val_mean_loss, config):
+        if epoch_control.retain_best(model, train_mean_loss, val_mean_loss, config):
             break
 
     # REPEAT FOR BASELINE MODEL
@@ -206,10 +206,6 @@ def run_config(
             val_y_pred=val_pred_y,
             val_loss=val_mean_loss,
         )
-
-        # check if model is better and save it
-        if epoch_control.should_early_stop(train_mean_loss, val_mean_loss):
-            break
 
     # todo: should I include plotting (save to file)? probably will make git bloated - use accuracy plot notebook
     #   instead
@@ -312,7 +308,9 @@ def choice_dataset(
             num_gondolas=config.num_gondolas,
             num_part_pg=config.num_part_pg,
             num_to_generate=config.ds_size,
-            dataset_path=dataset_path
+            dataset_path=dataset_path,
+            label_type=config.label_type,
+            final_label_factor=config.final_label_factor
         )
     elif config.dataset == 1:
         dataset, df_index = load_modified_ferris_wheel_dataset(
@@ -322,7 +320,9 @@ def choice_dataset(
             num_valid_to_add=int(config.ds_size * 0.2),
             num_invalid_to_add=0,
             dataset_path=dataset_path,
-            try_pregen=True
+            try_pregen=True,
+            label_type=config.label_type,
+            final_label_factor=config.final_label_factor
         )
     elif config.dataset == 2:
         dataset, df_index = load_modified_ferris_wheel_dataset(
@@ -332,7 +332,9 @@ def choice_dataset(
             num_valid_to_add=int(config.ds_size * 0.2),
             num_invalid_to_add=int(config.ds_size * 0.2),
             dataset_path=dataset_path,
-            try_pregen=True
+            try_pregen=True,
+            label_type=config.label_type,
+            final_label_factor=config.final_label_factor
         )
     else:
         raise Exception("wrong selection")
@@ -405,7 +407,9 @@ def run_with_params(
         batch_size: int = 1024,
         early_stop_tol: int = 5,
         use_equal_batcher: bool = False,
-        seed: int = 420
+        seed: int = 420,
+        label_type: str = "default",
+        final_label_factor: float = 1/1000
 ):
     """
     Function that runs the experiment(s) for one config. Automatically and continuously saves results.
@@ -434,7 +438,9 @@ def run_with_params(
             batch_size=batch_size,
             early_stop_tol=early_stop_tol,
             use_equal_batcher=use_equal_batcher,
-            seed=seed
+            seed=seed,
+            label_type=label_type,
+            final_label_factor=final_label_factor
         ),
         dataset_path=dataset_path,
         results_folder=results_folder

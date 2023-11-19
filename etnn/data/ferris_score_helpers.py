@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import typing
 
+from etnn import TreeNode
 
 """
 Rule ideas:
@@ -212,3 +213,110 @@ def build_wheel_happyness(
         )
         for own, foreign, bonus in zip(individual_scores, neighbor_scores, age_group_bonus)
     ])
+
+
+def _reformat(result):
+    if len(result.shape) != 2:
+        result = result.reshape(1, -1)
+    return result
+
+
+def build_generative_label(
+        tree: TreeNode,
+        df_health: pd.DataFrame,
+        map_element
+):
+    # Parameters
+    k = 3  # equal to one left one right (or next 2 right/left elements)
+    # generate embedding parameters
+    embedding_params = (np.arange(k) + 1) / (k*(k+1)/2)
+
+    # assert that index is id column
+    if 'id' in df_health:
+        df = df_health.set_index('id', inplace=False)
+    else:
+        df = df_health
+
+    if tree.node_type == "E":
+        return _reformat(df.loc[map_element].to_numpy(float))
+
+    elif tree.node_type == "P":
+        sub_elem = []
+        offset = 0
+        for child in tree.children:
+            sub_elem += [build_generative_label(
+                tree=child,
+                df_health=df,
+                map_element=map_element[offset:offset+child.num_elem]
+            )]
+            offset += child.num_elem
+
+        sub_elem = np.concatenate(sub_elem, axis=0)
+
+        return _reformat(sub_elem.sum(axis=0))
+
+    else:
+        # get subelements
+        sub_elem = []
+        offset = 0
+        for child in tree.children:
+            sub_elem += [build_generative_label(
+                tree=child,
+                df_health=df,
+                map_element=map_element[offset:offset+child.num_elem]
+            )]
+            offset += child.num_elem
+
+        sub_elem = np.concatenate(sub_elem, axis=0)
+
+        if tree.node_type == "S" or tree.node_type == "Q": # ignore difference between s and q and treat it as q
+            # shift stack
+            shifted_emb = np.stack(
+                [
+                    sub_elem[2:],
+                    sub_elem[1:-1],
+                    sub_elem[:-2]
+                ]
+            )
+
+        elif tree.node_type == "C":
+            # shift stack
+            shifted_emb = np.stack(
+                [
+                    sub_elem[2:],
+                    sub_elem[1:-1],
+                    sub_elem[:-2]
+                ]
+            )
+
+        # apply embedding parameters and sum up
+        # print(shifted_emb.shape, embedding_params.shape)
+        intermediate = np.einsum("abc,a->bc", shifted_emb, embedding_params)
+
+        # simulate final linear layer
+        final_embedding = ((np.arange(intermediate.shape[1]) + 1) / (intermediate.shape[1] * (intermediate.shape[1]+1)/2))[::-1]
+
+        return _reformat(np.einsum("ab,b->b", intermediate, final_embedding))
+
+
+def build_label_tree(
+        df_health: pd.DataFrame,
+        num_gondolas: int,
+        num_part_pg: int,
+        map_element: typing.Iterable[int],
+        final_label_factor: int = 1/1000
+) -> np.ndarray:
+    # build the tree structure
+    tree = TreeNode("C", [
+        TreeNode("P", [TreeNode("E", num_part_pg)])
+        for _ in range(num_gondolas)
+    ])
+
+    # calculate the label (intermediate)
+    label = build_generative_label(
+        tree=tree,
+        df_health=df_health,
+        map_element=map_element
+    )
+
+    return label.sum() * final_label_factor
