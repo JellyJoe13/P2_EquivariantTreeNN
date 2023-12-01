@@ -229,7 +229,10 @@ def build_generative_label(
     # Parameters
     k = 3  # equal to one left one right (or next 2 right/left elements)
     # generate embedding parameters
-    embedding_params = (np.arange(k) + 1) / (k*(k+1)/2)
+    if tree.node_type == "S":
+        embedding_params = (np.arange(k) + 1) / (k*(k+1)/2)
+    else:
+        embedding_params = np.array([0.1, 0.8, 0.1])
 
     # assert that index is id column
     if 'id' in df_health:
@@ -269,7 +272,7 @@ def build_generative_label(
 
         sub_elem = np.concatenate(sub_elem, axis=0)
 
-        if tree.node_type == "S" or tree.node_type == "Q": # ignore difference between s and q and treat it as q
+        if tree.node_type == "S" or tree.node_type == "Q":  # ignore difference between s and q and treat it as q
             # shift stack
             shifted_emb = np.stack(
                 [
@@ -281,11 +284,12 @@ def build_generative_label(
 
         elif tree.node_type == "C":
             # shift stack
+            # replace with previous times 0.1 and future times 0.1 and 0.8 itself
             shifted_emb = np.stack(
                 [
-                    sub_elem[2:],
-                    sub_elem[1:-1],
-                    sub_elem[:-2]
+                    np.concatenate([sub_elem[1:], sub_elem[0].reshape(1, -1)]),
+                    sub_elem,
+                    np.concatenate([sub_elem[-1].reshape(1, -1), sub_elem[:-1]])
                 ]
             )
 
@@ -304,13 +308,22 @@ def build_label_tree(
         num_gondolas: int,
         num_part_pg: int,
         map_element: typing.Iterable[int],
-        final_label_factor: int = 1/1000
+        final_label_factor: int = 1/1000,
+        mode: int = 0
 ) -> np.ndarray:
     # build the tree structure
-    tree = TreeNode("C", [
-        TreeNode("P", [TreeNode("E", num_part_pg)])
-        for _ in range(num_gondolas)
-    ])
+    if mode == 0:
+        tree = TreeNode("S", [
+            TreeNode("P", [TreeNode("E", num_part_pg)])
+            for _ in range(num_gondolas)
+        ])
+    elif mode == 1:
+        tree = TreeNode("C", [
+            TreeNode("P", [TreeNode("E", num_part_pg)])
+            for _ in range(num_gondolas)
+        ])
+    else:
+        raise Exception("not valid option chosen")
 
     # calculate the label (intermediate)
     label = build_generative_label(

@@ -172,9 +172,20 @@ def generate_ferris_dataset(
             map_element=x,
             num_gondolas=num_gondolas,
             num_part_pg=num_part_pg,
-            final_label_factor=final_label_factor
+            final_label_factor=final_label_factor,
+            mode=0
         )]
-        pass
+
+    elif label_type == "tree_advanced":
+        func = lambda x: x.flatten().tolist() + [build_label_tree(
+            df_health=df_health,
+            map_element=x,
+            num_gondolas=num_gondolas,
+            num_part_pg=num_part_pg,
+            final_label_factor=final_label_factor,
+            mode=1
+        )]
+
     else:
         func = lambda x: x.flatten().tolist() + [build_wheel_happyness(df_health, x)]
 
