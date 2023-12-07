@@ -21,7 +21,7 @@ def run_config(
         results_folder: str = "./results",
         check_duplicate: bool = True,
         verbose: bool = True
-):
+) -> int:
     """
     Function that runs the experiment(s) for one config. Automatically and continuously saves results.
 
@@ -31,7 +31,8 @@ def run_config(
     :type dataset_path: str
     :param results_folder: path to results folder. function will subsequently create this folder if it does not exist.
     :type results_folder: str
-    :return: None
+    :return: config id
+    :rtype: int
     """
     # definition of constants
     val_perc = 0.3
@@ -43,7 +44,7 @@ def run_config(
     # DEALING WITH SAVING PATH
     config_idx, already_present = acquire_config_idx(config, config_index_name, results_folder)
     if check_duplicate and already_present:
-        return
+        return config_idx
 
     # DEALING WITH STORAGE PATH CREATION AND CHECKS
     # if not present create the folder for this run
@@ -223,7 +224,7 @@ def run_config(
     #   instead
 
     # todo: should load test set and write some values to dict and json file? or seperate final evaluation notebook?
-    pass
+    return config_idx
 
 
 def choice_trainloader(

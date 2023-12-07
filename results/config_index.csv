@@ -101,3 +101,4 @@ config_idx,in_dim,hidden_dim,out_dim,k,dataset,ds_size,num_gondolas,num_part_pg,
 99,15,32,1,1,0,10000,10,5,mse,adam,100,0.001,1024,5,True,420,tree_advanced,0.001
 100,15,32,1,5,0,10000,10,5,mse,adam,100,0.001,1024,5,True,420,tree_advanced,0.001
 101,15,512,1,1,0,10000,10,5,mse,adam,100,0.001,1024,5,True,420,tree_advanced,0.001
+102,15,16,1,2,0,10000,10,5,mse,adam,300,0.0027798626982959,1024,5,False,420,tree_advanced,0.001
