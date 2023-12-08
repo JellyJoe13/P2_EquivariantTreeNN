@@ -316,7 +316,17 @@ def choice_dataset(
     :return: dataset and index dataframe describing dataset
     :rtype: typing.Tuple[Dataset, pd.DataFrame]
     """
-    if config.dataset == 0:
+    if config.dataset == -1:
+        dataset, df_index = load_pure_ferris_wheel_dataset(
+            num_gondolas=config.num_gondolas,
+            num_part_pg=config.num_part_pg,
+            num_to_generate=config.ds_size,
+            dataset_path=dataset_path,
+            label_type=config.label_type,
+            final_label_factor=config.final_label_factor,
+            normalize=True
+        )
+    elif config.dataset == 0:
         dataset, df_index = load_pure_ferris_wheel_dataset(
             num_gondolas=config.num_gondolas,
             num_part_pg=config.num_part_pg,

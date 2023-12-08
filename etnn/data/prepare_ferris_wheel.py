@@ -90,6 +90,25 @@ def prepare_1_ferris(
     return df
 
 
+def normalize_dataset(df_health):
+    cols = df_health.columns
+    cols = [
+        x
+        for x in cols
+        if 'id' != x
+    ]
+
+    from sklearn import preprocessing
+
+    scaler = preprocessing.MinMaxScaler()
+
+    df_out = df_health.copy()
+
+    df_out[cols] = scaler.fit_transform(df_health[cols].values)
+
+    return df_out
+
+
 def generate_ferris_dataset(
         num_gondolas: int = 10,
         num_part_pg: int = 5,
@@ -100,7 +119,8 @@ def generate_ferris_dataset(
         try_pregen: bool = True,
         seed: int = 4651431,
         label_type: str = "default",
-        final_label_factor: float = 1/1000
+        final_label_factor: float = 1/1000,
+        normalize: bool = False
 ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Function that generates the ferris dataset's core dataset, the health dataset and the index dataset.
@@ -136,11 +156,17 @@ def generate_ferris_dataset(
         try_pregen=try_pregen
     )
 
+    # if normalize - normalize dataset
+    if normalize:
+        df_health = normalize_dataset(df_health)
+
     # see if file already exists and load this
     # file name logic
     file_name = f"ferris-wheel_g-{num_gondolas}_p-{num_part_pg}_size-{num_to_generate}_seed-{seed}_label-{label_type}"
     if label_type == "tree":
         file_name += f"-{final_label_factor}"
+    if normalize:
+        file_name += f"-normalized"
     file_name += f".csv"
     file_path = os.path.join(dataset_path, file_name)
 
@@ -172,7 +198,7 @@ def generate_ferris_dataset(
             map_element=x,
             num_gondolas=num_gondolas,
             num_part_pg=num_part_pg,
-            final_label_factor=final_label_factor,
+            final_label_factor=final_label_factor*1000 if normalize else final_label_factor,
             mode=0
         )]
 
@@ -182,7 +208,7 @@ def generate_ferris_dataset(
             map_element=x,
             num_gondolas=num_gondolas,
             num_part_pg=num_part_pg,
-            final_label_factor=final_label_factor,
+            final_label_factor=final_label_factor*1000 if normalize else final_label_factor,
             mode=1
         )]
 

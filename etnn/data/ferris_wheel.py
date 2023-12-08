@@ -92,7 +92,8 @@ def load_pure_ferris_wheel_dataset(
         try_pregen: bool = True,
         seed: int = 4651431,
         label_type: str = "default",
-        final_label_factor: float = 1/1000
+        final_label_factor: float = 1/1000,
+        normalize: bool = False
 ) -> typing.Tuple[FerrisWheelDataset, pd.DataFrame]:
     """
     Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
@@ -133,7 +134,8 @@ def load_pure_ferris_wheel_dataset(
         try_pregen=try_pregen,
         seed=seed,
         label_type=label_type,
-        final_label_factor=final_label_factor
+        final_label_factor=final_label_factor,
+        normalize=normalize
     )
 
     return FerrisWheelDataset(df_health, df_index, num_gondolas), df_index
