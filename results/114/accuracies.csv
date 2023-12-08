@@ -1,0 +1,2 @@
+config_id,epoch,train_loss,val_loss,test_loss,train_mse,train_msa,train_explained_variance,train_r2,val_mse,val_msa,val_explained_variance,val_r2,test_mse,test_msa,test_explained_variance,test_r2
+etnn,1,384.32318115234375,1867.4189453125,0.,385.0156555175781,17.46709632873535,-260.015869140625,-265.61114909782873,1867.4188232421875,43.1983642578125,-2.452989339828491,-4883.364096125033,0.,0.,0.,0.
