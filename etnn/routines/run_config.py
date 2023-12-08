@@ -35,7 +35,7 @@ def run_config(
     :rtype: int
     """
     # definition of constants
-    val_perc = 0.3
+    test_perc = 0.3
     model_saving_name = "model.pt"
     config_saving_name = "config.json"
     accuracy_saving_name = "accuracies.csv"
@@ -58,9 +58,9 @@ def run_config(
 
     # SPLITTING DATASET IN TRAIN AND VAL
     generator = torch.Generator().manual_seed(config.seed)
-    train_ds, val_ds = random_split(
+    train_ds, test_ds = random_split(
         dataset,
-        [1 - val_perc, val_perc],
+        [1 - test_perc, test_perc],
         generator=generator
     )
 
@@ -69,7 +69,7 @@ def run_config(
     # ESTABLISHMENT OF LOADERS
     train_loader = choice_trainloader(config, df_index, train_ds)
 
-    val_loader = DataLoader(val_ds, batch_size=4 * config.batch_size, shuffle=False)
+    test_loader = DataLoader(test_ds, batch_size=4 * config.batch_size, shuffle=False)
 
     # BUILD DATASET SPECIFIC DATA STRUCTURE - FERRIS WHEEL
     tree_structure = TreeNode(
@@ -131,9 +131,9 @@ def run_config(
             criterion
         )
 
-        val_mean_loss, val_true_y, val_pred_y = eval_epoch(
+        test_mean_loss, test_true_y, test_pred_y = eval_epoch(
             model,
-            val_loader,
+            test_loader,
             device,
             criterion
         )
@@ -154,9 +154,9 @@ def run_config(
             train_y_true=train_true_y,
             train_y_pred=train_pred_y,
             train_loss=train_mean_loss,
-            val_y_true=val_true_y,
-            val_y_pred=val_pred_y,
-            val_loss=val_mean_loss,
+            test_y_true=test_true_y,
+            test_y_pred=test_pred_y,
+            test_loss=test_mean_loss,
             #    test_y_true=test_true_y,
             #    test_y_pred=test_pred_y,
             #    test_loss=test_mean_loss,
@@ -164,7 +164,7 @@ def run_config(
 
         # check if model is better and save it
         # todo: probably not required to write config over and over again
-        if epoch_control.retain_best(model, train_mean_loss, val_mean_loss, config):
+        if epoch_control.retain_best(model, train_mean_loss, test_mean_loss, config):
             break
 
     # REPEAT FOR BASELINE MODEL
@@ -201,9 +201,9 @@ def run_config(
             criterion
         )
 
-        val_mean_loss, val_true_y, val_pred_y = eval_epoch(
+        test_mean_loss, test_true_y, test_pred_y = eval_epoch(
             model,
-            val_loader,
+            test_loader,
             device,
             criterion
         )
@@ -215,9 +215,9 @@ def run_config(
             train_y_true=train_true_y,
             train_y_pred=train_pred_y,
             train_loss=train_mean_loss,
-            val_y_true=val_true_y,
-            val_y_pred=val_pred_y,
-            val_loss=val_mean_loss,
+            test_y_true=test_true_y,
+            test_y_pred=test_pred_y,
+            test_loss=test_mean_loss,
         )
 
     # todo: should I include plotting (save to file)? probably will make git bloated - use accuracy plot notebook

@@ -296,7 +296,7 @@ class AccuracyManager:
             "jaccard": jaccard_score,
         }
 
-        self.mode_order = ["train", "val", "test"]
+        self.mode_order = ["train", "test"]
 
         # open file and write header
         with open(self.storage_total_path, "w") as file:
@@ -304,9 +304,9 @@ class AccuracyManager:
             file.write("config_id,epoch")
 
             # write losses
-            file.write(",train_loss,val_loss,test_loss")
+            file.write(",train_loss,test_loss")
 
-            # write scores for train, val and test
+            # write scores for train and test
             for mode in self.mode_order:
                 # write headers for regression scores
                 for regression_score_name in self.regression_metrics.keys():
@@ -325,9 +325,6 @@ class AccuracyManager:
             train_y_true: torch.Tensor,
             train_y_pred: torch.Tensor,
             train_loss: torch.Tensor = None,
-            val_y_true: torch.Tensor = None,
-            val_y_pred: torch.Tensor = None,
-            val_loss: torch.Tensor = None,
             test_y_true: torch.Tensor = None,
             test_y_pred: torch.Tensor = None,
             test_loss: torch.Tensor = None,
@@ -341,8 +338,8 @@ class AccuracyManager:
         a classification or a regression problem.
 
         The function appends a new row to the CSV file with the following format:
-        config_id, epoch, train_loss, val_loss, test_loss, train_regression_scores, val_regression_scores,
-        test_regression_scores, train_classification_scores, val_classification_scores, test_classification_scores.
+        config_id, epoch, train_loss, test_loss, train_regression_scores,
+        test_regression_scores, train_classification_scores, test_classification_scores.
 
         If any of the values are missing or None, they will be written as 0. If any of the modes are not provided, they
         will be skipped and filled with 0s.
@@ -357,12 +354,6 @@ class AccuracyManager:
         :type train_y_pred: torch.Tensor
         :param train_loss: The loss value for the training set. If None, it will be written as 0.
         :type train_loss: torch.Tensor
-        :param val_y_true: The true labels for the validation set.
-        :type val_y_true: torch.Tensor
-        :param val_y_pred: The predicted labels for the validation set.
-        :type val_y_pred: torch.Tensor
-        :param val_loss: The loss value for the validation set. If None, it will be written as 0.
-        :type val_loss: torch.Tensor
         :param test_y_true: The true labels for the test set.
         :type test_y_true: torch.Tensor
         :param test_y_pred: The predicted labels for the test set.
@@ -379,12 +370,10 @@ class AccuracyManager:
         # ease latter logic
         y_true = {
             "train": train_y_true,
-            "val": val_y_true,
             "test": test_y_true
         }
         y_pred = {
             "train": train_y_pred,
-            "val": val_y_pred,
             "test": test_y_pred
         }
 
@@ -394,7 +383,7 @@ class AccuracyManager:
             file.write(f"{config_id},{epoch}")
 
             # write losses
-            for loss in [train_loss, val_loss, test_loss]:
+            for loss in [train_loss, test_loss]:
                 if loss is not None:
                     file.write(f",{float(loss)}")
                 else:
