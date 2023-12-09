@@ -397,7 +397,7 @@ def acquire_config_idx(
     # create new entry
     new_entry = pd.DataFrame(vars(config), index=[0])
     # check if config in table already
-    merge = pd.merge(config_table, new_entry, on=columns[1:], how='inner')
+    merge = pd.merge(config_table.round(decimals=10), new_entry.round(decimals=10), on=columns[1:], how='inner')
     if len(merge) == 0:
         if len(config_table) == 0:
             config_idx = 0
