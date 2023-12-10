@@ -236,6 +236,96 @@ def generate_ferris_dataset(
     return df_generated, df_health
 
 
+def generate_ferris_dataset_single_node(
+        node_type,
+        num_elem,
+        num_to_generate,
+        dataset_path,
+        seed,
+        final_label_factor,
+        normalize,
+        df_name_input: str = "Sleep_health_and_lifestyle_dataset.csv",
+        df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv'
+) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+    # set seed if not none
+    if seed is not None:
+        np.random.seed(seed)
+
+    # load dataset which is the base of the data generation
+    df_health = prepare_1_ferris(
+        df_name_input=df_name_input,
+        dataset_path=dataset_path,
+        df_name_output=df_intermediate_output_name,
+        try_pregen=True
+    )
+
+    # if normalize - normalize dataset
+    if normalize:
+        df_health = normalize_dataset(df_health)
+
+    # see if file already exists and load this
+    # file name logic
+    file_name = f"ferris-wheel_e-{num_elem}-type-{node_type}_size-{num_to_generate}_seed-{seed}_{final_label_factor}"
+    if normalize:
+        file_name += f"-normalized"
+    file_name += f".csv"
+    file_path = os.path.join(dataset_path, file_name)
+
+    if os.path.isfile(file_path):
+        return pd.read_csv(file_path, index_col=0), df_health
+
+    # else generate it
+    # init ordering array
+    random_order = np.arange(len(df_health))+1
+
+    # initialize dataset storage
+    dataset_storage = []
+    data_store = []
+
+    # produce a number of elements
+    for _ in tqdm(range(num_to_generate)):
+        # generate sample element
+        np.random.shuffle(random_order)
+        sample = random_order[:num_elem]
+
+        data_store += [sample.copy()]
+
+    # calc label
+    factor = final_label_factor * 1000 if normalize else final_label_factor
+    func = lambda x: x.flatten().tolist() + [build_generative_label(
+        tree=TreeNode(node_type, [TreeNode("E", num_elem)]),
+        df_health=df_health,
+        map_element=x
+    ).sum() * factor]
+
+    with Pool(processes=os.cpu_count()) as p:
+        dataset_storage = list(p.imap(func, tqdm(data_store)))
+
+    # dataset_storage = list(map(func, tqdm(data_store)))
+    #dataset_storage = [
+    #    build_generative_label(
+    #        tree=TreeNode(node_type, [TreeNode("E", num_elem)]),
+    #        df_health=df_health,
+    #        map_element=x
+    #    ).sum()
+    #    for x in data_store
+    #]
+
+    # fuze dataset
+    df_generated = pd.DataFrame(
+        dataset_storage,
+        columns=[
+                    f"e-{i}"
+                    for i in range(num_elem)
+                ] + ['label']
+    )
+
+    # save dataset
+    df_generated.to_csv(file_path)
+
+    return df_generated, df_health
+
+
 def add_valid_permutations(
         num_add_equal_elem: int,
         df_index: pd.DataFrame,
