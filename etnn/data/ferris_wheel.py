@@ -349,7 +349,7 @@ def prepare_pure_test_dataset(
     :param num_to_generate: Number of dataset entries to generate, default: ``1000``
     :type num_to_generate: int
     :param df_name_input: Name of the dataset to use as the input for the persons health data, default:
-        ``Sleep_health_and_lifestyle_dataset.csv``
+        ``'Sleep_health_and_lifestyle_dataset.csv'``
     :type df_name_input: str
     :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``
     :type dataset_path: str
