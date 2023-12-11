@@ -11,6 +11,17 @@ from etnn.tools.training_tools import ConfigStore
 def calc_n_params_config(
         config: ConfigStore
 ) -> typing.Tuple[int, int]:
+    """
+    Function to calculate the number of parameters of a model based its configuration. The model is to be an etnn model
+    or a model created with similar parameters (baseline model created by making it similar to the etnn model created
+    with the function ``create_baseline_model(...)``). Will return two parameter counts - one for the etnn model and
+    one for the corresponding baseline model.
+
+    :param config: config to use for the building of the etnn and baseline model.
+    :type config: ConfigStore
+    :return: number of parameters in etnn and baseline model, respectively.
+    :rtype: tying.Tuple[int, int]
+    """
     tree_structure = TreeNode(
         node_type="C",
         children=[

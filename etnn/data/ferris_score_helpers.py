@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import typing
 
+import torch
+
 from etnn import TreeNode
 
 """
@@ -215,7 +217,17 @@ def build_wheel_happyness(
     ])
 
 
-def _reformat(result):
+def _reformat(
+        result: torch.Tensor
+) -> torch.Tensor:
+    """
+    Reformat a torch tensor to 2 dimensions from a 1d tensor if it does not already have this shape.
+
+    :param result: result of a function to be transformed
+    :type result: torch.Tensor
+    :return: 2-d tensor
+    :rtype: torch.Tensor
+    """
     if len(result.shape) != 2:
         result = result.reshape(1, -1)
     return result
@@ -224,8 +236,21 @@ def _reformat(result):
 def build_generative_label(
         tree: TreeNode,
         df_health: pd.DataFrame,
-        map_element
-):
+        map_element: typing.Iterable[int]
+) -> torch.Tensor:
+    """
+    Function that builds a label for a permutation tree based structure.
+
+    :param tree: Tree to use for building the label
+    :type tree: TreeNode
+    :param df_health: dataset containing the data for each index in the map_element iterable parameter.
+    :type df_health: pd.DataFrame
+    :param map_element: elements containing ids of elements in the df_health data storage
+    :type map_element: typing.Iterable[int]
+    :return: tensor containing the label of the input data. Note that this output is still in the dimension of the the
+        data in df_health (1, data_dim)
+    :rtype: torch.Tensor
+    """
     # Parameters
     k = 3  # equal to one left one right (or next 2 right/left elements)
     # generate embedding parameters
@@ -310,7 +335,18 @@ def build_label_tree(
         map_element: typing.Iterable[int],
         final_label_factor: int = 1/1000,
         mode: int = 0
-) -> np.ndarray:
+) -> torch.Tensor:
+    """
+    Build label for ferris wheel dataset. Uses build_generative_label function.
+
+    :param df_health:
+    :param num_gondolas:
+    :param num_part_pg:
+    :param map_element:
+    :param final_label_factor:
+    :param mode:
+    :return:
+    """
     # build the tree structure
     if mode == 0:
         tree = TreeNode("S", [

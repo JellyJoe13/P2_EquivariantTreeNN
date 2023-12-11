@@ -90,7 +90,17 @@ def prepare_1_ferris(
     return df
 
 
-def normalize_dataset(df_health):
+def normalize_dataset(
+        df_health: pd.DataFrame
+) -> pd.DataFrame:
+    """
+    Normalize the provided dataset with sklearn min max scaler. Excludes a possible ``'id'`` column.
+
+    :param df_health: dataframe to be normaized.
+    :type df_health: pd.DataFrame
+    :return: normalized dataframe
+    :rtype: pd.DataFrame
+    """
     cols = df_health.columns
     cols = [
         x
@@ -141,6 +151,17 @@ def generate_ferris_dataset(
     :type try_pregen: bool
     :param seed: seed to be used for random generation procedures
     :type seed: int
+    :param label_type: label to be generated. Viable options: ``'default'`` producing the most complex label with logic
+        inspired by a real ferris wheel, ``'tree'`` and ``'tree_advanced'`` for a tree based generation of label with
+        minimal logic behind this label. Difference in first and second tree option is that the first option is a
+        downgraded version only using S and P type labels and not C type labels instead of C as it would have been
+        intended for a ferris wheel dataset, default: ``'default'``.
+    :type label_type: str
+    :param final_label_factor: Factor by which the label is scaled. Does not apply for ``'default'`` option in
+        label_type parameter. Default: ``1/1000``
+    :type final_label_factor: float
+    :param normalize: Whether or not the data is normalized with a min-max scaler, default: ``False``
+    :type normalize: bool
     :return: health dataset and index dataset
     :rtype: typing.Tuple[pd.DataFrame, pd.DataFrame]
     """
@@ -247,6 +268,33 @@ def generate_ferris_dataset_single_node(
         df_name_input: str = "Sleep_health_and_lifestyle_dataset.csv",
         df_intermediate_output_name: str = 'health_dataset_preprocessed-1.csv'
 ) -> typing.Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Function that creates a dataset and data fame for generating data generated with the logic of a permutation tree
+    with a singular node as its root with all elements.
+
+    :param node_type: Type of the label of the singular permutation tree in its defining permutation tree. Determines
+        how the label is generated.
+    :type node_type: str
+    :param num_elem: Number of elements to be grouped belonging to the singular permutation tree node.
+    :type num_elem: int
+    :param num_to_generate: number of elements to generate for the dataset.
+    :type num_to_generate: int
+    :param dataset_path: path to the dataset folder
+    :type dataset_path: str
+    :param final_label_factor: final label to be applied to the original label, default: ``1/1000``.
+    :type final_label_factor: float
+    :param normalize: bool controlling whether the input data with person health data should be normalized or not.
+    :type normalize: bool
+    :param seed: seed to make experiments reproducible, default: ``4651431``.
+    :type seed: int
+    :param df_name_input: name of the dataframe to load, default: ``'Sleep_health_and_lifestyle_dataset.csv'``.
+    :type df_name_input: str
+    :param df_intermediate_output_name: name of the intermediate (preprocessed) data to produce and store or load.
+        Default: ``'health_dataset_preprocessed-1.csv'``.
+    :type df_intermediate_output_name: str
+    :return: dataset and data frame containing structural information
+    :rtype: typing.Tuple[torch.utils.data.Dataset, pd.DataFrame]
+    """
     # set seed if not none
     if seed is not None:
         np.random.seed(seed)
