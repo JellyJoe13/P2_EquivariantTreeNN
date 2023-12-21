@@ -6,7 +6,7 @@ import pandas as pd
 import torch
 from etnn.data import DEFAULT_DATA_PATH
 from etnn.data.prepare_ferris_wheel import generate_ferris_dataset, add_valid_permutations, add_invalid_permutations, \
-    prepare_1_ferris, generate_ferris_dataset_single_node
+    prepare_1_ferris, generate_ferris_dataset_single_node, normalize_dataset
 
 
 class FerrisWheelDataset(torch.utils.data.Dataset):
@@ -80,6 +80,9 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         :return: Nothing
         """
         self.df_index.label = (self.df_index.label/(10*self.num_gondolas)*num_classes).round()
+
+    def post_normalize(self):
+        self.df_health = normalize_dataset(self.df_health)
 
 
 def load_pure_ferris_wheel_dataset(

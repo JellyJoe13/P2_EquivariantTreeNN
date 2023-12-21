@@ -35,7 +35,7 @@ def create_sampler(
     working_df['label_weights'] = working_df.rounded_label.map(lambda x: label_weights.loc[x])
 
     return WeightedRandomSampler(
-        working_df.label_weights,
+        working_df.label_weights.to_numpy(),
         len(working_df),
         replacement=True
     )
