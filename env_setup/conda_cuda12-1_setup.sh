@@ -24,7 +24,7 @@ echo "+ Activating environment"
 conda activate P2
 
 echo "+ Installing basic libraries..."
-conda install -y numpy=3.9.18 pandas=2.0.3
+conda install -y numpy=1.26.0 pandas=2.0.3
 
 echo "+ Installing pytorch..."
 conda install -y pytorch=2.1.0 torchvision=0.16.0 torchaudio=2.1.0 pytorch-cuda=12.1 -c pytorch -c nvidia
