@@ -96,7 +96,7 @@ def normalize_dataset(
     """
     Normalize the provided dataset with sklearn min max scaler. Excludes a possible ``'id'`` column.
 
-    :param df_health: dataframe to be normaized.
+    :param df_health: dataframe to be normalized.
     :type df_health: pd.DataFrame
     :return: normalized dataframe
     :rtype: pd.DataFrame
