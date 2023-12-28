@@ -7,8 +7,6 @@ DeepSets and ChiENN, see the report of this project for more information.
 ## Documentation
 Documentation is available via https://jellyjoe13.github.io/P2_EquivariantTreeNN - genereated using library Sphinx.
 
-Coming Soon.
-
 ## Report
 Coming soon.
 
