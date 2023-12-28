@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.routines.run_config &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">etnn.routines.run_config</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for etnn.routines.run_config</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">torch.utils.data</span> <span class="kn">import</span> <span class="n">random_split</span><span class="p">,</span> <span class="n">DataLoader</span><span class="p">,</span> <span class="n">Dataset</span><span class="p">,</span> <span class="n">Subset</span>
+<span class="kn">from</span> <span class="nn">tqdm</span> <span class="kn">import</span> <span class="n">tqdm</span>
+
+<span class="kn">from</span> <span class="nn">etnn</span> <span class="kn">import</span> <span class="n">TreeNode</span>
+<span class="kn">from</span> <span class="nn">etnn.data.ferris_wheel</span> <span class="kn">import</span> <span class="n">load_pure_ferris_wheel_dataset</span><span class="p">,</span> <span class="n">load_modified_ferris_wheel_dataset</span>
+<span class="kn">from</span> <span class="nn">etnn.nn.layer_framework</span> <span class="kn">import</span> <span class="n">LayerManagementFramework</span>
+<span class="kn">from</span> <span class="nn">etnn.tools.loader</span> <span class="kn">import</span> <span class="n">create_sampler</span>
+<span class="kn">from</span> <span class="nn">etnn.tools.training</span> <span class="kn">import</span> <span class="n">train_epoch</span><span class="p">,</span> <span class="n">eval_epoch</span>
+<span class="kn">from</span> <span class="nn">etnn.tools.training_tools</span> <span class="kn">import</span> <span class="n">ConfigStore</span><span class="p">,</span> <span class="n">AccuracyManager</span><span class="p">,</span> <span class="n">seeding_all</span><span class="p">,</span> <span class="n">EpochControl</span>
+<span class="kn">from</span> <span class="nn">etnn.nn.baseline</span> <span class="kn">import</span> <span class="n">create_baseline_model</span><span class="p">,</span> <span class="n">calc_params</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+
+<div class="viewcode-block" id="run_config">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.run_config">[docs]</a>
+<span class="k">def</span> <span class="nf">run_config</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./datasets&quot;</span><span class="p">,</span>
+        <span class="n">results_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./results&quot;</span><span class="p">,</span>
+        <span class="n">check_duplicate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that runs the experiment(s) for one config. Automatically and continuously saves results.</span>
+
+<span class="sd">    :param config: config to execute</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :param dataset_path: path to dataset folder.</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :param results_folder: path to results folder. function will subsequently create this folder if it does not exist.</span>
+<span class="sd">    :type results_folder: str</span>
+<span class="sd">    :param check_duplicate: Parameter controlling whether it should be checked if the config already exists. If existing</span>
+<span class="sd">        then do nothing and return. Default: ``True``</span>
+<span class="sd">    :type check_duplicate: bool</span>
+<span class="sd">    :param verbose: Parameter controlling whether print/progress statements should be written to console output.</span>
+<span class="sd">        Default: ``True``</span>
+<span class="sd">    :type verbose: bool</span>
+<span class="sd">    :return: config id</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># definition of constants</span>
+    <span class="n">test_perc</span> <span class="o">=</span> <span class="mf">0.3</span>
+    <span class="n">model_saving_name</span> <span class="o">=</span> <span class="s2">&quot;model.pt&quot;</span>
+    <span class="n">config_saving_name</span> <span class="o">=</span> <span class="s2">&quot;config.json&quot;</span>
+    <span class="n">accuracy_saving_name</span> <span class="o">=</span> <span class="s2">&quot;accuracies.csv&quot;</span>
+    <span class="n">config_index_name</span> <span class="o">=</span> <span class="s2">&quot;config_index.csv&quot;</span>
+
+    <span class="c1"># DEALING WITH SAVING PATH</span>
+    <span class="n">config_idx</span><span class="p">,</span> <span class="n">already_present</span> <span class="o">=</span> <span class="n">acquire_config_idx</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">config_index_name</span><span class="p">,</span> <span class="n">results_folder</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">check_duplicate</span> <span class="ow">and</span> <span class="n">already_present</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">config_idx</span>
+
+    <span class="c1"># DEALING WITH STORAGE PATH CREATION AND CHECKS</span>
+    <span class="c1"># if not present create the folder for this run</span>
+    <span class="n">storage_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_folder</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">config_idx</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">storage_folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">storage_folder</span><span class="p">)</span>
+
+    <span class="c1"># CHOICES FOR DATASET</span>
+    <span class="c1"># todo: add further with more permutated elements and with invalid elements</span>
+    <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span> <span class="o">=</span> <span class="n">choice_dataset</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">dataset_path</span><span class="p">)</span>
+
+    <span class="c1"># SPLITTING DATASET IN TRAIN AND VAL</span>
+    <span class="n">generator</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">Generator</span><span class="p">()</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">train_ds</span><span class="p">,</span> <span class="n">test_ds</span> <span class="o">=</span> <span class="n">random_split</span><span class="p">(</span>
+        <span class="n">dataset</span><span class="p">,</span>
+        <span class="p">[</span><span class="mi">1</span> <span class="o">-</span> <span class="n">test_perc</span><span class="p">,</span> <span class="n">test_perc</span><span class="p">],</span>
+        <span class="n">generator</span><span class="o">=</span><span class="n">generator</span>
+    <span class="p">)</span>
+
+    <span class="c1"># todo: rethink presence of testset in this method - yes or no. currently: no</span>
+
+    <span class="c1"># ESTABLISHMENT OF LOADERS</span>
+    <span class="n">train_loader</span> <span class="o">=</span> <span class="n">choice_trainloader</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">df_index</span><span class="p">,</span> <span class="n">train_ds</span><span class="p">)</span>
+
+    <span class="n">test_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">test_ds</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">4</span> <span class="o">*</span> <span class="n">config</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+    <span class="c1"># BUILD DATASET SPECIFIC DATA STRUCTURE - FERRIS WHEEL</span>
+    <span class="n">tree_structure</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">(</span>
+        <span class="n">node_type</span><span class="o">=</span><span class="s2">&quot;C&quot;</span><span class="p">,</span>
+        <span class="n">children</span><span class="o">=</span><span class="p">[</span>
+            <span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">)])</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># DEFINE DEVICE</span>
+    <span class="n">device</span> <span class="o">=</span> <span class="s2">&quot;cuda&quot;</span> <span class="k">if</span> <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="k">else</span> <span class="s2">&quot;cpu&quot;</span>
+
+    <span class="c1"># SET UP ACCURACY PROTOCOLLING</span>
+    <span class="n">accuracy_protocoller</span> <span class="o">=</span> <span class="n">AccuracyManager</span><span class="p">(</span>
+        <span class="n">storage_name</span><span class="o">=</span><span class="n">accuracy_saving_name</span><span class="p">,</span>
+        <span class="n">storage_path</span><span class="o">=</span><span class="n">storage_folder</span><span class="p">,</span>
+        <span class="n">is_classification</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+
+    <span class="c1"># SEEDING</span>
+    <span class="n">seeding_all</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="c1"># DEFINE ETNN MODEL</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">LayerManagementFramework</span><span class="p">(</span>
+        <span class="n">in_dim</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">in_dim</span><span class="p">,</span>
+        <span class="n">tree</span><span class="o">=</span><span class="n">tree_structure</span><span class="p">,</span>
+        <span class="n">hidden_dim</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">hidden_dim</span><span class="p">,</span>
+        <span class="n">out_dim</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">out_dim</span><span class="p">,</span>
+        <span class="n">k</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">k</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+
+    <span class="c1"># DEFINE LOSS AND OPTIMIZER</span>
+    <span class="n">criterion</span> <span class="o">=</span> <span class="n">choice_loss</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">choice_optim</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="c1"># TRAINING OF ETNN</span>
+    <span class="n">epoch_control</span> <span class="o">=</span> <span class="n">EpochControl</span><span class="p">(</span>
+        <span class="n">model_save_name</span><span class="o">=</span><span class="n">model_saving_name</span><span class="p">,</span>
+        <span class="n">config_save_name</span><span class="o">=</span><span class="n">config_saving_name</span><span class="p">,</span>
+        <span class="n">saving_folder_path</span><span class="o">=</span><span class="n">storage_folder</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">early_stop_tol</span><span class="p">,</span>
+        <span class="n">is_accuracy_score</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="c1"># %%</span>
+    <span class="c1"># train for N epochs</span>
+    <span class="n">iterating</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">num_max_epochs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">iterating</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">iterating</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">iterating</span><span class="p">:</span>
+        <span class="n">train_mean_loss</span><span class="p">,</span> <span class="n">train_true_y</span><span class="p">,</span> <span class="n">train_pred_y</span> <span class="o">=</span> <span class="n">train_epoch</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">train_loader</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">device</span><span class="p">,</span>
+            <span class="n">criterion</span>
+        <span class="p">)</span>
+
+        <span class="n">test_mean_loss</span><span class="p">,</span> <span class="n">test_true_y</span><span class="p">,</span> <span class="n">test_pred_y</span> <span class="o">=</span> <span class="n">eval_epoch</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">test_loader</span><span class="p">,</span>
+            <span class="n">device</span><span class="p">,</span>
+            <span class="n">criterion</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Not calculated for every step as the original purpose of test is to be tested for the best model/state</span>
+        <span class="c1"># Note: this influences training and slows it down massively.</span>
+        <span class="c1"># test_mean_loss, test_true_y, test_pred_y = eval_epoch(</span>
+        <span class="c1">#    model,</span>
+        <span class="c1">#    test_loader,</span>
+        <span class="c1">#    device,</span>
+        <span class="c1">#    criterion</span>
+        <span class="c1"># )</span>
+
+        <span class="c1"># use accuracy manager to calc accuracy metrics and save them</span>
+        <span class="n">accuracy_protocoller</span><span class="o">.</span><span class="n">calc_and_collect</span><span class="p">(</span>
+            <span class="n">config_id</span><span class="o">=</span><span class="s2">&quot;etnn&quot;</span><span class="p">,</span>
+            <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">train_y_true</span><span class="o">=</span><span class="n">train_true_y</span><span class="p">,</span>
+            <span class="n">train_y_pred</span><span class="o">=</span><span class="n">train_pred_y</span><span class="p">,</span>
+            <span class="n">train_loss</span><span class="o">=</span><span class="n">train_mean_loss</span><span class="p">,</span>
+            <span class="n">test_y_true</span><span class="o">=</span><span class="n">test_true_y</span><span class="p">,</span>
+            <span class="n">test_y_pred</span><span class="o">=</span><span class="n">test_pred_y</span><span class="p">,</span>
+            <span class="n">test_loss</span><span class="o">=</span><span class="n">test_mean_loss</span><span class="p">,</span>
+            <span class="c1">#    test_y_true=test_true_y,</span>
+            <span class="c1">#    test_y_pred=test_pred_y,</span>
+            <span class="c1">#    test_loss=test_mean_loss,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># check if model is better and save it</span>
+        <span class="c1"># todo: probably not required to write config over and over again</span>
+        <span class="k">if</span> <span class="n">epoch_control</span><span class="o">.</span><span class="n">retain_best</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_mean_loss</span><span class="p">,</span> <span class="n">test_mean_loss</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+            <span class="k">break</span>
+
+    <span class="c1"># REPEAT FOR BASELINE MODEL</span>
+    <span class="n">seeding_all</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">seed</span><span class="p">)</span>
+    <span class="c1"># %%</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">create_baseline_model</span><span class="p">(</span>
+        <span class="n">n_params</span><span class="o">=</span><span class="n">calc_params</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
+        <span class="n">input_dim</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">in_dim</span> <span class="o">*</span> <span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span> <span class="o">*</span> <span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">,</span>
+        <span class="n">n_layer</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">output_dim</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">device</span><span class="p">)</span>
+    <span class="c1"># %%</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">choice_optim</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="c1"># %%</span>
+    <span class="n">epoch_control</span> <span class="o">=</span> <span class="n">EpochControl</span><span class="p">(</span>
+        <span class="n">model_save_name</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span>
+        <span class="n">config_save_name</span><span class="o">=</span><span class="s2">&quot;b&quot;</span><span class="p">,</span>
+        <span class="n">saving_folder_path</span><span class="o">=</span><span class="n">storage_folder</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">early_stop_tol</span><span class="p">,</span>
+        <span class="n">is_accuracy_score</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="c1"># %%</span>
+    <span class="c1"># train for N epochs</span>
+    <span class="n">iterating</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">num_max_epochs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span>
+        <span class="n">iterating</span> <span class="o">=</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">iterating</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">iterating</span><span class="p">:</span>
+        <span class="n">train_mean_loss</span><span class="p">,</span> <span class="n">train_true_y</span><span class="p">,</span> <span class="n">train_pred_y</span> <span class="o">=</span> <span class="n">train_epoch</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">train_loader</span><span class="p">,</span>
+            <span class="n">optimizer</span><span class="p">,</span>
+            <span class="n">device</span><span class="p">,</span>
+            <span class="n">criterion</span>
+        <span class="p">)</span>
+
+        <span class="n">test_mean_loss</span><span class="p">,</span> <span class="n">test_true_y</span><span class="p">,</span> <span class="n">test_pred_y</span> <span class="o">=</span> <span class="n">eval_epoch</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span>
+            <span class="n">test_loader</span><span class="p">,</span>
+            <span class="n">device</span><span class="p">,</span>
+            <span class="n">criterion</span>
+        <span class="p">)</span>
+
+        <span class="c1"># use accuracy manager to calc accuracy metrics and save them</span>
+        <span class="n">accuracy_protocoller</span><span class="o">.</span><span class="n">calc_and_collect</span><span class="p">(</span>
+            <span class="n">config_id</span><span class="o">=</span><span class="s2">&quot;baseline&quot;</span><span class="p">,</span>
+            <span class="n">epoch</span><span class="o">=</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">train_y_true</span><span class="o">=</span><span class="n">train_true_y</span><span class="p">,</span>
+            <span class="n">train_y_pred</span><span class="o">=</span><span class="n">train_pred_y</span><span class="p">,</span>
+            <span class="n">train_loss</span><span class="o">=</span><span class="n">train_mean_loss</span><span class="p">,</span>
+            <span class="n">test_y_true</span><span class="o">=</span><span class="n">test_true_y</span><span class="p">,</span>
+            <span class="n">test_y_pred</span><span class="o">=</span><span class="n">test_pred_y</span><span class="p">,</span>
+            <span class="n">test_loss</span><span class="o">=</span><span class="n">test_mean_loss</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="c1"># todo: should I include plotting (save to file)? probably will make git bloated - use accuracy plot notebook</span>
+    <span class="c1">#   instead</span>
+
+    <span class="c1"># todo: should load test set and write some values to dict and json file? or seperate final evaluation notebook?</span>
+    <span class="k">return</span> <span class="n">config_idx</span></div>
+
+
+
+<div class="viewcode-block" id="choice_trainloader">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.choice_trainloader">[docs]</a>
+<span class="k">def</span> <span class="nf">choice_trainloader</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span><span class="p">,</span>
+        <span class="n">df_index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">train_ds</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Subset</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataLoader</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function realizing the choice of whether to use a weighted random sampler to even distribution issues or not</span>
+<span class="sd">    controlled by the parameter ``use_equal_batcher``.</span>
+
+<span class="sd">    :param config: config containing the parameter ``loss_name`` which contains string values that control which loss</span>
+<span class="sd">        to use.</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :param df_index: data index framework to use for the creation of weighted random sampler</span>
+<span class="sd">    :type df_index: pd.DataFrame</span>
+<span class="sd">    :param train_ds: Train dataset (if subset - split) to get indices representing which entries of ``df_index`` are</span>
+<span class="sd">        to be in the training dataloader</span>
+<span class="sd">    :type train_ds: typing.Union[Subset, None]</span>
+<span class="sd">    :return: training dataloader</span>
+<span class="sd">    :rtype: DataLoader</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">use_equal_batcher</span><span class="p">:</span>
+        <span class="n">sampler</span> <span class="o">=</span> <span class="n">create_sampler</span><span class="p">(</span><span class="n">df_index</span><span class="o">=</span><span class="n">df_index</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">train_ds</span><span class="p">)</span>
+        <span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">train_ds</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">sampler</span><span class="o">=</span><span class="n">sampler</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">train_loader</span> <span class="o">=</span> <span class="n">DataLoader</span><span class="p">(</span><span class="n">train_ds</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">train_loader</span></div>
+
+
+
+<div class="viewcode-block" id="choice_optim">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.choice_optim">[docs]</a>
+<span class="k">def</span> <span class="nf">choice_optim</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function realizing the choice of optimizer possible in the config parameters.</span>
+
+<span class="sd">    :param config: config containing the parameter ``optimizer_name`` which contains string values that control which</span>
+<span class="sd">        loss to use.</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :param model: Model which parameters to use for the optimizer initialization</span>
+<span class="sd">    :type model: torch.nn.Module</span>
+<span class="sd">    :return: torch optimizer</span>
+<span class="sd">    :rtype: torch.optim.Optimizer</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;adam&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;sgd&#39;</span><span class="p">:</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">SGD</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">momentum</span><span class="o">=</span><span class="mf">0.9</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;wrong selection&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">optimizer</span></div>
+
+
+
+<div class="viewcode-block" id="choice_loss">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.choice_loss">[docs]</a>
+<span class="k">def</span> <span class="nf">choice_loss</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function realizing the choice of loss function possible in the config parameters.</span>
+
+<span class="sd">    :param config: config containing the parameter ``loss_name`` which contains string values that control which loss</span>
+<span class="sd">        to use.</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :return: torch loss function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">loss_name</span> <span class="o">==</span> <span class="s1">&#39;mse&#39;</span><span class="p">:</span>
+        <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">loss_name</span> <span class="o">==</span> <span class="s1">&#39;mae&#39;</span><span class="p">:</span>
+        <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">L1Loss</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">loss_name</span> <span class="o">==</span> <span class="s1">&#39;smooth-l1&#39;</span><span class="p">:</span>
+        <span class="n">criterion</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">SmoothL1Loss</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;wrong selection&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">criterion</span></div>
+
+
+
+<div class="viewcode-block" id="choice_dataset">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.choice_dataset">[docs]</a>
+<span class="k">def</span> <span class="nf">choice_dataset</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function realizing the choice of dataset initialization possible in the config parameters.</span>
+
+<span class="sd">    :param config: config containing the parameter ``dataset`` which contains integer values that control which dataset</span>
+<span class="sd">        to generate.</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :param dataset_path: path to the folder where the dataset csv&#39;s are located</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :return: dataset and index dataframe describing dataset</span>
+<span class="sd">    :rtype: typing.Tuple[Dataset, pd.DataFrame]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span> <span class="o">=</span> <span class="n">load_pure_ferris_wheel_dataset</span><span class="p">(</span>
+            <span class="n">num_gondolas</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">,</span>
+            <span class="n">num_to_generate</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span><span class="p">,</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">,</span>
+            <span class="n">final_label_factor</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">final_label_factor</span><span class="p">,</span>
+            <span class="n">normalize</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span> <span class="o">=</span> <span class="n">load_pure_ferris_wheel_dataset</span><span class="p">(</span>
+            <span class="n">num_gondolas</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">,</span>
+            <span class="n">num_to_generate</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span><span class="p">,</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">,</span>
+            <span class="n">final_label_factor</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">final_label_factor</span><span class="p">,</span>
+            <span class="n">normalize</span><span class="o">=</span><span class="kc">False</span>
+        <span class="p">)</span>
+        <span class="n">dataset</span><span class="o">.</span><span class="n">post_normalize</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span> <span class="o">=</span> <span class="n">load_pure_ferris_wheel_dataset</span><span class="p">(</span>
+            <span class="n">num_gondolas</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">,</span>
+            <span class="n">num_to_generate</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span><span class="p">,</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">,</span>
+            <span class="n">final_label_factor</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">final_label_factor</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span> <span class="o">=</span> <span class="n">load_modified_ferris_wheel_dataset</span><span class="p">(</span>
+            <span class="n">num_gondolas</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">,</span>
+            <span class="n">num_to_generate</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span> <span class="o">*</span> <span class="mf">0.8</span><span class="p">),</span>
+            <span class="n">num_valid_to_add</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">num_invalid_to_add</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+            <span class="n">try_pregen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">,</span>
+            <span class="n">final_label_factor</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">final_label_factor</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">config</span><span class="o">.</span><span class="n">dataset</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span> <span class="o">=</span> <span class="n">load_modified_ferris_wheel_dataset</span><span class="p">(</span>
+            <span class="n">num_gondolas</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">num_part_pg</span><span class="p">,</span>
+            <span class="n">num_to_generate</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span> <span class="o">*</span> <span class="mf">0.6</span><span class="p">),</span>
+            <span class="n">num_valid_to_add</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">num_invalid_to_add</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">ds_size</span> <span class="o">*</span> <span class="mf">0.2</span><span class="p">),</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+            <span class="n">try_pregen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">label_type</span><span class="p">,</span>
+            <span class="n">final_label_factor</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">final_label_factor</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;wrong selection&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">df_index</span></div>
+
+
+
+<div class="viewcode-block" id="acquire_config_idx">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.acquire_config_idx">[docs]</a>
+<span class="k">def</span> <span class="nf">acquire_config_idx</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span><span class="p">,</span>
+        <span class="n">config_index_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">results_folder</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Realizes acquisition of config ids which is used to determine where to store the config and the measurements/model.</span>
+
+<span class="sd">    :param config: config containing all exchangeable parameters</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :param config_index_name: Name of the config index file</span>
+<span class="sd">    :type config_index_name: str</span>
+<span class="sd">    :param results_folder: path to the folder where the results are to be stored (not to be confused with the actual</span>
+<span class="sd">        saving path of the metrics, model parameters and configs, this is a subfolder of this)</span>
+<span class="sd">    :type results_folder: str</span>
+<span class="sd">    :return: config index, bool whether this config already exists</span>
+<span class="sd">    :rtype: typing.Tuple[int, bool]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># acquire saving path</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_folder</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">results_folder</span><span class="p">)</span>
+    <span class="c1"># create path where the config idx file should be located</span>
+    <span class="n">config_idx_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results_folder</span><span class="p">,</span> <span class="n">config_index_name</span><span class="p">)</span>
+    <span class="c1"># define columns of index table</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;config_idx&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="c1"># if the config file exists - load it. else create a blank table</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">config_idx_path</span><span class="p">):</span>
+        <span class="n">config_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">config_idx_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">config_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">)</span>
+    <span class="c1"># create new entry</span>
+    <span class="n">new_entry</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># check if config in table already</span>
+    <span class="n">merge</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">config_table</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">decimals</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">new_entry</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">decimals</span><span class="o">=</span><span class="mi">10</span><span class="p">),</span> <span class="n">on</span><span class="o">=</span><span class="n">columns</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;inner&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">merge</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">config_table</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">config_idx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">config_idx</span> <span class="o">=</span> <span class="n">config_table</span><span class="p">[</span><span class="s1">&#39;config_idx&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="c1"># add this config to idx table</span>
+        <span class="n">new_entry</span><span class="p">[</span><span class="s1">&#39;config_idx&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">config_idx</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">config_table</span><span class="p">,</span> <span class="n">new_entry</span><span class="p">])</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">config_idx_path</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">config_idx</span><span class="p">,</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">config_idx</span> <span class="o">=</span> <span class="n">merge</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;config_idx&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">config_idx</span><span class="p">,</span> <span class="kc">True</span></div>
+
+
+
+<div class="viewcode-block" id="run_with_params">
+<a class="viewcode-back" href="../../../etnn.routines.html#etnn.routines.run_config.run_with_params">[docs]</a>
+<span class="k">def</span> <span class="nf">run_with_params</span><span class="p">(</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./datasets&quot;</span><span class="p">,</span>
+        <span class="n">results_folder</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;./results&quot;</span><span class="p">,</span>
+        <span class="n">in_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
+        <span class="n">hidden_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+        <span class="n">out_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">ds_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10_000</span><span class="p">,</span>
+        <span class="n">num_gondolas</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_part_pg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">loss_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mse&quot;</span><span class="p">,</span>
+        <span class="n">optimizer_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;adam&#39;</span><span class="p">,</span>
+        <span class="n">num_max_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+        <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+        <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1024</span><span class="p">,</span>
+        <span class="n">early_stop_tol</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">use_equal_batcher</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">420</span><span class="p">,</span>
+        <span class="n">label_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1000</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that runs the experiment(s) for one config. Automatically and continuously saves results.</span>
+
+<span class="sd">    :param dataset_path: path to dataset folder.</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :param results_folder: path to results folder. function will subsequently create this folder if it does not exist.</span>
+<span class="sd">    :type results_folder: str</span>
+<span class="sd">    :param other_parameters: Other parameters in correspondence with config settings.</span>
+<span class="sd">    :return: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">run_config</span><span class="p">(</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">ConfigStore</span><span class="p">(</span>
+            <span class="n">in_dim</span><span class="o">=</span><span class="n">in_dim</span><span class="p">,</span>
+            <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+            <span class="n">out_dim</span><span class="o">=</span><span class="n">out_dim</span><span class="p">,</span>
+            <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">ds_size</span><span class="o">=</span><span class="n">ds_size</span><span class="p">,</span>
+            <span class="n">num_gondolas</span><span class="o">=</span><span class="n">num_gondolas</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="o">=</span><span class="n">num_part_pg</span><span class="p">,</span>
+            <span class="n">loss_name</span><span class="o">=</span><span class="n">loss_name</span><span class="p">,</span>
+            <span class="n">optimizer_name</span><span class="o">=</span><span class="n">optimizer_name</span><span class="p">,</span>
+            <span class="n">num_max_epochs</span><span class="o">=</span><span class="n">num_max_epochs</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">early_stop_tol</span><span class="o">=</span><span class="n">early_stop_tol</span><span class="p">,</span>
+            <span class="n">use_equal_batcher</span><span class="o">=</span><span class="n">use_equal_batcher</span><span class="p">,</span>
+            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="o">=</span><span class="n">label_type</span><span class="p">,</span>
+            <span class="n">final_label_factor</span><span class="o">=</span><span class="n">final_label_factor</span>
+        <span class="p">),</span>
+        <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+        <span class="n">results_folder</span><span class="o">=</span><span class="n">results_folder</span>
+    <span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

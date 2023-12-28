@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.nn.baseline &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">etnn.nn.baseline</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for etnn.nn.baseline</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+
+<div class="viewcode-block" id="create_baseline_model">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.baseline.create_baseline_model">[docs]</a>
+<span class="k">def</span> <span class="nf">create_baseline_model</span><span class="p">(</span>
+        <span class="n">n_params</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">input_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">output_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">n_layer</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+        <span class="n">tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.05</span><span class="p">,</span>
+        <span class="n">end_tolerance</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.1</span><span class="p">,</span>
+        <span class="n">iteration_increase</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">start_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">2.</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a baseline model consisting of linear layers and relu activation functions in between.</span>
+
+<span class="sd">    :param n_params: number of parameter the original model has</span>
+<span class="sd">    :type n_params: int</span>
+<span class="sd">    :param input_dim: input dimension this model should have. should be number of elements in the input sequence</span>
+<span class="sd">        times the dimension of each element</span>
+<span class="sd">    :type input_dim: int</span>
+<span class="sd">    :param output_dim: dimension of the output</span>
+<span class="sd">    :type output_dim: int</span>
+<span class="sd">    :param n_layer: number of layers the model should have</span>
+<span class="sd">    :type n_layer: int</span>
+<span class="sd">    :param tolerance: factor by how much the number of parameters may be exceeded (only roughly as the RELU layer</span>
+<span class="sd">        parameters are not accounted for here)</span>
+<span class="sd">    :type tolerance: float</span>
+<span class="sd">    :param end_tolerance: at the end the model parameters of the constructed model will be checked again. This</span>
+<span class="sd">        parameter controls the parameter by which factor the parameter count may exceed the input parameters with</span>
+<span class="sd">        still being considered a model one could and should use</span>
+<span class="sd">    :type end_tolerance: float</span>
+<span class="sd">    :param iteration_increase: value by how much the factor increases in each iteration</span>
+<span class="sd">    :type iteration_increase: float</span>
+<span class="sd">    :param start_factor: value controlling with which value the factor should start</span>
+<span class="sd">    :type start_factor: float</span>
+<span class="sd">    :return: model and bool whether the model should be used or has too many parameters</span>
+<span class="sd">    :rtype: typing.Tuple[torch.nn.Sequential, bool]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># for this we want to use a factor that is closes to producing the wanted parameter count</span>
+
+    <span class="c1"># init factor</span>
+    <span class="n">factor</span> <span class="o">=</span> <span class="n">start_factor</span>
+    <span class="c1"># try different factors until we find one that is closest to the initial parameters</span>
+    <span class="n">temp_factor</span> <span class="o">=</span> <span class="n">factor</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># increase factor</span>
+        <span class="n">temp_factor</span> <span class="o">+=</span> <span class="n">iteration_increase</span>
+
+        <span class="c1"># init parameter counter</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># iterate over layers (pseudo-inverted)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_layer</span><span class="p">):</span>
+
+            <span class="c1"># cover the last layer</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">+=</span> <span class="n">output_dim</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp_factor</span><span class="p">)</span>
+
+            <span class="c1"># cover the first layer</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_layer</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="n">params</span> <span class="o">+=</span> <span class="n">input_dim</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp_factor</span> <span class="o">**</span> <span class="n">i</span><span class="p">)</span>
+
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">params</span> <span class="o">+=</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp_factor</span> <span class="o">**</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp_factor</span> <span class="o">**</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># check if with this factor the number of parameters is still smaller</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="o">&lt;=</span> <span class="p">(</span><span class="n">n_params</span><span class="o">*</span><span class="n">tolerance</span><span class="p">):</span>
+            <span class="n">factor</span> <span class="o">=</span> <span class="n">temp_factor</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="c1"># create the layers</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Flatten</span><span class="p">()]</span>
+    <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_layer</span><span class="p">):</span>
+
+        <span class="c1"># create a pseudo-index</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="n">n_layer</span> <span class="o">-</span> <span class="n">idx</span>
+
+        <span class="c1"># first layer</span>
+        <span class="k">if</span> <span class="n">idx</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">factor</span> <span class="o">**</span> <span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)))]</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()]</span>
+
+        <span class="c1"># last layer</span>
+        <span class="k">elif</span> <span class="n">idx</span> <span class="o">==</span> <span class="p">(</span><span class="n">n_layer</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">factor</span><span class="p">),</span> <span class="n">output_dim</span><span class="p">)]</span>
+
+        <span class="c1"># intermediate layers</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="p">(</span><span class="n">factor</span> <span class="o">**</span> <span class="p">(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="o">*</span><span class="n">factor</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">temp</span><span class="p">))]</span>
+            <span class="n">layers</span> <span class="o">+=</span> <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ReLU</span><span class="p">()]</span>
+
+    <span class="c1"># use layers to build module and return it</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Sequential</span><span class="p">(</span><span class="o">*</span><span class="n">layers</span><span class="p">)</span>
+
+    <span class="c1"># last layer check</span>
+    <span class="n">should_use</span> <span class="o">=</span> <span class="n">calc_params</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">end_tolerance</span> <span class="o">*</span> <span class="n">n_params</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">should_use</span></div>
+
+
+
+<div class="viewcode-block" id="calc_params">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.baseline.calc_params">[docs]</a>
+<span class="k">def</span> <span class="nf">calc_params</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Small function calculating the total number of parameters of a model.</span>
+
+<span class="sd">    :param model: Model for which to count the parameters for</span>
+<span class="sd">    :type model: torch.nn.Module</span>
+<span class="sd">    :return: Number of parameters</span>
+<span class="sd">    :rtype: int</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span><span class="n">p</span><span class="o">.</span><span class="n">numel</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">()])</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
