@@ -31,6 +31,12 @@ def run_config(
     :type dataset_path: str
     :param results_folder: path to results folder. function will subsequently create this folder if it does not exist.
     :type results_folder: str
+    :param check_duplicate: Parameter controlling whether it should be checked if the config already exists. If existing
+        then do nothing and return. Default: ``True``
+    :type check_duplicate: bool
+    :param verbose: Parameter controlling whether print/progress statements should be written to console output.
+        Default: ``True``
+    :type verbose: bool
     :return: config id
     :rtype: int
     """
@@ -53,7 +59,6 @@ def run_config(
         os.mkdir(storage_folder)
 
     # CHOICES FOR DATASET
-    # todo: add further with more permutated elements and with invalid elements
     dataset, df_index = choice_dataset(config, dataset_path)
 
     # SPLITTING DATASET IN TRAIN AND VAL
@@ -63,8 +68,6 @@ def run_config(
         [1 - test_perc, test_perc],
         generator=generator
     )
-
-    # todo: rethink presence of testset in this method - yes or no. currently: no
 
     # ESTABLISHMENT OF LOADERS
     train_loader = choice_trainloader(config, df_index, train_ds)
@@ -163,7 +166,6 @@ def run_config(
         )
 
         # check if model is better and save it
-        # todo: probably not required to write config over and over again
         if epoch_control.retain_best(model, train_mean_loss, test_mean_loss, config):
             break
 
@@ -220,10 +222,6 @@ def run_config(
             test_loss=test_mean_loss,
         )
 
-    # todo: should I include plotting (save to file)? probably will make git bloated - use accuracy plot notebook
-    #   instead
-
-    # todo: should load test set and write some values to dict and json file? or seperate final evaluation notebook?
     return config_idx
 
 
