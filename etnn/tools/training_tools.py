@@ -80,6 +80,15 @@ def config_to_json(
         config: ConfigStore,
         saving_path: str
 ):
+    """
+    Saves the configuration in a json file in the specified path.
+
+    :param config: configuration to save
+    :type config: ConfigStore
+    :param saving_path: Path in which to save the json
+    :type saving_path: str
+    :return: Nothing
+    """
     with open(saving_path, 'w') as file:
         json.dump(vars(config), file, indent=4)
     return
@@ -88,6 +97,14 @@ def config_to_json(
 def load_config(
         file_path: str
 ) -> ConfigStore:
+    """
+    Load the Configuration object from a json file.
+
+    :param file_path: File path to json file to load from
+    :type file_path: str
+    :return: loaded configuration
+    :rtype: ConfigStore
+    """
     with open(file_path, 'r') as file:
         data = json.load(file)
         return ConfigStore(**data)

@@ -82,6 +82,11 @@ class FerrisWheelDataset(torch.utils.data.Dataset):
         self.df_index.label = (self.df_index.label/(10*self.num_gondolas)*num_classes).round()
 
     def post_normalize(self):
+        """
+        Function that normalizes the body of the dataset, namely the stored person health data. Does not affect labels.
+
+        :return: Nothing
+        """
         self.df_health = normalize_dataset(self.df_health)
 
 
