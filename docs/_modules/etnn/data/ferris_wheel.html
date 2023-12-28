@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.data.ferris_wheel &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">etnn.data.ferris_wheel</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for etnn.data.ferris_wheel</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">etnn.data</span> <span class="kn">import</span> <span class="n">DEFAULT_DATA_PATH</span>
+<span class="kn">from</span> <span class="nn">etnn.data.prepare_ferris_wheel</span> <span class="kn">import</span> <span class="n">generate_ferris_dataset</span><span class="p">,</span> <span class="n">add_valid_permutations</span><span class="p">,</span> <span class="n">add_invalid_permutations</span><span class="p">,</span> \
+    <span class="n">prepare_1_ferris</span><span class="p">,</span> <span class="n">generate_ferris_dataset_single_node</span><span class="p">,</span> <span class="n">normalize_dataset</span>
+
+
+<div class="viewcode-block" id="FerrisWheelDataset">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.FerrisWheelDataset">[docs]</a>
+<span class="k">class</span> <span class="nc">FerrisWheelDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Pytorch dataset of the ferris wheel dataset concept. Each element in the dataset consists of data x and a label y.</span>
+
+<span class="sd">    y in this case is the happyness score calculated by the function ``build_wheel_happyness(...)``.</span>
+
+<span class="sd">    x consists of gondolas which contains a certain number of people, which is specified by the input dataset. The logic</span>
+<span class="sd">    how many gondolas and persons per gondolas are is not explicitly contained in this object but contained in the</span>
+<span class="sd">    element ``df_index`` through column names. The tensor provided by this function however will not be in any</span>
+<span class="sd">    specific order or structure that indicates which data is assigned to which gondola.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_health</span><span class="p">,</span> <span class="n">df_index</span><span class="p">,</span> <span class="n">num_gondolas</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Init function of the pytorch FerrisWheelDataset, which inherits the pytorch Dataset object.</span>
+
+<span class="sd">        :param df_health: Person health dataset</span>
+<span class="sd">        :type df_health: pd.DataFrame</span>
+<span class="sd">        :param df_index: Gondola dataset containing person ids and happyness score (=label)</span>
+<span class="sd">        :type df_index: pd.DataFrame</span>
+<span class="sd">        :param num_gondolas: Number of gondolas in ferris wheel</span>
+<span class="sd">        :type num_gondolas: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_health</span> <span class="o">=</span> <span class="n">df_health</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">df_health</span> <span class="k">else</span> <span class="n">df_health</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_index</span> <span class="o">=</span> <span class="n">df_index</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_gondolas</span> <span class="o">=</span> <span class="n">num_gondolas</span>
+
+    <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic length function.</span>
+
+<span class="sd">        :return: The number of elements contained in the dataset.</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_index</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the item stored in the dataset at position idx.</span>
+
+<span class="sd">        :param idx: index of the item to return</span>
+<span class="sd">        :type idx: int</span>
+<span class="sd">        :return: Data and label of this index. Data has shape</span>
+<span class="sd">            ``(num_gondolas*num_persons_in_gondola, person_data_dim)``, label is a simple 1d tensor containing one</span>
+<span class="sd">            float value.</span>
+<span class="sd">        :rtype: typing.Tuple[torch.Tensor, torch.Tensor]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get the ID from the id_frame</span>
+        <span class="n">p_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Use the ID to index into the data_frame</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_health</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">p_ids</span><span class="p">]</span>
+
+        <span class="c1"># Get the label from the last column of id_frame</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_index</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">idx</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+
+<div class="viewcode-block" id="FerrisWheelDataset.to_classification">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.FerrisWheelDataset.to_classification">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_classification</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the regression type dataset into a classification type dataset by dividing the continuous labels</span>
+<span class="sd">        through their maximum amount and and multiplying them with the desired number of classes - then round.</span>
+
+<span class="sd">        :param num_classes: number of classes for the new classification dataset</span>
+<span class="sd">        :type num_classes: int</span>
+<span class="sd">        :return: Nothing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_index</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_index</span><span class="o">.</span><span class="n">label</span><span class="o">/</span><span class="p">(</span><span class="mi">10</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">num_gondolas</span><span class="p">)</span><span class="o">*</span><span class="n">num_classes</span><span class="p">)</span><span class="o">.</span><span class="n">round</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="FerrisWheelDataset.post_normalize">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.FerrisWheelDataset.post_normalize">[docs]</a>
+    <span class="k">def</span> <span class="nf">post_normalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function that normalizes the body of the dataset, namely the stored person health data. Does not affect labels.</span>
+
+<span class="sd">        :return: Nothing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_health</span> <span class="o">=</span> <span class="n">normalize_dataset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">df_health</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="load_pure_ferris_wheel_dataset">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset">[docs]</a>
+<span class="k">def</span> <span class="nf">load_pure_ferris_wheel_dataset</span><span class="p">(</span>
+        <span class="n">num_gondolas</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_part_pg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Sleep_health_and_lifestyle_dataset.csv&quot;</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_DATA_PATH</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;health_dataset_preprocessed-1.csv&#39;</span><span class="p">,</span>
+        <span class="n">try_pregen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4651431</span><span class="p">,</span>
+        <span class="n">label_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">FerrisWheelDataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these</span>
+<span class="sd">    intermediate csv files). Loads a dataset that exactly follows the allowed permutations combined with the exact</span>
+<span class="sd">    calculated happyness scores(or other scores).</span>
+
+<span class="sd">    :param num_gondolas: Number of gondolas the ferris wheel should have, default: ``15``</span>
+<span class="sd">    :type num_gondolas: int</span>
+<span class="sd">    :param num_part_pg: Number of persons in each gondola, default: ``5``. (by default no empty passengers/seats will be</span>
+<span class="sd">        generated)</span>
+<span class="sd">    :type num_part_pg: int</span>
+<span class="sd">    :param num_to_generate: Number of dataset entries to generate, default: ``1000``</span>
+<span class="sd">    :type num_to_generate: int</span>
+<span class="sd">    :param df_name_input: Name of the dataset to use as the input for the persons health data, default:</span>
+<span class="sd">        ``Sleep_health_and_lifestyle_dataset.csv``</span>
+<span class="sd">    :type df_name_input: str</span>
+<span class="sd">    :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :param df_intermediate_output_name: Name of the intermediate datasets output, default:</span>
+<span class="sd">        ``&#39;health_dataset_preprocessed-1.csv&#39;``. Intermediate dataset denotes the preprocessed health dataset.</span>
+<span class="sd">    :type df_intermediate_output_name: str</span>
+<span class="sd">    :param try_pregen: Controls whether pre-generated shall be loaded or new data should be generated hence overwriting</span>
+<span class="sd">        and updating previously generated data with the same parameters, default: ``True``</span>
+<span class="sd">    :type try_pregen: bool</span>
+<span class="sd">    :param seed: Seed to use for random generation</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :param label_type: label to be generated. Viable options: ``&#39;default&#39;`` producing the most complex label with logic</span>
+<span class="sd">        inspired by a real ferris wheel, ``&#39;tree&#39;`` and ``&#39;tree_advanced&#39;`` for a tree based generation of label with</span>
+<span class="sd">        minimal logic behind this label. Difference in first and second tree option is that the first option is a</span>
+<span class="sd">        downgraded version only using S and P type labels and not C type labels instead of C as it would have been</span>
+<span class="sd">        intended for a ferris wheel dataset, default: ``&#39;default&#39;``.</span>
+<span class="sd">    :type label_type: str</span>
+<span class="sd">    :param final_label_factor: Factor by which the label is scaled. Does not apply for ``&#39;default&#39;`` option in</span>
+<span class="sd">        label_type parameter. Default: ``1/1000``</span>
+<span class="sd">    :type final_label_factor: float</span>
+<span class="sd">    :param normalize: Whether or not the data is normalized with a min-max scaler, default: ``False``</span>
+<span class="sd">    :type normalize: bool</span>
+<span class="sd">    :return: generated dataset and index dataframe for data loading purposes</span>
+<span class="sd">    :rtype: typing.Tuple[FerrisWheelDataset, pd.DataFrame]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># load the datasets</span>
+    <span class="n">df_index</span><span class="p">,</span> <span class="n">df_health</span> <span class="o">=</span> <span class="n">generate_ferris_dataset</span><span class="p">(</span>
+        <span class="n">num_gondolas</span><span class="o">=</span><span class="n">num_gondolas</span><span class="p">,</span>
+        <span class="n">num_part_pg</span><span class="o">=</span><span class="n">num_part_pg</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="o">=</span><span class="n">num_to_generate</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="o">=</span><span class="n">df_intermediate_output_name</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="o">=</span><span class="n">df_name_input</span><span class="p">,</span>
+        <span class="n">try_pregen</span><span class="o">=</span><span class="n">try_pregen</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">label_type</span><span class="o">=</span><span class="n">label_type</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="o">=</span><span class="n">final_label_factor</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FerrisWheelDataset</span><span class="p">(</span><span class="n">df_health</span><span class="p">,</span> <span class="n">df_index</span><span class="p">,</span> <span class="n">num_gondolas</span><span class="p">),</span> <span class="n">df_index</span></div>
+
+
+
+<div class="viewcode-block" id="load_pure_ferris_wheel_dataset_single_node">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset_single_node">[docs]</a>
+<span class="k">def</span> <span class="nf">load_pure_ferris_wheel_dataset_single_node</span><span class="p">(</span>
+        <span class="n">node_type</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">num_elem</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4651431</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Sleep_health_and_lifestyle_dataset.csv&quot;</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;health_dataset_preprocessed-1.csv&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that creates a dataset and data fame for generating data generated with the logic of a permutation tree</span>
+<span class="sd">    with a singular node as its root with all elements.</span>
+
+<span class="sd">    :param node_type: Type of the label of the singular permutation tree in its defining permutation tree. Determines</span>
+<span class="sd">        how the label is generated.</span>
+<span class="sd">    :type node_type: str</span>
+<span class="sd">    :param num_elem: Number of elements to be grouped belonging to the singular permutation tree node.</span>
+<span class="sd">    :type num_elem: int</span>
+<span class="sd">    :param num_to_generate: number of elements to generate for the dataset.</span>
+<span class="sd">    :type num_to_generate: int</span>
+<span class="sd">    :param dataset_path: path to the dataset folder</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :param final_label_factor: final label to be applied to the original label, default: ``1/1000``.</span>
+<span class="sd">    :type final_label_factor: float</span>
+<span class="sd">    :param normalize: bool controlling whether the input data with person health data should be normalized or not.</span>
+<span class="sd">    :type normalize: bool</span>
+<span class="sd">    :param seed: seed to make experiments reproducible, default: ``4651431``.</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :param df_name_input: name of the dataframe to load, default: ``&#39;Sleep_health_and_lifestyle_dataset.csv&#39;``.</span>
+<span class="sd">    :type df_name_input: str</span>
+<span class="sd">    :param df_intermediate_output_name: name of the intermediate (preprocessed) data to produce and store or load.</span>
+<span class="sd">        Default: ``&#39;health_dataset_preprocessed-1.csv&#39;``.</span>
+<span class="sd">    :type df_intermediate_output_name: str</span>
+<span class="sd">    :return: dataset and data frame containing structural information</span>
+<span class="sd">    :rtype: typing.Tuple[torch.utils.data.Dataset, pd.DataFrame]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># load the datasets</span>
+    <span class="n">df_index</span><span class="p">,</span> <span class="n">df_health</span> <span class="o">=</span> <span class="n">generate_ferris_dataset_single_node</span><span class="p">(</span>
+        <span class="n">node_type</span><span class="o">=</span><span class="n">node_type</span><span class="p">,</span>
+        <span class="n">num_elem</span><span class="o">=</span><span class="n">num_elem</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="o">=</span><span class="n">num_to_generate</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="o">=</span><span class="n">final_label_factor</span><span class="p">,</span>
+        <span class="n">normalize</span><span class="o">=</span><span class="n">normalize</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="o">=</span><span class="n">df_name_input</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="o">=</span><span class="n">df_intermediate_output_name</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FerrisWheelDataset</span><span class="p">(</span><span class="n">df_health</span><span class="p">,</span> <span class="n">df_index</span><span class="p">,</span> <span class="n">num_elem</span><span class="p">),</span> <span class="n">df_index</span></div>
+
+
+
+<div class="viewcode-block" id="load_modified_ferris_wheel_dataset">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.load_modified_ferris_wheel_dataset">[docs]</a>
+<span class="k">def</span> <span class="nf">load_modified_ferris_wheel_dataset</span><span class="p">(</span>
+        <span class="n">num_gondolas</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">num_part_pg</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>
+        <span class="n">num_valid_to_add</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>
+        <span class="n">num_invalid_to_add</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Sleep_health_and_lifestyle_dataset.csv&quot;</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_DATA_PATH</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;health_dataset_preprocessed-1.csv&#39;</span><span class="p">,</span>
+        <span class="n">try_pregen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4651431</span><span class="p">,</span>
+        <span class="n">label_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1000</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">FerrisWheelDataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these</span>
+<span class="sd">    intermediate csv files). Loads a dataset that not exactly follows the allowed permutations combined with the</span>
+<span class="sd">    exact calculated happyness scores. It contains these items in the beginning and then adds permutated pure</span>
+<span class="sd">    items to increase the potential benefit of equivariant nn&#39;s but afterwards adds label perturbed data.</span>
+
+<span class="sd">    :param num_gondolas: Number of gondolas the ferris wheel should have, default: ``15``</span>
+<span class="sd">    :type num_gondolas: int</span>
+<span class="sd">    :param num_part_pg: Number of persons in each gondola, default: ``5``. (by default no empty passengers/seats will be</span>
+<span class="sd">        generated)</span>
+<span class="sd">    :type num_part_pg: int</span>
+<span class="sd">    :param num_to_generate: Number of dataset entries to generate, default: ``1000``</span>
+<span class="sd">    :type num_to_generate: int</span>
+<span class="sd">    :param num_valid_to_add: Number of pure items to add which (permuted) already exist within the original dataset,</span>
+<span class="sd">        default: ``1000``</span>
+<span class="sd">    :type num_valid_to_add: int</span>
+<span class="sd">    :param num_invalid_to_add: Number of perturbed items to add to the previously pure data to challenge the neural</span>
+<span class="sd">        networks capability to react to falsified data, default: ``1000``</span>
+<span class="sd">    :type num_invalid_to_add: int</span>
+<span class="sd">    :param df_name_input: Name of the dataset to use as the input for the persons health data, default:</span>
+<span class="sd">        ``Sleep_health_and_lifestyle_dataset.csv``</span>
+<span class="sd">    :type df_name_input: str</span>
+<span class="sd">    :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :param df_intermediate_output_name: Name of the intermediate datasets output, default:</span>
+<span class="sd">        ``&#39;health_dataset_preprocessed-1.csv&#39;``. Intermediate dataset denotes the preprocessed health dataset.</span>
+<span class="sd">    :type df_intermediate_output_name: str</span>
+<span class="sd">    :param try_pregen: Controls whether pre-generated shall be loaded or new data should be generated hence overwriting</span>
+<span class="sd">        and updating previously generated data with the same parameters, default: ``True``</span>
+<span class="sd">    :type try_pregen: bool</span>
+<span class="sd">    :param seed: Seed to use for random generation</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :param label_type: label to be generated. Viable options: ``&#39;default&#39;`` producing the most complex label with logic</span>
+<span class="sd">        inspired by a real ferris wheel, ``&#39;tree&#39;`` and ``&#39;tree_advanced&#39;`` for a tree based generation of label with</span>
+<span class="sd">        minimal logic behind this label. Difference in first and second tree option is that the first option is a</span>
+<span class="sd">        downgraded version only using S and P type labels and not C type labels instead of C as it would have been</span>
+<span class="sd">        intended for a ferris wheel dataset, default: ``&#39;default&#39;``.</span>
+<span class="sd">    :type label_type: str</span>
+<span class="sd">    :param final_label_factor: Factor by which the label is scaled. Does not apply for ``&#39;default&#39;`` option in</span>
+<span class="sd">        label_type parameter. Default: ``1/1000``</span>
+<span class="sd">    :type final_label_factor: float</span>
+<span class="sd">    :return: generated dataset and index dataframe for data loading purposes</span>
+<span class="sd">    :rtype: typing.Tuple[FerrisWheelDataset, pd.DataFrame]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if pregenerated and parameter true, load dataset</span>
+    <span class="n">file_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;ferris-wheel_g-</span><span class="si">{</span><span class="n">num_gondolas</span><span class="si">}</span><span class="s2">_p-</span><span class="si">{</span><span class="n">num_part_pg</span><span class="si">}</span><span class="s2">_size-</span><span class="si">{</span><span class="n">num_to_generate</span><span class="si">}</span><span class="s2">_seed-</span><span class="si">{</span><span class="n">seed</span><span class="si">}</span><span class="s2">_valid&quot;</span> \
+                <span class="sa">f</span><span class="s2">&quot;-</span><span class="si">{</span><span class="n">num_valid_to_add</span><span class="si">}</span><span class="s2">_invalid-</span><span class="si">{</span><span class="n">num_invalid_to_add</span><span class="si">}</span><span class="s2">_label-</span><span class="si">{</span><span class="n">label_type</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">if</span> <span class="n">label_type</span> <span class="o">==</span> <span class="s2">&quot;tree&quot;</span><span class="p">:</span>
+        <span class="n">file_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;-</span><span class="si">{</span><span class="n">final_label_factor</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="n">file_name</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;.csv&quot;</span>
+    <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dataset_path</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">try_pregen</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+        <span class="n">df_health</span> <span class="o">=</span> <span class="n">prepare_1_ferris</span><span class="p">(</span>
+            <span class="n">df_name_input</span><span class="o">=</span><span class="n">df_name_input</span><span class="p">,</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+            <span class="n">df_name_output</span><span class="o">=</span><span class="n">df_intermediate_output_name</span><span class="p">,</span>
+            <span class="n">try_pregen</span><span class="o">=</span><span class="n">try_pregen</span>
+        <span class="p">)</span>
+        <span class="n">df_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">index_col</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FerrisWheelDataset</span><span class="p">(</span><span class="n">df_health</span><span class="p">,</span> <span class="n">df_index</span><span class="p">,</span> <span class="n">num_gondolas</span><span class="p">),</span> <span class="n">df_index</span>
+
+    <span class="c1"># seed randomness</span>
+    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+
+    <span class="c1"># load the datasets</span>
+    <span class="n">df_index</span><span class="p">,</span> <span class="n">df_health</span> <span class="o">=</span> <span class="n">generate_ferris_dataset</span><span class="p">(</span>
+        <span class="n">num_gondolas</span><span class="o">=</span><span class="n">num_gondolas</span><span class="p">,</span>
+        <span class="n">num_part_pg</span><span class="o">=</span><span class="n">num_part_pg</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="o">=</span><span class="n">num_to_generate</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="o">=</span><span class="n">df_intermediate_output_name</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="o">=</span><span class="n">df_name_input</span><span class="p">,</span>
+        <span class="n">try_pregen</span><span class="o">=</span><span class="n">try_pregen</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
+        <span class="n">label_type</span><span class="o">=</span><span class="n">label_type</span><span class="p">,</span>
+        <span class="n">final_label_factor</span><span class="o">=</span><span class="n">final_label_factor</span>
+    <span class="p">)</span>
+
+    <span class="n">result_of_randomly_hitting_keyboard</span> <span class="o">=</span> <span class="mi">656658998</span>
+
+    <span class="c1"># add valid permutations</span>
+    <span class="n">df_index</span> <span class="o">=</span> <span class="n">add_valid_permutations</span><span class="p">(</span>
+        <span class="n">num_add_equal_elem</span><span class="o">=</span><span class="n">num_valid_to_add</span><span class="p">,</span>
+        <span class="n">df_index</span><span class="o">=</span><span class="n">df_index</span><span class="p">,</span>
+        <span class="n">num_gondolas</span><span class="o">=</span><span class="n">num_gondolas</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">result_of_randomly_hitting_keyboard</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># add invalid permutations (invalid meaning valid permutations but with different labels - hence confusing the</span>
+    <span class="c1"># equivariant system and the normal nn)</span>
+    <span class="n">df_index</span> <span class="o">=</span> <span class="n">add_invalid_permutations</span><span class="p">(</span>
+        <span class="n">num_add_nequal_elem</span><span class="o">=</span><span class="n">num_invalid_to_add</span><span class="p">,</span>
+        <span class="n">df_index</span><span class="o">=</span><span class="n">df_index</span><span class="p">,</span>
+        <span class="n">num_gondolas</span><span class="o">=</span><span class="n">num_gondolas</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randint</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">result_of_randomly_hitting_keyboard</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># save dataset</span>
+    <span class="n">df_index</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">FerrisWheelDataset</span><span class="p">(</span><span class="n">df_health</span><span class="p">,</span> <span class="n">df_index</span><span class="p">,</span> <span class="n">num_gondolas</span><span class="p">),</span> <span class="n">df_index</span></div>
+
+
+
+<div class="viewcode-block" id="prepare_pure_test_dataset">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_wheel.prepare_pure_test_dataset">[docs]</a>
+<span class="k">def</span> <span class="nf">prepare_pure_test_dataset</span><span class="p">(</span>
+        <span class="n">df_index</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">train_indices</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">num_gondolas</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">num_to_generate</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1_000</span><span class="p">,</span>
+        <span class="n">df_name_input</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;Sleep_health_and_lifestyle_dataset.csv&quot;</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">DEFAULT_DATA_PATH</span><span class="p">,</span>
+        <span class="n">df_intermediate_output_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;health_dataset_preprocessed-1.csv&#39;</span><span class="p">,</span>
+        <span class="n">try_pregen</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4651431</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">typing</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">FerrisWheelDataset</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that creates &#39;pure&#39; dataset based on training set. Hence has already been learned in the ETNN.</span>
+
+<span class="sd">    :param df_index: Dataframe that describes the ferris wheel guests with an id</span>
+<span class="sd">    :type df_index: pd.DataFrame</span>
+<span class="sd">    :param train_indices: Indices of the split dataset or sub-dataset corresponding to the training dataset</span>
+<span class="sd">    :type train_indices: typing.Iterable[int]</span>
+<span class="sd">    :param num_gondolas: Number of gondolas the ferris wheel should have, default: ``15``</span>
+<span class="sd">    :type num_gondolas: int</span>
+<span class="sd">    :param num_to_generate: Number of dataset entries to generate, default: ``1000``</span>
+<span class="sd">    :type num_to_generate: int</span>
+<span class="sd">    :param df_name_input: Name of the dataset to use as the input for the persons health data, default:</span>
+<span class="sd">        ``&#39;Sleep_health_and_lifestyle_dataset.csv&#39;``</span>
+<span class="sd">    :type df_name_input: str</span>
+<span class="sd">    :param dataset_path: Specifies the path to the dataset folder, default ``DEFAULT_DATA_PATH``</span>
+<span class="sd">    :type dataset_path: str</span>
+<span class="sd">    :param df_intermediate_output_name: Name of the intermediate datasets output, default:</span>
+<span class="sd">        ``&#39;health_dataset_preprocessed-1.csv&#39;``. Intermediate dataset denotes the preprocessed health dataset.</span>
+<span class="sd">    :type df_intermediate_output_name: str</span>
+<span class="sd">    :param try_pregen: Controls whether pre-generated shall be loaded or new data should be generated hence overwriting</span>
+<span class="sd">        and updating previously generated data with the same parameters, default: ``True``</span>
+<span class="sd">    :type try_pregen: bool</span>
+<span class="sd">    :param seed: Seed to use for random generation</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :return: generated dataset and index dataframe for data loading purposes</span>
+<span class="sd">    :rtype: typing.Tuple[FerrisWheelDataset, pd.DataFrame]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># get health dataset</span>
+    <span class="n">df_health</span> <span class="o">=</span> <span class="n">prepare_1_ferris</span><span class="p">(</span>
+        <span class="n">df_name_input</span><span class="o">=</span><span class="n">df_name_input</span><span class="p">,</span>
+        <span class="n">dataset_path</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
+        <span class="n">df_name_output</span><span class="o">=</span><span class="n">df_intermediate_output_name</span><span class="p">,</span>
+        <span class="n">try_pregen</span><span class="o">=</span><span class="n">try_pregen</span>
+    <span class="p">)</span>
+
+    <span class="c1"># filter out training index if it differs</span>
+    <span class="k">if</span> <span class="n">train_indices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">df_index_train</span> <span class="o">=</span> <span class="n">df_index</span><span class="p">[</span><span class="n">df_index</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">train_indices</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df_index_train</span> <span class="o">=</span> <span class="n">df_index</span>
+
+    <span class="c1"># generate valid(pure) permutations</span>
+    <span class="n">df_index_test</span> <span class="o">=</span> <span class="n">add_valid_permutations</span><span class="p">(</span>
+        <span class="n">num_add_equal_elem</span><span class="o">=</span><span class="n">num_to_generate</span><span class="p">,</span>
+        <span class="n">df_index</span><span class="o">=</span><span class="n">df_index_train</span><span class="p">,</span>
+        <span class="n">num_gondolas</span><span class="o">=</span><span class="n">num_gondolas</span><span class="p">,</span>
+        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">FerrisWheelDataset</span><span class="p">(</span>
+        <span class="n">df_health</span><span class="p">,</span>
+        <span class="n">df_index_test</span><span class="p">,</span>
+        <span class="n">num_gondolas</span>
+    <span class="p">),</span> <span class="n">df_index_test</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

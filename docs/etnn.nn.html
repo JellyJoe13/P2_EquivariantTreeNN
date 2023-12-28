@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.nn &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="etnn.nn.c" href="etnn.nn.c.html" />
+    <link rel="prev" title="etnn.data" href="etnn.data.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="etnn.html">etnn</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="etnn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="etnn.data.html">etnn.data</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">etnn.nn</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#subpackages">Subpackages</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="etnn.nn.c.html">etnn.nn.c</a></li>
+<li class="toctree-l6"><a class="reference internal" href="etnn.nn.p.html">etnn.nn.p</a></li>
+<li class="toctree-l6"><a class="reference internal" href="etnn.nn.q.html">etnn.nn.q</a></li>
+<li class="toctree-l6"><a class="reference internal" href="etnn.nn.s.html">etnn.nn.s</a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.nn.baseline">etnn.nn.baseline module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.nn.baseline.calc_params"><code class="docutils literal notranslate"><span class="pre">calc_params()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.nn.baseline.create_baseline_model"><code class="docutils literal notranslate"><span class="pre">create_baseline_model()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.nn.layer_framework">etnn.nn.layer_framework module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.control_hub"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.control_hub()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.forward"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.forward()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_c"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.handle_c()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_p"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.handle_p()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_q"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.handle_q()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_s"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.handle_s()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.ordered_tree_traversal"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.ordered_tree_traversal()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.nn.layer_framework.LayerManagementFramework.training"><code class="docutils literal notranslate"><span class="pre">LayerManagementFramework.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.nn">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.routines.html">etnn.routines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.tests.html">etnn.tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.tools.html">etnn.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="etnn.html#module-etnn">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="etnn.html">etnn</a></li>
+      <li class="breadcrumb-item active">etnn.nn</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/etnn.nn.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="etnn-nn">
+<h1>etnn.nn<a class="headerlink" href="#etnn-nn" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="etnn.nn.c.html">etnn.nn.c</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.c.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.c.html#module-etnn.nn.c.chiral_node">etnn.nn.c.chiral_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="etnn.nn.c.html#etnn.nn.c.chiral_node.ChiralNodeNetworkTypeC"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeC</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.c.html#etnn.nn.c.chiral_node.ChiralNodeNetworkTypeC.forward"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeC.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.c.html#etnn.nn.c.chiral_node.ChiralNodeNetworkTypeC.training"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeC.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.c.html#module-etnn.nn.c">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="etnn.nn.p.html">etnn.nn.p</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.p.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.p.html#module-etnn.nn.p.chiral_node">etnn.nn.p.chiral_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="etnn.nn.p.html#etnn.nn.p.chiral_node.ChiralNodeNetworkTypeP"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeP</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.p.html#etnn.nn.p.chiral_node.ChiralNodeNetworkTypeP.forward"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeP.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.p.html#etnn.nn.p.chiral_node.ChiralNodeNetworkTypeP.training"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeP.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.p.html#module-etnn.nn.p">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="etnn.nn.q.html">etnn.nn.q</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.q.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.q.html#module-etnn.nn.q.chiral_node">etnn.nn.q.chiral_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="etnn.nn.q.html#etnn.nn.q.chiral_node.ChiralNodeNetworkTypeQ"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeQ</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.q.html#etnn.nn.q.chiral_node.ChiralNodeNetworkTypeQ.forward"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeQ.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.q.html#etnn.nn.q.chiral_node.ChiralNodeNetworkTypeQ.training"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeQ.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.q.html#module-etnn.nn.q">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="etnn.nn.s.html">etnn.nn.s</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.s.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.s.html#module-etnn.nn.s.chiral_node">etnn.nn.s.chiral_node module</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="etnn.nn.s.html#etnn.nn.s.chiral_node.ChiralNodeNetworkTypeS"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeS</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.s.html#etnn.nn.s.chiral_node.ChiralNodeNetworkTypeS.forward"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeS.forward()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.s.html#etnn.nn.s.chiral_node.ChiralNodeNetworkTypeS.training"><code class="docutils literal notranslate"><span class="pre">ChiralNodeNetworkTypeS.training</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="etnn.nn.s.html#module-etnn.nn.s">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-etnn.nn.baseline">
+<span id="etnn-nn-baseline-module"></span><h2>etnn.nn.baseline module<a class="headerlink" href="#module-etnn.nn.baseline" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.nn.baseline.calc_params">
+<span class="sig-prename descclassname"><span class="pre">etnn.nn.baseline.</span></span><span class="sig-name descname"><span class="pre">calc_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Module</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/etnn/nn/baseline.html#calc_params"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.baseline.calc_params" title="Link to this definition"></a></dt>
+<dd><p>Small function calculating the total number of parameters of a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>torch.nn.Module</em>) – Model for which to count the parameters for</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Number of parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.nn.baseline.create_baseline_model">
+<span class="sig-prename descclassname"><span class="pre">etnn.nn.baseline.</span></span><span class="sig-name descname"><span class="pre">create_baseline_model</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n_params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n_layer</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.05</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_tolerance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration_increase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2.0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Sequential</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/nn/baseline.html#create_baseline_model"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.baseline.create_baseline_model" title="Link to this definition"></a></dt>
+<dd><p>Creates a baseline model consisting of linear layers and relu activation functions in between.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_params</strong> (<em>int</em>) – number of parameter the original model has</p></li>
+<li><p><strong>input_dim</strong> (<em>int</em>) – input dimension this model should have. should be number of elements in the input sequence
+times the dimension of each element</p></li>
+<li><p><strong>output_dim</strong> (<em>int</em>) – dimension of the output</p></li>
+<li><p><strong>n_layer</strong> (<em>int</em>) – number of layers the model should have</p></li>
+<li><p><strong>tolerance</strong> (<em>float</em>) – factor by how much the number of parameters may be exceeded (only roughly as the RELU layer
+parameters are not accounted for here)</p></li>
+<li><p><strong>end_tolerance</strong> (<em>float</em>) – at the end the model parameters of the constructed model will be checked again. This
+parameter controls the parameter by which factor the parameter count may exceed the input parameters with
+still being considered a model one could and should use</p></li>
+<li><p><strong>iteration_increase</strong> (<em>float</em>) – value by how much the factor increases in each iteration</p></li>
+<li><p><strong>start_factor</strong> (<em>float</em>) – value controlling with which value the factor should start</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>model and bool whether the model should be used or has too many parameters</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[torch.nn.Sequential, bool]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.nn.layer_framework">
+<span id="etnn-nn-layer-framework-module"></span><h2>etnn.nn.layer_framework module<a class="headerlink" href="#module-etnn.nn.layer_framework" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">etnn.nn.layer_framework.</span></span><span class="sig-name descname"><span class="pre">LayerManagementFramework</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">in_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">hidden_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">128</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">out_dim</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">k</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'chiral'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>Class that realises a layer for equivariant inputs according to a permutation definition through a permutation
+tree.
+Handles submodules of ‘chiral’ type that are heavily inspired by <a class="reference internal" href="index.html#gainski2023" id="id1"><span>[Gainski2023]</span></a>.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.control_hub">
+<span class="sig-name descname"><span class="pre">control_hub</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.control_hub"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.control_hub" title="Link to this definition"></a></dt>
+<dd><p>Function to act as a switch to abstract the choice of functionality for each node type. Used to call instead
+of the actual node type for better readability and reuse of functionality.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embedded_x</strong> (<em>torch.Tensor</em>) – Tensor containing the input data in an embedded form meaning of dimension <code class="docutils literal notranslate"><span class="pre">hidden_dim</span></code>.</p></li>
+<li><p><strong>tree</strong> (<a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – Tree containing the tree node for which to currently act upon.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>prediction/result of a subcomponent used to derive the final result (=label)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward function as used in most pytorch modules. Returns prediction of the input data element(s). Read more
+about this in the official pytorch documentation: <a class="reference external" href="https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.forward">https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.forward</a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>torch.Tensor</em>) – Input data to predict.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Prediction of the module</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.handle_c">
+<span class="sig-name descname"><span class="pre">handle_c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.handle_c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_c" title="Link to this definition"></a></dt>
+<dd><p>Function realising the functionality of a C type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embedded_x</strong> (<em>torch.Tensor</em>) – Tensor containing the input data in an embedded form meaning of dimension <code class="docutils literal notranslate"><span class="pre">hidden_dim</span></code>.</p></li>
+<li><p><strong>children_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a><em>]</em>) – Defining which components are contained in the current node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>prediction/result of a subcomponent used to derive the final result (=label)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.handle_p">
+<span class="sig-name descname"><span class="pre">handle_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.handle_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_p" title="Link to this definition"></a></dt>
+<dd><p>Function realising the functionality of a P type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embedded_x</strong> (<em>torch.Tensor</em>) – Tensor containing the input data in an embedded form meaning of dimension <code class="docutils literal notranslate"><span class="pre">hidden_dim</span></code>.</p></li>
+<li><p><strong>children_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a><em>]</em>) – Defining which components are contained in the current node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>prediction/result of a subcomponent used to derive the final result (=label)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.handle_q">
+<span class="sig-name descname"><span class="pre">handle_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.handle_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_q" title="Link to this definition"></a></dt>
+<dd><p>Function realising the functionality of a Q type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embedded_x</strong> (<em>torch.Tensor</em>) – Tensor containing the input data in an embedded form meaning of dimension <code class="docutils literal notranslate"><span class="pre">hidden_dim</span></code>.</p></li>
+<li><p><strong>children_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a><em>]</em>) – Defining which components are contained in the current node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>prediction/result of a subcomponent used to derive the final result (=label)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.handle_s">
+<span class="sig-name descname"><span class="pre">handle_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.handle_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.handle_s" title="Link to this definition"></a></dt>
+<dd><p>Function realising the functionality of a S type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embedded_x</strong> (<em>torch.Tensor</em>) – Tensor containing the input data in an embedded form meaning of dimension <code class="docutils literal notranslate"><span class="pre">hidden_dim</span></code>.</p></li>
+<li><p><strong>children_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a><em>]</em>) – Defining which components are contained in the current node</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>prediction/result of a subcomponent used to derive the final result (=label)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.ordered_tree_traversal">
+<span class="sig-name descname"><span class="pre">ordered_tree_traversal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">embedded_x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">node_module</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/nn/layer_framework.html#LayerManagementFramework.ordered_tree_traversal"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.ordered_tree_traversal" title="Link to this definition"></a></dt>
+<dd><p>Function to traverse the tree nodes provided in the parameter in order to generate a prediction/label for the
+input data at this node level. Uses the provided function as an indicator of what nodetype the current node is.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>embedded_x</strong> (<em>torch.Tensor</em>) – Tensor containing the input data in an embedded form meaning of dimension <code class="docutils literal notranslate"><span class="pre">hidden_dim</span></code>.</p></li>
+<li><p><strong>children_list</strong> (<em>List</em><em>[</em><a class="reference internal" href="etnn.data.html#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a><em>]</em>) – List of nodes that are children to the current node</p></li>
+<li><p><strong>node_module</strong> (<em>Callable</em><em>[</em><em>[</em><em>torch.Tensor</em><em>]</em><em>, </em><em>torch.Tensor</em><em>]</em>) – Specifies which module to use for the current node type</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>prediction/result of a subcomponent used to derive the final result (=label)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="etnn.nn.layer_framework.LayerManagementFramework.training">
+<span class="sig-name descname"><span class="pre">training</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#etnn.nn.layer_framework.LayerManagementFramework.training" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-etnn.nn">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-etnn.nn" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="etnn.data.html" class="btn btn-neutral float-left" title="etnn.data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="etnn.nn.c.html" class="btn btn-neutral float-right" title="etnn.nn.c" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

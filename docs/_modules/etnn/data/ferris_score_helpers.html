@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.data.ferris_score_helpers &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">etnn.data.ferris_score_helpers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for etnn.data.ferris_score_helpers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">import</span> <span class="nn">torch</span>
+
+<span class="kn">from</span> <span class="nn">etnn</span> <span class="kn">import</span> <span class="n">TreeNode</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Rule ideas:</span>
+<span class="sd">- People being happy with other people in same gondola</span>
+<span class="sd">    + Age composition too seperated is bad</span>
+<span class="sd">    + shift in gender is bad if too much, 50-50 is good or all one gender</span>
+<span class="sd">    + same with age composition</span>
+<span class="sd">    + sleep derived(multiplier with quality) persons get a subtraction and &#39;good sleepers&#39; get bonus (sleep disorder </span>
+<span class="sd">      counts as stronger subtraction)</span>
+<span class="sd">    + higher heart rate and pressure = joy or fear</span>
+<span class="sd">    + composition of persons in regards to bmi : extreme values make others (no exception for group all those as to many</span>
+<span class="sd">      underweight or overweight persons may be awquard as well)</span>
+<span class="sd">- People being happy with neighboring gondolas composition</span>
+<span class="sd">    + same age gets bonus, none gets penalty as potentially group is separated</span>
+<span class="sd">    + gap between happyness index between self and neighbors causes it to produce a mean of only the neighbors</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="age_composition_score">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.age_composition_score">[docs]</a>
+<span class="k">def</span> <span class="nf">age_composition_score</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">id_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to calculate an age score of the group specified in the id list.</span>
+
+<span class="sd">    :param df_elements: Dataframe containing the health data of the persons provided in the id list</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param id_list: list of ids of the persons in this group (gondola)</span>
+<span class="sd">    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]</span>
+<span class="sd">    :return: age score which is in [0, 1]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_subset</span> <span class="o">=</span> <span class="n">df_elements</span><span class="p">[</span><span class="n">df_elements</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">id_list</span><span class="p">)]</span>
+
+    <span class="n">score</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">age</span> <span class="o">=</span> <span class="n">df_subset</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">sorted_age</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">age</span><span class="p">)</span>
+
+    <span class="c1"># check if in 10 year gap</span>
+    <span class="n">gap</span> <span class="o">=</span> <span class="n">sorted_age</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">sorted_age</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="c1"># print(gap)</span>
+    <span class="k">if</span> <span class="n">gap</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">score</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">gap</span> <span class="o">-</span> <span class="mi">10</span>
+        <span class="n">score</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="mi">60</span><span class="p">)</span><span class="o">*</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">score</span></div>
+
+
+
+<div class="viewcode-block" id="gender_composition_score">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.gender_composition_score">[docs]</a>
+<span class="k">def</span> <span class="nf">gender_composition_score</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">id_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to calculate a gender score of the group specified in the id list.</span>
+
+<span class="sd">    :param df_elements: Dataframe containing the health data of the persons provided in the id list</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param id_list: list of ids of the persons in this group (gondola)</span>
+<span class="sd">    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]</span>
+<span class="sd">    :return: score which is in [0, 1]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_elements</span><span class="p">[</span><span class="n">df_elements</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">id_list</span><span class="p">)]</span>
+    <span class="c1"># other genders are considered neutral</span>
+    <span class="n">male</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">df_sub</span><span class="o">.</span><span class="n">gender_male</span><span class="p">)</span>
+    <span class="n">female</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">df_sub</span><span class="o">.</span><span class="n">gender_female</span><span class="p">)</span>
+    <span class="n">gsum</span> <span class="o">=</span> <span class="n">male</span> <span class="o">+</span> <span class="n">female</span>
+
+    <span class="k">return</span> <span class="mi">2</span><span class="o">*</span><span class="nb">min</span><span class="p">(</span><span class="n">male</span><span class="o">/</span><span class="n">gsum</span><span class="p">,</span> <span class="n">female</span><span class="o">/</span><span class="n">gsum</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">male</span> <span class="ow">and</span> <span class="n">female</span><span class="p">)</span> <span class="k">else</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="sleep_composition_score">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.sleep_composition_score">[docs]</a>
+<span class="k">def</span> <span class="nf">sleep_composition_score</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">id_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to calculate a sleep score of the group specified in the id list.</span>
+
+<span class="sd">    :param df_elements: Dataframe containing the health data of the persons provided in the id list</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param id_list: list of ids of the persons in this group (gondola)</span>
+<span class="sd">    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]</span>
+<span class="sd">    :return: score which is in [0, 1]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_elements</span><span class="p">[</span><span class="n">df_elements</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">id_list</span><span class="p">)]</span>
+
+    <span class="n">sleep_d_mean</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">sleep_duration</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+    <span class="n">sleep_q_mean</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">sleep_quality</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="nb">min</span><span class="p">((</span><span class="n">sleep_q_mean</span><span class="o">/</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">sleep_d_mean</span><span class="o">/</span><span class="mf">7.5</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="bmi_composition_score">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.bmi_composition_score">[docs]</a>
+<span class="k">def</span> <span class="nf">bmi_composition_score</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">id_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to calculate a bmi score of the group specified in the id list.</span>
+
+<span class="sd">    :param df_elements: Dataframe containing the health data of the persons provided in the id list</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param id_list: list of ids of the persons in this group (gondola)</span>
+<span class="sd">    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]</span>
+<span class="sd">    :return: score which is in [0, 1]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_elements</span><span class="p">[</span><span class="n">df_elements</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">id_list</span><span class="p">)]</span>
+
+    <span class="n">bmi</span> <span class="o">=</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">bmi</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="n">bmi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">bmi</span><span class="o">&lt;</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="n">bmi</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">bmi</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">df_sub</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">score</span></div>
+
+
+
+<div class="viewcode-block" id="fear_composition_score">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.fear_composition_score">[docs]</a>
+<span class="k">def</span> <span class="nf">fear_composition_score</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">id_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to calculate a fear/heartrate score of the group specified in the id list.</span>
+
+<span class="sd">    :param df_elements: Dataframe containing the health data of the persons provided in the id list</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param id_list: list of ids of the persons in this group (gondola)</span>
+<span class="sd">    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]</span>
+<span class="sd">    :return: score which is in [0, 1]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df_sub</span> <span class="o">=</span> <span class="n">df_elements</span><span class="p">[</span><span class="n">df_elements</span><span class="o">.</span><span class="n">id</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">id_list</span><span class="p">)]</span>
+
+    <span class="n">blood_value</span> <span class="o">=</span> <span class="p">(</span><span class="n">df_sub</span><span class="o">.</span><span class="n">blood_pressure1</span> <span class="o">*</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">blood_pressure2</span> <span class="o">*</span> <span class="n">df_sub</span><span class="o">.</span><span class="n">heart_rate</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="c1"># print(blood_value)</span>
+    <span class="n">border</span> <span class="o">=</span> <span class="mi">900000</span>
+
+    <span class="k">if</span> <span class="n">blood_value</span> <span class="o">&gt;=</span> <span class="n">border</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span></div>
+
+
+
+<div class="viewcode-block" id="build_gondola_score">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.build_gondola_score">[docs]</a>
+<span class="k">def</span> <span class="nf">build_gondola_score</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">id_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">float</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function to calculate a score of the group specified in the id list. This score is a weighted sum of the age,</span>
+<span class="sd">    gender, sleep, bmi and fear scores introduced beforehand.</span>
+
+<span class="sd">    :param df_elements: Dataframe containing the health data of the persons provided in the id list</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param id_list: list of ids of the persons in this group (gondola)</span>
+<span class="sd">    :type id_list: typing.Union[typing.Iterable[int], typing.Iterable[float]]</span>
+<span class="sd">    :return: score which is in [0, 10]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">age_score</span> <span class="o">=</span> <span class="n">age_composition_score</span><span class="p">(</span><span class="n">df_elements</span><span class="p">,</span> <span class="n">id_list</span><span class="p">)</span>
+    <span class="n">gender_score</span> <span class="o">=</span> <span class="n">gender_composition_score</span><span class="p">(</span><span class="n">df_elements</span><span class="p">,</span> <span class="n">id_list</span><span class="p">)</span>
+    <span class="n">sleep_score</span> <span class="o">=</span> <span class="n">sleep_composition_score</span><span class="p">(</span><span class="n">df_elements</span><span class="p">,</span> <span class="n">id_list</span><span class="p">)</span>
+    <span class="n">bmi_score</span> <span class="o">=</span> <span class="n">bmi_composition_score</span><span class="p">(</span><span class="n">df_elements</span><span class="p">,</span> <span class="n">id_list</span><span class="p">)</span>
+    <span class="n">fear_score</span> <span class="o">=</span> <span class="n">fear_composition_score</span><span class="p">(</span><span class="n">df_elements</span><span class="p">,</span> <span class="n">id_list</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="mf">2.5</span><span class="o">*</span><span class="n">age_score</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">gender_score</span> <span class="o">+</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">sleep_score</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">bmi_score</span> <span class="o">+</span> <span class="mi">3</span><span class="o">*</span><span class="n">fear_score</span></div>
+
+
+
+<div class="viewcode-block" id="build_wheel_happyness">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.build_wheel_happyness">[docs]</a>
+<span class="k">def</span> <span class="nf">build_wheel_happyness</span><span class="p">(</span>
+        <span class="n">df_elements</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">wheel</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that calculates the overall happyness of the ferris wheel which is to become a label to be predicted. Uses</span>
+<span class="sd">    gondola wise scoring using function ``build_gondola_score(...)`` of own gondola, neighboring gondolas and age</span>
+<span class="sd">    statistics of the neighboring gondolas to derive a new gondola happyness score which is summed up.</span>
+
+<span class="sd">    :param df_elements: dataframe containing the person health data</span>
+<span class="sd">    :type df_elements: pd.DataFrame</span>
+<span class="sd">    :param wheel: numpy array containing the ids of the persons in the gondolas. Has shape</span>
+<span class="sd">        ``(num_gondolas, num_persons_per_gondola)``</span>
+<span class="sd">    :return: score of the ferris wheel, [0, num_gondolas * 10]</span>
+<span class="sd">    :rtype: float</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">individual_scores</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">build_gondola_score</span><span class="p">(</span><span class="n">df_elements</span><span class="p">,</span> <span class="n">wheel</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="n">neighbor_scores</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">individual_scores</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">)]</span> <span class="o">+</span> <span class="n">individual_scores</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">)])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="n">age_mean</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">df_elements</span><span class="p">[</span><span class="n">df_elements</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">wheel</span><span class="p">[</span><span class="n">i</span><span class="p">])]</span><span class="o">.</span><span class="n">age</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">))</span>
+    <span class="p">]</span>
+    <span class="n">age_group_bonus</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">abs</span><span class="p">(</span><span class="n">age_mean</span><span class="p">[(</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">)]</span> <span class="o">-</span> <span class="n">age_mean</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">or</span> <span class="nb">abs</span><span class="p">(</span><span class="n">age_mean</span><span class="p">[(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">)]</span> <span class="o">-</span> <span class="n">age_mean</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">5</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">wheel</span><span class="p">))</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="nb">sum</span><span class="p">([</span>
+        <span class="nb">min</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">own</span> <span class="o">+</span> <span class="n">foreign</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">bonus</span><span class="p">,</span>
+            <span class="mi">10</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">own</span><span class="p">,</span> <span class="n">foreign</span><span class="p">,</span> <span class="n">bonus</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">individual_scores</span><span class="p">,</span> <span class="n">neighbor_scores</span><span class="p">,</span> <span class="n">age_group_bonus</span><span class="p">)</span>
+    <span class="p">])</span></div>
+
+
+
+<span class="k">def</span> <span class="nf">_reformat</span><span class="p">(</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reformat a torch tensor to 2 dimensions from a 1d tensor if it does not already have this shape.</span>
+
+<span class="sd">    :param result: result of a function to be transformed</span>
+<span class="sd">    :type result: torch.Tensor</span>
+<span class="sd">    :return: 2-d tensor</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+
+<div class="viewcode-block" id="build_generative_label">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.build_generative_label">[docs]</a>
+<span class="k">def</span> <span class="nf">build_generative_label</span><span class="p">(</span>
+        <span class="n">tree</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span>
+        <span class="n">df_health</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">map_element</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Function that builds a label for a permutation tree based structure.</span>
+
+<span class="sd">    :param tree: Tree to use for building the label</span>
+<span class="sd">    :type tree: TreeNode</span>
+<span class="sd">    :param df_health: dataset containing the data for each index in the map_element iterable parameter.</span>
+<span class="sd">    :type df_health: pd.DataFrame</span>
+<span class="sd">    :param map_element: elements containing ids of elements in the df_health data storage</span>
+<span class="sd">    :type map_element: typing.Iterable[int]</span>
+<span class="sd">    :return: tensor containing the label of the input data. Note that this output is still in the dimension of the the</span>
+<span class="sd">        data in df_health (1, data_dim)</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Parameters</span>
+    <span class="n">k</span> <span class="o">=</span> <span class="mi">3</span>  <span class="c1"># equal to one left one right (or next 2 right/left elements)</span>
+    <span class="c1"># generate embedding parameters</span>
+    <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+        <span class="n">embedding_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">k</span><span class="o">*</span><span class="p">(</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">embedding_params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">])</span>
+
+    <span class="c1"># assert that index is id column</span>
+    <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">df_health</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df_health</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df_health</span>
+
+    <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_reformat</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">map_element</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(</span><span class="nb">float</span><span class="p">))</span>
+
+    <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+        <span class="n">sub_elem</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">sub_elem</span> <span class="o">+=</span> <span class="p">[</span><span class="n">build_generative_label</span><span class="p">(</span>
+                <span class="n">tree</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
+                <span class="n">df_health</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                <span class="n">map_element</span><span class="o">=</span><span class="n">map_element</span><span class="p">[</span><span class="n">offset</span><span class="p">:</span><span class="n">offset</span><span class="o">+</span><span class="n">child</span><span class="o">.</span><span class="n">num_elem</span><span class="p">]</span>
+            <span class="p">)]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="n">child</span><span class="o">.</span><span class="n">num_elem</span>
+
+        <span class="n">sub_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">sub_elem</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">_reformat</span><span class="p">(</span><span class="n">sub_elem</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># get subelements</span>
+        <span class="n">sub_elem</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
+            <span class="n">sub_elem</span> <span class="o">+=</span> <span class="p">[</span><span class="n">build_generative_label</span><span class="p">(</span>
+                <span class="n">tree</span><span class="o">=</span><span class="n">child</span><span class="p">,</span>
+                <span class="n">df_health</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
+                <span class="n">map_element</span><span class="o">=</span><span class="n">map_element</span><span class="p">[</span><span class="n">offset</span><span class="p">:</span><span class="n">offset</span><span class="o">+</span><span class="n">child</span><span class="o">.</span><span class="n">num_elem</span><span class="p">]</span>
+            <span class="p">)]</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="n">child</span><span class="o">.</span><span class="n">num_elem</span>
+
+        <span class="n">sub_elem</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">sub_elem</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span> <span class="ow">or</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;Q&quot;</span><span class="p">:</span>  <span class="c1"># ignore difference between s and q and treat it as q</span>
+            <span class="c1"># shift stack</span>
+            <span class="n">shifted_emb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">sub_elem</span><span class="p">[</span><span class="mi">2</span><span class="p">:],</span>
+                    <span class="n">sub_elem</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">sub_elem</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span>
+            <span class="c1"># shift stack</span>
+            <span class="c1"># replace with previous times 0.1 and future times 0.1 and 0.8 itself</span>
+            <span class="n">shifted_emb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+                <span class="p">[</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sub_elem</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="n">sub_elem</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)]),</span>
+                    <span class="n">sub_elem</span><span class="p">,</span>
+                    <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">sub_elem</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">sub_elem</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+
+        <span class="c1"># apply embedding parameters and sum up</span>
+        <span class="c1"># print(shifted_emb.shape, embedding_params.shape)</span>
+        <span class="n">intermediate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;abc,a-&gt;bc&quot;</span><span class="p">,</span> <span class="n">shifted_emb</span><span class="p">,</span> <span class="n">embedding_params</span><span class="p">)</span>
+
+        <span class="c1"># simulate final linear layer</span>
+        <span class="n">final_embedding</span> <span class="o">=</span> <span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">intermediate</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">intermediate</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">intermediate</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">_reformat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">einsum</span><span class="p">(</span><span class="s2">&quot;ab,b-&gt;b&quot;</span><span class="p">,</span> <span class="n">intermediate</span><span class="p">,</span> <span class="n">final_embedding</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="build_label_tree">
+<a class="viewcode-back" href="../../../etnn.data.html#etnn.data.ferris_score_helpers.build_label_tree">[docs]</a>
+<span class="k">def</span> <span class="nf">build_label_tree</span><span class="p">(</span>
+        <span class="n">df_health</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">num_gondolas</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">num_part_pg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">map_element</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">final_label_factor</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1000</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build label for ferris wheel dataset. Uses build_generative_label function.</span>
+
+<span class="sd">    :param df_health:</span>
+<span class="sd">    :param num_gondolas:</span>
+<span class="sd">    :param num_part_pg:</span>
+<span class="sd">    :param map_element:</span>
+<span class="sd">    :param final_label_factor:</span>
+<span class="sd">    :param mode:</span>
+<span class="sd">    :return: label generated by function</span>
+<span class="sd">    :rtype: torch.Tensor</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># build the tree structure</span>
+    <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="n">num_part_pg</span><span class="p">)])</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_gondolas</span><span class="p">)</span>
+        <span class="p">])</span>
+    <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="p">[</span>
+            <span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="p">[</span><span class="n">TreeNode</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">,</span> <span class="n">num_part_pg</span><span class="p">)])</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_gondolas</span><span class="p">)</span>
+        <span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;not valid option chosen&quot;</span><span class="p">)</span>
+
+    <span class="c1"># calculate the label (intermediate)</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">build_generative_label</span><span class="p">(</span>
+        <span class="n">tree</span><span class="o">=</span><span class="n">tree</span><span class="p">,</span>
+        <span class="n">df_health</span><span class="o">=</span><span class="n">df_health</span><span class="p">,</span>
+        <span class="n">map_element</span><span class="o">=</span><span class="n">map_element</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">label</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">*</span> <span class="n">final_label_factor</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.data &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="etnn.nn" href="etnn.nn.html" />
+    <link rel="prev" title="etnn" href="etnn.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="etnn.html">etnn</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="etnn.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">etnn.data</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.dataset">etnn.data.dataset module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.dataset.SimplePermutation"><code class="docutils literal notranslate"><span class="pre">SimplePermutation</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.dataset_generation">etnn.data.dataset_generation module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.dataset_generation.generate_simple_multiclass_permutation"><code class="docutils literal notranslate"><span class="pre">generate_simple_multiclass_permutation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.ferris_score_helpers">etnn.data.ferris_score_helpers</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.age_composition_score"><code class="docutils literal notranslate"><span class="pre">age_composition_score()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.bmi_composition_score"><code class="docutils literal notranslate"><span class="pre">bmi_composition_score()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.build_generative_label"><code class="docutils literal notranslate"><span class="pre">build_generative_label()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.build_gondola_score"><code class="docutils literal notranslate"><span class="pre">build_gondola_score()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.build_label_tree"><code class="docutils literal notranslate"><span class="pre">build_label_tree()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.build_wheel_happyness"><code class="docutils literal notranslate"><span class="pre">build_wheel_happyness()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.fear_composition_score"><code class="docutils literal notranslate"><span class="pre">fear_composition_score()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.gender_composition_score"><code class="docutils literal notranslate"><span class="pre">gender_composition_score()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_score_helpers.sleep_composition_score"><code class="docutils literal notranslate"><span class="pre">sleep_composition_score()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.ferris_wheel">etnn.data.ferris_wheel</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset"><code class="docutils literal notranslate"><span class="pre">FerrisWheelDataset</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset.post_normalize"><code class="docutils literal notranslate"><span class="pre">FerrisWheelDataset.post_normalize()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset.to_classification"><code class="docutils literal notranslate"><span class="pre">FerrisWheelDataset.to_classification()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_wheel.load_modified_ferris_wheel_dataset"><code class="docutils literal notranslate"><span class="pre">load_modified_ferris_wheel_dataset()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset"><code class="docutils literal notranslate"><span class="pre">load_pure_ferris_wheel_dataset()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset_single_node"><code class="docutils literal notranslate"><span class="pre">load_pure_ferris_wheel_dataset_single_node()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.ferris_wheel.prepare_pure_test_dataset"><code class="docutils literal notranslate"><span class="pre">prepare_pure_test_dataset()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.permutation">etnn.data.permutation module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.create_reverse_index"><code class="docutils literal notranslate"><span class="pre">create_reverse_index()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.fuze_permutations"><code class="docutils literal notranslate"><span class="pre">fuze_permutations()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.generate_all_permutations"><code class="docutils literal notranslate"><span class="pre">generate_all_permutations()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.permutation_c"><code class="docutils literal notranslate"><span class="pre">permutation_c()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.permutation_e"><code class="docutils literal notranslate"><span class="pre">permutation_e()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.permutation_p"><code class="docutils literal notranslate"><span class="pre">permutation_p()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.permutation_q"><code class="docutils literal notranslate"><span class="pre">permutation_q()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.permutation.permutation_s"><code class="docutils literal notranslate"><span class="pre">permutation_s()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.prepare_ferris_wheel">etnn.data.prepare_ferris_wheel module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.add_invalid_permutations"><code class="docutils literal notranslate"><span class="pre">add_invalid_permutations()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.add_valid_permutations"><code class="docutils literal notranslate"><span class="pre">add_valid_permutations()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.generate_ferris_dataset"><code class="docutils literal notranslate"><span class="pre">generate_ferris_dataset()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.generate_ferris_dataset_single_node"><code class="docutils literal notranslate"><span class="pre">generate_ferris_dataset_single_node()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.normalize_dataset"><code class="docutils literal notranslate"><span class="pre">normalize_dataset()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.prepare_1_ferris"><code class="docutils literal notranslate"><span class="pre">prepare_1_ferris()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.prepare_ferris_wheel.sample_new_permutations"><code class="docutils literal notranslate"><span class="pre">sample_new_permutations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data.tree_structure">etnn.data.tree_structure module</a><ul>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode"><code class="docutils literal notranslate"><span class="pre">TreeNode</span></code></a><ul>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode.calc_num_elem"><code class="docutils literal notranslate"><span class="pre">TreeNode.calc_num_elem()</span></code></a></li>
+<li class="toctree-l7"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode.to_json"><code class="docutils literal notranslate"><span class="pre">TreeNode.to_json()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.tree_structure.load_tree"><code class="docutils literal notranslate"><span class="pre">load_tree()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.tree_structure.load_tree_from_json"><code class="docutils literal notranslate"><span class="pre">load_tree_from_json()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.tree_structure.save_tree"><code class="docutils literal notranslate"><span class="pre">save_tree()</span></code></a></li>
+<li class="toctree-l6"><a class="reference internal" href="#etnn.data.tree_structure.unroll_node"><code class="docutils literal notranslate"><span class="pre">unroll_node()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l5"><a class="reference internal" href="#module-etnn.data">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.nn.html">etnn.nn</a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.routines.html">etnn.routines</a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.tests.html">etnn.tests</a></li>
+<li class="toctree-l4"><a class="reference internal" href="etnn.tools.html">etnn.tools</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="etnn.html#module-etnn">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Modules</a></li>
+          <li class="breadcrumb-item"><a href="etnn.html">etnn</a></li>
+      <li class="breadcrumb-item active">etnn.data</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/etnn.data.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="etnn-data">
+<h1>etnn.data<a class="headerlink" href="#etnn-data" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-etnn.data.dataset">
+<span id="etnn-data-dataset-module"></span><h2>etnn.data.dataset module<a class="headerlink" href="#module-etnn.data.dataset" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="etnn.data.dataset.SimplePermutation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">etnn.data.dataset.</span></span><span class="sig-name descname"><span class="pre">SimplePermutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permutation_tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/dataset.html#SimplePermutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.dataset.SimplePermutation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data.dataset_generation">
+<span id="etnn-data-dataset-generation-module"></span><h2>etnn.data.dataset_generation module<a class="headerlink" href="#module-etnn.data.dataset_generation" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.dataset_generation.generate_simple_multiclass_permutation">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.dataset_generation.</span></span><span class="sig-name descname"><span class="pre">generate_simple_multiclass_permutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">permutation_tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">integer_generation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/dataset_generation.html#generate_simple_multiclass_permutation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.dataset_generation.generate_simple_multiclass_permutation" title="Link to this definition"></a></dt>
+<dd><p>Function that allows for the generation of a very simple dataset that is more symbolic than actually usable. Uses
+simple integers ranging from 0 to #elements spanned by tree and adds labels to them according to their permutation
+group. Assigns one permutation tree per label.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>permutation_tree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – Tree containing the struction of a permutation tree which in itself determines which
+elements to consider equal in a set input setting.</p></li>
+<li><p><strong>integer_generation</strong> (<em>bool</em>) – Determines if integer are to be generated by the function. Currently only functionality
+for the case <code class="docutils literal notranslate"><span class="pre">True</span></code> is implemented. Default: <code class="docutils literal notranslate"><span class="pre">True</span></code>.</p></li>
+<li><p><strong>num_classes</strong> (<em>int</em>) – Defines the number of classes (and hence also the number of permutation trees) to be contained
+in the returned data. If not enough permutation trees are available it may happen that classes are empty.
+Default: <code class="docutils literal notranslate"><span class="pre">2</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tuple of data and corresponding classes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[np.ndarray, np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data.ferris_score_helpers">
+<span id="etnn-data-ferris-score-helpers"></span><h2>etnn.data.ferris_score_helpers<a class="headerlink" href="#module-etnn.data.ferris_score_helpers" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.age_composition_score">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">age_composition_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#age_composition_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.age_composition_score" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate an age score of the group specified in the id list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – Dataframe containing the health data of the persons provided in the id list</p></li>
+<li><p><strong>id_list</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – list of ids of the persons in this group (gondola)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>age score which is in [0, 1]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.bmi_composition_score">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">bmi_composition_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#bmi_composition_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.bmi_composition_score" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate a bmi score of the group specified in the id list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – Dataframe containing the health data of the persons provided in the id list</p></li>
+<li><p><strong>id_list</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – list of ids of the persons in this group (gondola)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>score which is in [0, 1]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.build_generative_label">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">build_generative_label</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_health</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#build_generative_label"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.build_generative_label" title="Link to this definition"></a></dt>
+<dd><p>Function that builds a label for a permutation tree based structure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – Tree to use for building the label</p></li>
+<li><p><strong>df_health</strong> (<em>pd.DataFrame</em>) – dataset containing the data for each index in the map_element iterable parameter.</p></li>
+<li><p><strong>map_element</strong> (<em>Iterable</em><em>[</em><em>int</em><em>]</em>) – elements containing ids of elements in the df_health data storage</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>tensor containing the label of the input data. Note that this output is still in the dimension of the the
+data in df_health (1, data_dim)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.build_gondola_score">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">build_gondola_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#build_gondola_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.build_gondola_score" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate a score of the group specified in the id list. This score is a weighted sum of the age,
+gender, sleep, bmi and fear scores introduced beforehand.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – Dataframe containing the health data of the persons provided in the id list</p></li>
+<li><p><strong>id_list</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – list of ids of the persons in this group (gondola)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>score which is in [0, 10]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.build_label_tree">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">build_label_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_health</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_part_pg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">map_element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_label_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#build_label_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.build_label_tree" title="Link to this definition"></a></dt>
+<dd><p>Build label for ferris wheel dataset. Uses build_generative_label function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_health</strong> – </p></li>
+<li><p><strong>num_gondolas</strong> – </p></li>
+<li><p><strong>num_part_pg</strong> – </p></li>
+<li><p><strong>map_element</strong> – </p></li>
+<li><p><strong>final_label_factor</strong> – </p></li>
+<li><p><strong>mode</strong> – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>label generated by function</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>torch.Tensor</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.build_wheel_happyness">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">build_wheel_happyness</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wheel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#build_wheel_happyness"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.build_wheel_happyness" title="Link to this definition"></a></dt>
+<dd><p>Function that calculates the overall happyness of the ferris wheel which is to become a label to be predicted. Uses
+gondola wise scoring using function <code class="docutils literal notranslate"><span class="pre">build_gondola_score(...)</span></code> of own gondola, neighboring gondolas and age
+statistics of the neighboring gondolas to derive a new gondola happyness score which is summed up.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – dataframe containing the person health data</p></li>
+<li><p><strong>wheel</strong> – numpy array containing the ids of the persons in the gondolas. Has shape
+<code class="docutils literal notranslate"><span class="pre">(num_gondolas,</span> <span class="pre">num_persons_per_gondola)</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>score of the ferris wheel, [0, num_gondolas * 10]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.fear_composition_score">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">fear_composition_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#fear_composition_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.fear_composition_score" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate a fear/heartrate score of the group specified in the id list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – Dataframe containing the health data of the persons provided in the id list</p></li>
+<li><p><strong>id_list</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – list of ids of the persons in this group (gondola)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>score which is in [0, 1]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.gender_composition_score">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">gender_composition_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#gender_composition_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.gender_composition_score" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate a gender score of the group specified in the id list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – Dataframe containing the health data of the persons provided in the id list</p></li>
+<li><p><strong>id_list</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – list of ids of the persons in this group (gondola)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>score which is in [0, 1]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_score_helpers.sleep_composition_score">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_score_helpers.</span></span><span class="sig-name descname"><span class="pre">sleep_composition_score</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_score_helpers.html#sleep_composition_score"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_score_helpers.sleep_composition_score" title="Link to this definition"></a></dt>
+<dd><p>Function to calculate a sleep score of the group specified in the id list.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_elements</strong> (<em>pd.DataFrame</em>) – Dataframe containing the health data of the persons provided in the id list</p></li>
+<li><p><strong>id_list</strong> (<em>Union</em><em>[</em><em>Iterable</em><em>[</em><em>int</em><em>]</em><em>, </em><em>Iterable</em><em>[</em><em>float</em><em>]</em><em>]</em>) – list of ids of the persons in this group (gondola)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>score which is in [0, 1]</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>float</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data.ferris_wheel">
+<span id="etnn-data-ferris-wheel"></span><h2>etnn.data.ferris_wheel<a class="headerlink" href="#module-etnn.data.ferris_wheel" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.FerrisWheelDataset">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">FerrisWheelDataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_health</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_index</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#FerrisWheelDataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Dataset</span></code></p>
+<p>Pytorch dataset of the ferris wheel dataset concept. Each element in the dataset consists of data x and a label y.</p>
+<p>y in this case is the happyness score calculated by the function <code class="docutils literal notranslate"><span class="pre">build_wheel_happyness(...)</span></code>.</p>
+<p>x consists of gondolas which contains a certain number of people, which is specified by the input dataset. The logic
+how many gondolas and persons per gondolas are is not explicitly contained in this object but contained in the
+element <code class="docutils literal notranslate"><span class="pre">df_index</span></code> through column names. The tensor provided by this function however will not be in any
+specific order or structure that indicates which data is assigned to which gondola.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.FerrisWheelDataset.post_normalize">
+<span class="sig-name descname"><span class="pre">post_normalize</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#FerrisWheelDataset.post_normalize"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.FerrisWheelDataset.post_normalize" title="Link to this definition"></a></dt>
+<dd><p>Function that normalizes the body of the dataset, namely the stored person health data. Does not affect labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.FerrisWheelDataset.to_classification">
+<span class="sig-name descname"><span class="pre">to_classification</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_classes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#FerrisWheelDataset.to_classification"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.FerrisWheelDataset.to_classification" title="Link to this definition"></a></dt>
+<dd><p>Converts the regression type dataset into a classification type dataset by dividing the continuous labels
+through their maximum amount and and multiplying them with the desired number of classes - then round.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>num_classes</strong> (<em>int</em>) – number of classes for the new classification dataset</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Nothing</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.load_modified_ferris_wheel_dataset">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">load_modified_ferris_wheel_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_part_pg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_generate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_valid_to_add</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_invalid_to_add</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_intermediate_output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_pregen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4651431</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_label_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="etnn.data.ferris_wheel.FerrisWheelDataset"><span class="pre">FerrisWheelDataset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#load_modified_ferris_wheel_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.load_modified_ferris_wheel_dataset" title="Link to this definition"></a></dt>
+<dd><p>Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
+intermediate csv files). Loads a dataset that not exactly follows the allowed permutations combined with the
+exact calculated happyness scores. It contains these items in the beginning and then adds permutated pure
+items to increase the potential benefit of equivariant nn’s but afterwards adds label perturbed data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – Number of gondolas the ferris wheel should have, default: <code class="docutils literal notranslate"><span class="pre">15</span></code></p></li>
+<li><p><strong>num_part_pg</strong> (<em>int</em>) – Number of persons in each gondola, default: <code class="docutils literal notranslate"><span class="pre">5</span></code>. (by default no empty passengers/seats will be
+generated)</p></li>
+<li><p><strong>num_to_generate</strong> (<em>int</em>) – Number of dataset entries to generate, default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p><strong>num_valid_to_add</strong> (<em>int</em>) – Number of pure items to add which (permuted) already exist within the original dataset,
+default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p><strong>num_invalid_to_add</strong> (<em>int</em>) – Number of perturbed items to add to the previously pure data to challenge the neural
+networks capability to react to falsified data, default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p><strong>df_name_input</strong> (<em>str</em>) – Name of the dataset to use as the input for the persons health data, default:
+<code class="docutils literal notranslate"><span class="pre">Sleep_health_and_lifestyle_dataset.csv</span></code></p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – Specifies the path to the dataset folder, default <code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_PATH</span></code></p></li>
+<li><p><strong>df_intermediate_output_name</strong> (<em>str</em>) – Name of the intermediate datasets output, default:
+<code class="docutils literal notranslate"><span class="pre">'health_dataset_preprocessed-1.csv'</span></code>. Intermediate dataset denotes the preprocessed health dataset.</p></li>
+<li><p><strong>try_pregen</strong> (<em>bool</em>) – Controls whether pre-generated shall be loaded or new data should be generated hence overwriting
+and updating previously generated data with the same parameters, default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – Seed to use for random generation</p></li>
+<li><p><strong>label_type</strong> (<em>str</em>) – label to be generated. Viable options: <code class="docutils literal notranslate"><span class="pre">'default'</span></code> producing the most complex label with logic
+inspired by a real ferris wheel, <code class="docutils literal notranslate"><span class="pre">'tree'</span></code> and <code class="docutils literal notranslate"><span class="pre">'tree_advanced'</span></code> for a tree based generation of label with
+minimal logic behind this label. Difference in first and second tree option is that the first option is a
+downgraded version only using S and P type labels and not C type labels instead of C as it would have been
+intended for a ferris wheel dataset, default: <code class="docutils literal notranslate"><span class="pre">'default'</span></code>.</p></li>
+<li><p><strong>final_label_factor</strong> (<em>float</em>) – Factor by which the label is scaled. Does not apply for <code class="docutils literal notranslate"><span class="pre">'default'</span></code> option in
+label_type parameter. Default: <code class="docutils literal notranslate"><span class="pre">1/1000</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>generated dataset and index dataframe for data loading purposes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="etnn.data.ferris_wheel.FerrisWheelDataset">FerrisWheelDataset</a>, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">load_pure_ferris_wheel_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_part_pg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_generate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_intermediate_output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_pregen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4651431</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_label_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="etnn.data.ferris_wheel.FerrisWheelDataset"><span class="pre">FerrisWheelDataset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#load_pure_ferris_wheel_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset" title="Link to this definition"></a></dt>
+<dd><p>Function that loads dataset from pre-generated csv files or generates data(and dataset) (and saves these
+intermediate csv files). Loads a dataset that exactly follows the allowed permutations combined with the exact
+calculated happyness scores(or other scores).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – Number of gondolas the ferris wheel should have, default: <code class="docutils literal notranslate"><span class="pre">15</span></code></p></li>
+<li><p><strong>num_part_pg</strong> (<em>int</em>) – Number of persons in each gondola, default: <code class="docutils literal notranslate"><span class="pre">5</span></code>. (by default no empty passengers/seats will be
+generated)</p></li>
+<li><p><strong>num_to_generate</strong> (<em>int</em>) – Number of dataset entries to generate, default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p><strong>df_name_input</strong> (<em>str</em>) – Name of the dataset to use as the input for the persons health data, default:
+<code class="docutils literal notranslate"><span class="pre">Sleep_health_and_lifestyle_dataset.csv</span></code></p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – Specifies the path to the dataset folder, default <code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_PATH</span></code></p></li>
+<li><p><strong>df_intermediate_output_name</strong> (<em>str</em>) – Name of the intermediate datasets output, default:
+<code class="docutils literal notranslate"><span class="pre">'health_dataset_preprocessed-1.csv'</span></code>. Intermediate dataset denotes the preprocessed health dataset.</p></li>
+<li><p><strong>try_pregen</strong> (<em>bool</em>) – Controls whether pre-generated shall be loaded or new data should be generated hence overwriting
+and updating previously generated data with the same parameters, default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – Seed to use for random generation</p></li>
+<li><p><strong>label_type</strong> (<em>str</em>) – label to be generated. Viable options: <code class="docutils literal notranslate"><span class="pre">'default'</span></code> producing the most complex label with logic
+inspired by a real ferris wheel, <code class="docutils literal notranslate"><span class="pre">'tree'</span></code> and <code class="docutils literal notranslate"><span class="pre">'tree_advanced'</span></code> for a tree based generation of label with
+minimal logic behind this label. Difference in first and second tree option is that the first option is a
+downgraded version only using S and P type labels and not C type labels instead of C as it would have been
+intended for a ferris wheel dataset, default: <code class="docutils literal notranslate"><span class="pre">'default'</span></code>.</p></li>
+<li><p><strong>final_label_factor</strong> (<em>float</em>) – Factor by which the label is scaled. Does not apply for <code class="docutils literal notranslate"><span class="pre">'default'</span></code> option in
+label_type parameter. Default: <code class="docutils literal notranslate"><span class="pre">1/1000</span></code></p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – Whether or not the data is normalized with a min-max scaler, default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>generated dataset and index dataframe for data loading purposes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="etnn.data.ferris_wheel.FerrisWheelDataset">FerrisWheelDataset</a>, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset_single_node">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">load_pure_ferris_wheel_dataset_single_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_elem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_generate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_label_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4651431</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_intermediate_output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dataset</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#load_pure_ferris_wheel_dataset_single_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.load_pure_ferris_wheel_dataset_single_node" title="Link to this definition"></a></dt>
+<dd><p>Function that creates a dataset and data fame for generating data generated with the logic of a permutation tree
+with a singular node as its root with all elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_type</strong> (<em>str</em>) – Type of the label of the singular permutation tree in its defining permutation tree. Determines
+how the label is generated.</p></li>
+<li><p><strong>num_elem</strong> (<em>int</em>) – Number of elements to be grouped belonging to the singular permutation tree node.</p></li>
+<li><p><strong>num_to_generate</strong> (<em>int</em>) – number of elements to generate for the dataset.</p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – path to the dataset folder</p></li>
+<li><p><strong>final_label_factor</strong> (<em>float</em>) – final label to be applied to the original label, default: <code class="docutils literal notranslate"><span class="pre">1/1000</span></code>.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – bool controlling whether the input data with person health data should be normalized or not.</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – seed to make experiments reproducible, default: <code class="docutils literal notranslate"><span class="pre">4651431</span></code>.</p></li>
+<li><p><strong>df_name_input</strong> (<em>str</em>) – name of the dataframe to load, default: <code class="docutils literal notranslate"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></code>.</p></li>
+<li><p><strong>df_intermediate_output_name</strong> (<em>str</em>) – name of the intermediate (preprocessed) data to produce and store or load.
+Default: <code class="docutils literal notranslate"><span class="pre">'health_dataset_preprocessed-1.csv'</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataset and data frame containing structural information</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[torch.utils.data.Dataset, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.ferris_wheel.prepare_pure_test_dataset">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">prepare_pure_test_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_indices</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_generate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_intermediate_output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_pregen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4651431</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="etnn.data.ferris_wheel.FerrisWheelDataset"><span class="pre">FerrisWheelDataset</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/ferris_wheel.html#prepare_pure_test_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.ferris_wheel.prepare_pure_test_dataset" title="Link to this definition"></a></dt>
+<dd><p>Function that creates ‘pure’ dataset based on training set. Hence has already been learned in the ETNN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_index</strong> (<em>pd.DataFrame</em>) – Dataframe that describes the ferris wheel guests with an id</p></li>
+<li><p><strong>train_indices</strong> (<em>Iterable</em><em>[</em><em>int</em><em>]</em>) – Indices of the split dataset or sub-dataset corresponding to the training dataset</p></li>
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – Number of gondolas the ferris wheel should have, default: <code class="docutils literal notranslate"><span class="pre">15</span></code></p></li>
+<li><p><strong>num_to_generate</strong> (<em>int</em>) – Number of dataset entries to generate, default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p><strong>df_name_input</strong> (<em>str</em>) – Name of the dataset to use as the input for the persons health data, default:
+<code class="docutils literal notranslate"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></code></p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – Specifies the path to the dataset folder, default <code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_PATH</span></code></p></li>
+<li><p><strong>df_intermediate_output_name</strong> (<em>str</em>) – Name of the intermediate datasets output, default:
+<code class="docutils literal notranslate"><span class="pre">'health_dataset_preprocessed-1.csv'</span></code>. Intermediate dataset denotes the preprocessed health dataset.</p></li>
+<li><p><strong>try_pregen</strong> (<em>bool</em>) – Controls whether pre-generated shall be loaded or new data should be generated hence overwriting
+and updating previously generated data with the same parameters, default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – Seed to use for random generation</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>generated dataset and index dataframe for data loading purposes</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[<a class="reference internal" href="#etnn.data.ferris_wheel.FerrisWheelDataset" title="etnn.data.ferris_wheel.FerrisWheelDataset">FerrisWheelDataset</a>, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data.permutation">
+<span id="etnn-data-permutation-module"></span><h2>etnn.data.permutation module<a class="headerlink" href="#module-etnn.data.permutation" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.create_reverse_index">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">create_reverse_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">invert</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/etnn/data/permutation.html#create_reverse_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.create_reverse_index" title="Link to this definition"></a></dt>
+<dd><p>Create an reverse element index based of the tree. Can be inverted.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subtree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – Tree to use for the group definitions</p></li>
+<li><p><strong>invert</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to invert the tree permutation group order or not, default false</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>index to reorder elements</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.fuze_permutations">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">fuze_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">perms</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/etnn/data/permutation.html#fuze_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.fuze_permutations" title="Link to this definition"></a></dt>
+<dd><p>Function that fuzes permutations of nodes with other permutations into permutations of the parent node.
+Example: [[[a,b,c]],[[d,e],[f,g]]] becomes [[a,b,c,d,e],[a,b,c,f,g]]</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>perms</strong> (<em>Union</em><em>[</em><em>np.ndarray</em><em>, </em><em>List</em><em>[</em><em>np.ndarray</em><em>]</em><em>]</em>) – List of lists containing permutations from children permutations.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Fuzed permutations.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.generate_all_permutations">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">generate_all_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">elements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="_modules/etnn/data/permutation.html#generate_all_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.generate_all_permutations" title="Link to this definition"></a></dt>
+<dd><p>Generate the permutation for a permutation tree.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to use for permutation generation</p></li>
+<li><p><strong>elements</strong> (<em>np.ndarray</em>) – set of elements to permute</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>permutations in list or array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[np.ndarray], np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.permutation_c">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">permutation_c</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/etnn/data/permutation.html#permutation_c"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.permutation_c" title="Link to this definition"></a></dt>
+<dd><p>Generate the permutation for a C-type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subtree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to use for permutation generation</p></li>
+<li><p><strong>element_subset</strong> (<em>np.ndarray</em>) – set of elements to permute</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>permutations in list or array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[np.ndarray], np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.permutation_e">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">permutation_e</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/etnn/data/permutation.html#permutation_e"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.permutation_e" title="Link to this definition"></a></dt>
+<dd><p>Generate the permutation for an E-type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subtree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to use for permutation generation</p></li>
+<li><p><strong>element_subset</strong> (<em>np.ndarray</em>) – set of elements to permute</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>permutations in list or array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[np.ndarray], np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.permutation_p">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">permutation_p</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/permutation.html#permutation_p"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.permutation_p" title="Link to this definition"></a></dt>
+<dd><p>Generate the permutation for a P-type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subtree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to use for permutation generation</p></li>
+<li><p><strong>element_subset</strong> (<em>np.ndarray</em>) – set of elements to permute</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>permutations in list or array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[np.ndarray], np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.permutation_q">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">permutation_q</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">ndarray</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="reference internal" href="_modules/etnn/data/permutation.html#permutation_q"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.permutation_q" title="Link to this definition"></a></dt>
+<dd><p>Generate the permutation for a Q-type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>subtree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to use for permutation generation</p></li>
+<li><p><strong>element_subset</strong> (<em>np.ndarray</em>) – set of elements to permute</p></li>
+<li><p><strong>group_order</strong> (<em>np.ndarray</em><em>[</em><em>int</em><em>]</em>) – Order of the children nodes of the node to be applied. Relevant when using this method for
+non-default applications than the Q-permutation order. Array of indexes. Default: <code class="docutils literal notranslate"><span class="pre">None</span></code> (meaning default
+order)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>permutations in list or array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[np.ndarray], np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.permutation.permutation_s">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.permutation.</span></span><span class="sig-name descname"><span class="pre">permutation_s</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subtree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_subset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverted</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">group_order</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/permutation.html#permutation_s"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.permutation.permutation_s" title="Link to this definition"></a></dt>
+<dd><p>Generate the permutation for a S-type node.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>group_order</strong> (<em>np.ndarray</em><em>[</em><em>int</em><em>]</em><em>, </em><em>optional</em>) – custom group order to traverse, default None</p></li>
+<li><p><strong>subtree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to use for permutation generation</p></li>
+<li><p><strong>element_subset</strong> (<em>np.ndarray</em>) – set of elements to permute</p></li>
+<li><p><strong>inverted</strong> (<em>bool</em><em>, </em><em>optional</em>) – Tells the function to invert the tree (but not the elements), default false</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>permutations in list or array</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Union</em>[<em>List</em>[np.ndarray], np.ndarray]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data.prepare_ferris_wheel">
+<span id="etnn-data-prepare-ferris-wheel-module"></span><h2>etnn.data.prepare_ferris_wheel module<a class="headerlink" href="#module-etnn.data.prepare_ferris_wheel" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.add_invalid_permutations">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">add_invalid_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_add_nequal_elem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4354353</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#add_invalid_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.add_invalid_permutations" title="Link to this definition"></a></dt>
+<dd><p>Function that permutes some sampled elements in the index dataframe and adds them with the perturbed value to the
+dataframe that is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_add_nequal_elem</strong> (<em>int</em>) – number of equivariant elements to add (with perturbed label)</p></li>
+<li><p><strong>df_index</strong> (<em>pd.DataFrame</em>) – dataframe from which to sample elements and which to enlarge with this operations newly permutated
+elements</p></li>
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – number of gondolas the ferris wheel has</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – seed to use for random permutation operations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the enlarged df_index dataset with falsely labeled elements</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.add_valid_permutations">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">add_valid_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_add_equal_elem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4354353</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#add_valid_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.add_valid_permutations" title="Link to this definition"></a></dt>
+<dd><p>Function that permutes some sampled elements in the index dataframe and adds them with the correct value to the
+dataframe that is returned.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_add_equal_elem</strong> (<em>int</em>) – number of equivariant elements to add</p></li>
+<li><p><strong>df_index</strong> (<em>pd.DataFrame</em>) – dataframe from which to sample elements and which to enlarge with this operations newly permutated
+elements</p></li>
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – number of gondolas the ferris wheel has</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – seed to use for random permutation operations</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>the enlarged df_index dataset with correctly labeled elements</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.generate_ferris_dataset">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">generate_ferris_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_part_pg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_generate</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_intermediate_output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_pregen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4651431</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'default'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_label_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.001</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#generate_ferris_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.generate_ferris_dataset" title="Link to this definition"></a></dt>
+<dd><p>Function that generates the ferris dataset’s core dataset, the health dataset and the index dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – number of gondolas the ferris wheel should have, default: <code class="docutils literal notranslate"><span class="pre">10</span></code></p></li>
+<li><p><strong>num_part_pg</strong> (<em>int</em>) – number of people in each gondola, default: <code class="docutils literal notranslate"><span class="pre">5</span></code></p></li>
+<li><p><strong>num_to_generate</strong> (<em>int</em>) – number of elements the core dataset should have, default: <code class="docutils literal notranslate"><span class="pre">1000</span></code></p></li>
+<li><p><strong>df_name_input</strong> (<em>str</em>) – name of the dataset input, default: <code class="docutils literal notranslate"><span class="pre">Sleep_health_and_lifestyle_dataset.csv</span></code></p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – path to dataset folder, default: <code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_PATH</span></code></p></li>
+<li><p><strong>df_intermediate_output_name</strong> (<em>str</em>) – name of intermediate dataset csv, default: <code class="docutils literal notranslate"><span class="pre">health_dataset_preprocessed-1.csv</span></code></p></li>
+<li><p><strong>try_pregen</strong> (<em>bool</em>) – determines whether it shall be attempted to load the pre-generated csv files, default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – seed to be used for random generation procedures</p></li>
+<li><p><strong>label_type</strong> (<em>str</em>) – label to be generated. Viable options: <code class="docutils literal notranslate"><span class="pre">'default'</span></code> producing the most complex label with logic
+inspired by a real ferris wheel, <code class="docutils literal notranslate"><span class="pre">'tree'</span></code> and <code class="docutils literal notranslate"><span class="pre">'tree_advanced'</span></code> for a tree based generation of label with
+minimal logic behind this label. Difference in first and second tree option is that the first option is a
+downgraded version only using S and P type labels and not C type labels instead of C as it would have been
+intended for a ferris wheel dataset, default: <code class="docutils literal notranslate"><span class="pre">'default'</span></code>.</p></li>
+<li><p><strong>final_label_factor</strong> (<em>float</em>) – Factor by which the label is scaled. Does not apply for <code class="docutils literal notranslate"><span class="pre">'default'</span></code> option in
+label_type parameter. Default: <code class="docutils literal notranslate"><span class="pre">1/1000</span></code></p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – Whether or not the data is normalized with a min-max scaler, default: <code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>health dataset and index dataset</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[pd.DataFrame, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.generate_ferris_dataset_single_node">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">generate_ferris_dataset_single_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_elem</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_to_generate</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">final_label_factor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">normalize</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_intermediate_output_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#generate_ferris_dataset_single_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.generate_ferris_dataset_single_node" title="Link to this definition"></a></dt>
+<dd><p>Function that creates a dataset and data fame for generating data generated with the logic of a permutation tree
+with a singular node as its root with all elements.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>node_type</strong> (<em>str</em>) – Type of the label of the singular permutation tree in its defining permutation tree. Determines
+how the label is generated.</p></li>
+<li><p><strong>num_elem</strong> (<em>int</em>) – Number of elements to be grouped belonging to the singular permutation tree node.</p></li>
+<li><p><strong>num_to_generate</strong> (<em>int</em>) – number of elements to generate for the dataset.</p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – path to the dataset folder</p></li>
+<li><p><strong>final_label_factor</strong> (<em>float</em>) – final label to be applied to the original label, default: <code class="docutils literal notranslate"><span class="pre">1/1000</span></code>.</p></li>
+<li><p><strong>normalize</strong> (<em>bool</em>) – bool controlling whether the input data with person health data should be normalized or not.</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – seed to make experiments reproducible, default: <code class="docutils literal notranslate"><span class="pre">4651431</span></code>.</p></li>
+<li><p><strong>df_name_input</strong> (<em>str</em>) – name of the dataframe to load, default: <code class="docutils literal notranslate"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></code>.</p></li>
+<li><p><strong>df_intermediate_output_name</strong> (<em>str</em>) – name of the intermediate (preprocessed) data to produce and store or load.
+Default: <code class="docutils literal notranslate"><span class="pre">'health_dataset_preprocessed-1.csv'</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataset and data frame containing structural information</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><em>Tuple</em>[torch.utils.data.Dataset, pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.normalize_dataset">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">normalize_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_health</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#normalize_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.normalize_dataset" title="Link to this definition"></a></dt>
+<dd><p>Normalize the provided dataset with sklearn min max scaler. Excludes a possible <code class="docutils literal notranslate"><span class="pre">'id'</span></code> column.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>df_health</strong> (<em>pd.DataFrame</em>) – dataframe to be normalized.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>normalized dataframe</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.prepare_1_ferris">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">prepare_1_ferris</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_name_input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Sleep_health_and_lifestyle_dataset.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dataset_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">df_name_output</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'health_dataset_preprocessed-1.csv'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">try_pregen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#prepare_1_ferris"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.prepare_1_ferris" title="Link to this definition"></a></dt>
+<dd><p>Function that preprocesses the person health dataset once in respect to creating the ferris wheel dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_name_input</strong> (<em>str</em>) – name of the dataframe to process, default: <code class="docutils literal notranslate"><span class="pre">Sleep_health_and_lifestyle_dataset.csv</span></code>.</p></li>
+<li><p><strong>dataset_path</strong> (<em>str</em>) – Path to the dataset folder, default: <code class="docutils literal notranslate"><span class="pre">DEFAULT_DATA_PATH</span></code></p></li>
+<li><p><strong>df_name_output</strong> (<em>str</em>) – name of the file into which to save the preprocessed dataset, default:
+<code class="docutils literal notranslate"><span class="pre">health_dataset_preprocessed-1.csv</span></code>.</p></li>
+<li><p><strong>try_pregen</strong> (<em>bool</em>) – determines whether a pre-existing preprocessed data file should be used or not, default: <code class="docutils literal notranslate"><span class="pre">True</span></code></p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>dataframe containing the preprocessed data</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.prepare_ferris_wheel.sample_new_permutations">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.prepare_ferris_wheel.</span></span><span class="sig-name descname"><span class="pre">sample_new_permutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_elem</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_gondolas</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_check</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">DataFrame</span></span></span><a class="reference internal" href="_modules/etnn/data/prepare_ferris_wheel.html#sample_new_permutations"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.prepare_ferris_wheel.sample_new_permutations" title="Link to this definition"></a></dt>
+<dd><p>Function to create permutations to the ferris wheel dataset and returning it as a pandas DataFrame.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df_index</strong> (<em>pd.DataFrame</em>) – dataframe which elements to sample and randomly permute</p></li>
+<li><p><strong>num_elem</strong> (<em>int</em>) – number of elements to create</p></li>
+<li><p><strong>num_gondolas</strong> (<em>int</em>) – number of gondolas the dataset has. can be also read from the dataframe by the column names
+but not used in this method</p></li>
+<li><p><strong>seed</strong> (<em>int</em>) – seed to use to control randomness, default: <code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
+<li><p><strong>merge_check</strong> (<em>bool</em>) – boolean parameters controlling whether a merge check should be performed. A merge check contains
+whether it should be checked if the random permutation produced an element which is already in df_index</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>pandas dataframe containing the newly created elements</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data.tree_structure">
+<span id="etnn-data-tree-structure-module"></span><h2>etnn.data.tree_structure module<a class="headerlink" href="#module-etnn.data.tree_structure" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.TreeNode">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">etnn.data.tree_structure.</span></span><span class="sig-name descname"><span class="pre">TreeNode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">node_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">children</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#TreeNode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.TreeNode" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Tree class for permutation group representation</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.TreeNode.calc_num_elem">
+<span class="sig-name descname"><span class="pre">calc_num_elem</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#TreeNode.calc_num_elem"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.TreeNode.calc_num_elem" title="Link to this definition"></a></dt>
+<dd><p>Calculate and update number of elements contained in this node</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>number of elements assigned to node</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.TreeNode.to_json">
+<span class="sig-name descname"><span class="pre">to_json</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#TreeNode.to_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.TreeNode.to_json" title="Link to this definition"></a></dt>
+<dd><p>Function to persist Tree and save it later on as a json</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>dict representing the json that is to be saved</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.load_tree">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.tree_structure.</span></span><span class="sig-name descname"><span class="pre">load_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#load_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.load_tree" title="Link to this definition"></a></dt>
+<dd><p>Load tree from json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_name</strong> (<em>str</em>) – name of the file</p></li>
+<li><p><strong>folder_path</strong> (<em>str</em><em>, </em><em>optional</em>) – folder path (relative or absolute)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Tree constructed from json file</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode">TreeNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.load_tree_from_json">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.tree_structure.</span></span><span class="sig-name descname"><span class="pre">load_tree_from_json</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#load_tree_from_json"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.load_tree_from_json" title="Link to this definition"></a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>Union</em><em>[</em><em>str</em><em>, </em><em>list</em><em>]</em><em>]</em>) – tree in a json representation(aka dict)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Loaded tree in basic version</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode">TreeNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.save_tree">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.tree_structure.</span></span><span class="sig-name descname"><span class="pre">save_tree</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">folder_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'datasets'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pretty_save</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#save_tree"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.save_tree" title="Link to this definition"></a></dt>
+<dd><p>Save tree structure as a json file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>tree_node</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – tree to be saved</p></li>
+<li><p><strong>file_name</strong> (<em>str</em>) – file name</p></li>
+<li><p><strong>folder_path</strong> (<em>str</em><em>, </em><em>optional</em>) – folder path (absolute or relative)</p></li>
+<li><p><strong>pretty_save</strong> (<em>bool</em><em>, </em><em>optional</em>) – whether it shall be saved in a formatted way or not, default: true</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="etnn.data.tree_structure.unroll_node">
+<span class="sig-prename descclassname"><span class="pre">etnn.data.tree_structure.</span></span><span class="sig-name descname"><span class="pre">unroll_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><span class="pre">TreeNode</span></a></span></span><a class="reference internal" href="_modules/etnn/data/tree_structure.html#unroll_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#etnn.data.tree_structure.unroll_node" title="Link to this definition"></a></dt>
+<dd><p>Function used to unroll a tree node, meaning that E-type children will be converted in several e-type children.
+An E type node with children parameter 5 will become 5 nodes of type E with 1 as children value.</p>
+<p>Serves to make some other functions dealing with permutation logic to be simpler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tree</strong> (<a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode"><em>TreeNode</em></a>) – Tree which is to be unrolled</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Unrolled tree</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#etnn.data.tree_structure.TreeNode" title="etnn.data.tree_structure.TreeNode">TreeNode</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-etnn.data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-etnn.data" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="etnn.html" class="btn btn-neutral float-left" title="etnn" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="etnn.nn.html" class="btn btn-neutral float-right" title="etnn.nn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

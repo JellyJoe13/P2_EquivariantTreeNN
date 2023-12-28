@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.nn.layer_framework &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">etnn.nn.layer_framework</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for etnn.nn.layer_framework</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">typing</span>
+
+<span class="kn">from</span> <span class="nn">torch.nn</span> <span class="kn">import</span> <span class="n">Module</span><span class="p">,</span> <span class="n">Linear</span><span class="p">,</span> <span class="n">ReLU</span>
+<span class="kn">from</span> <span class="nn">etnn.nn.s.chiral_node</span> <span class="kn">import</span> <span class="n">ChiralNodeNetworkTypeS</span>
+<span class="kn">from</span> <span class="nn">etnn.nn.q.chiral_node</span> <span class="kn">import</span> <span class="n">ChiralNodeNetworkTypeQ</span>
+<span class="kn">from</span> <span class="nn">etnn.nn.c.chiral_node</span> <span class="kn">import</span> <span class="n">ChiralNodeNetworkTypeC</span>
+<span class="kn">from</span> <span class="nn">etnn.nn.p.chiral_node</span> <span class="kn">import</span> <span class="n">ChiralNodeNetworkTypeP</span>
+
+<span class="kn">from</span> <span class="nn">etnn.nn.s.rnn</span> <span class="kn">import</span> <span class="n">RnnNetworkTypeS</span>
+<span class="kn">import</span> <span class="nn">etnn.tools.permutation_reordering</span> <span class="k">as</span> <span class="nn">pr</span>
+<span class="kn">from</span> <span class="nn">etnn.tools.tree_existance</span> <span class="kn">import</span> <span class="n">contains_node_type</span>
+<span class="kn">from</span> <span class="nn">etnn.data</span> <span class="kn">import</span> <span class="n">TreeNode</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">permutations</span>
+
+
+<div class="viewcode-block" id="LayerManagementFramework">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework">[docs]</a>
+<span class="k">class</span> <span class="nc">LayerManagementFramework</span><span class="p">(</span><span class="n">Module</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that realises a layer for equivariant inputs according to a permutation definition through a permutation</span>
+<span class="sd">    tree.</span>
+<span class="sd">    Handles submodules of &#39;chiral&#39; type that are heavily inspired by [Gainski2023]_.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">in_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">tree</span><span class="p">:</span> <span class="n">TreeNode</span><span class="p">,</span>
+            <span class="n">hidden_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">128</span><span class="p">,</span>
+            <span class="n">out_dim</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="n">node_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;chiral&quot;</span><span class="p">,</span>
+            <span class="n">bidirectional</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializes `LayerManagementFramework`. Input to this layer is 3-dimensional:</span>
+<span class="sd">        (set, elements_in_set, dimension_element)</span>
+
+<span class="sd">        :param in_dim: Dimension of the input values - denotes the dimension of each element in the set input.</span>
+<span class="sd">        :type in_dim: int</span>
+<span class="sd">        :param tree: Tree determining which input to consider equal</span>
+<span class="sd">        :type tree: TreeNode</span>
+<span class="sd">        :param hidden_dim: Hidden dimension the elements in the sets are transferred to. Default: ``128``.</span>
+<span class="sd">        :type hidden_dim: int</span>
+<span class="sd">        :param out_dim: Dimension of the desired output. General dimension of output: ``(set, out_dim)``. Default: ``1``</span>
+<span class="sd">        :type out_dim: int</span>
+<span class="sd">        :param k: Value that determines how many elements in order to set into context with each other. Default: ``2``</span>
+<span class="sd">        :type k: int</span>
+<span class="sd">        :param node_type: Parameter determining which neural network modules are to be used to realize the tree</span>
+<span class="sd">            equivariance nodes. Possible options: ``&#39;chiral&#39;`` for original 2-MLP connection of entries as shown in</span>
+<span class="sd">            [Gainski2023]_ or ``&#39;rnn&#39;`` for a structure similar to that but using RNN&#39;s instead of MLP&#39;s to set</span>
+<span class="sd">            elements in context to each other. Default: ``&#39;chiral&#39;``</span>
+<span class="sd">        :type node_type: str</span>
+<span class="sd">        :param bidirectional: Parameter that controls for RNN related nodes if the RNN should be bidirectional or not.</span>
+<span class="sd">            Default: ``False``</span>
+<span class="sd">        :type bidirectional: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">embedding_layer</span> <span class="o">=</span> <span class="n">Linear</span><span class="p">(</span><span class="n">in_dim</span><span class="p">,</span> <span class="n">hidden_dim</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span> <span class="o">=</span> <span class="n">tree</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="o">.</span><span class="n">calc_num_elem</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">node_type</span> <span class="o">==</span> <span class="s1">&#39;chiral&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">contains_node_type</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_s</span> <span class="o">=</span> <span class="n">ChiralNodeNetworkTypeS</span><span class="p">(</span>
+                    <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+                    <span class="n">k</span><span class="o">=</span><span class="n">k</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">contains_node_type</span><span class="p">(</span><span class="s2">&quot;Q&quot;</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_q</span> <span class="o">=</span> <span class="n">ChiralNodeNetworkTypeQ</span><span class="p">(</span>
+                    <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+                    <span class="n">k</span><span class="o">=</span><span class="n">k</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">contains_node_type</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_c</span> <span class="o">=</span> <span class="n">ChiralNodeNetworkTypeC</span><span class="p">(</span>
+                    <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+                    <span class="n">k</span><span class="o">=</span><span class="n">k</span>
+                <span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">contains_node_type</span><span class="p">(</span><span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_p</span> <span class="o">=</span> <span class="n">ChiralNodeNetworkTypeP</span><span class="p">(</span>
+                    <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+                    <span class="n">k</span><span class="o">=</span><span class="mi">1</span>  <span class="c1"># originally k but meaningless as the effective parameters do not change x*p_1 + x*p_2 = x*p</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">node_type</span> <span class="o">==</span> <span class="s1">&#39;rnn&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">contains_node_type</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">tree</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_s</span> <span class="o">=</span> <span class="n">RnnNetworkTypeS</span><span class="p">(</span>
+                    <span class="n">hidden_dim</span><span class="o">=</span><span class="n">hidden_dim</span><span class="p">,</span>
+                    <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="p">,</span>
+                    <span class="n">bidirectional</span><span class="o">=</span><span class="n">bidirectional</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Node type &#39;</span><span class="si">{</span><span class="n">node_type</span><span class="si">}</span><span class="s2">&#39; not implemented. Use documentation to see available &quot;</span>
+                                      <span class="sa">f</span><span class="s2">&quot;options.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">reduction_layers</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">ModuleList</span><span class="p">([</span>
+            <span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span><span class="p">,</span> <span class="n">hidden_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span> <span class="o">//</span> <span class="mi">2</span><span class="p">,</span> <span class="n">hidden_dim</span> <span class="o">//</span> <span class="mi">4</span><span class="p">),</span>
+            <span class="n">ReLU</span><span class="p">(),</span>
+            <span class="n">Linear</span><span class="p">(</span><span class="n">hidden_dim</span> <span class="o">//</span> <span class="mi">4</span><span class="p">,</span> <span class="n">out_dim</span><span class="p">)</span>
+        <span class="p">])</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="LayerManagementFramework.forward">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.forward">[docs]</a>
+    <span class="k">def</span> <span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Forward function as used in most pytorch modules. Returns prediction of the input data element(s). Read more</span>
+<span class="sd">        about this in the official pytorch documentation: https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.forward.</span>
+
+<span class="sd">        :param x: Input data to predict.</span>
+<span class="sd">        :type x: torch.Tensor</span>
+<span class="sd">        :return: Prediction of the module</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># embed the input through a linear layer</span>
+        <span class="n">embedded_x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">embedding_layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="c1"># run through tree layer</span>
+        <span class="n">after_layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">control_hub</span><span class="p">(</span><span class="n">embedded_x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">tree</span><span class="p">)</span>
+
+        <span class="c1"># end linear layers to get from dim hidden to output</span>
+        <span class="n">reduction</span> <span class="o">=</span> <span class="n">after_layer</span>
+        <span class="k">for</span> <span class="n">reduction_layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduction_layers</span><span class="p">:</span>
+            <span class="n">reduction</span> <span class="o">=</span> <span class="n">reduction_layer</span><span class="p">(</span><span class="n">reduction</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reduction</span></div>
+
+
+<div class="viewcode-block" id="LayerManagementFramework.control_hub">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.control_hub">[docs]</a>
+    <span class="k">def</span> <span class="nf">control_hub</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">embedded_x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">tree</span><span class="p">:</span> <span class="n">TreeNode</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to act as a switch to abstract the choice of functionality for each node type. Used to call instead</span>
+<span class="sd">        of the actual node type for better readability and reuse of functionality.</span>
+
+<span class="sd">        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.</span>
+<span class="sd">        :type embedded_x: torch.Tensor</span>
+<span class="sd">        :param tree: Tree containing the tree node for which to currently act upon.</span>
+<span class="sd">        :type tree: TreeNode</span>
+<span class="sd">        :return: prediction/result of a subcomponent used to derive the final result (=label)</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># todo(potential): get rid of recursive calling with dynamic routines</span>
+        <span class="c1"># todo(potential): increase efficiency</span>
+        <span class="c1"># node type switch to handle different nodes later on more easily</span>
+        <span class="k">if</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;S&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_s</span><span class="p">(</span><span class="n">embedded_x</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;Q&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_q</span><span class="p">(</span><span class="n">embedded_x</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;C&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_c</span><span class="p">(</span><span class="n">embedded_x</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">tree</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;P&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_p</span><span class="p">(</span><span class="n">embedded_x</span><span class="p">,</span> <span class="n">tree</span><span class="o">.</span><span class="n">children</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;not implemented yet&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LayerManagementFramework.ordered_tree_traversal">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.ordered_tree_traversal">[docs]</a>
+    <span class="k">def</span> <span class="nf">ordered_tree_traversal</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">embedded_x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">TreeNode</span><span class="p">],</span>
+            <span class="n">node_module</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function to traverse the tree nodes provided in the parameter in order to generate a prediction/label for the</span>
+<span class="sd">        input data at this node level. Uses the provided function as an indicator of what nodetype the current node is.</span>
+
+<span class="sd">        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.</span>
+<span class="sd">        :type embedded_x: torch.Tensor</span>
+<span class="sd">        :param children_list: List of nodes that are children to the current node</span>
+<span class="sd">        :type children_list: typing.List[TreeNode]</span>
+<span class="sd">        :param node_module: Specifies which module to use for the current node type</span>
+<span class="sd">        :type node_module: typing.Callable[[torch.Tensor], torch.Tensor]</span>
+<span class="sd">        :return: prediction/result of a subcomponent used to derive the final result (=label)</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># init storage room</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># init offset to index properly</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># loop over children and add to data storage by either</span>
+        <span class="c1"># - directly adding part of the tensor</span>
+        <span class="c1"># - run a submodule part and reduce to one vector</span>
+        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">children_list</span><span class="p">:</span>
+
+            <span class="c1"># if node is E then just add the part of tensor to data array</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">node_type</span> <span class="o">==</span> <span class="s2">&quot;E&quot;</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">+=</span> <span class="p">[</span><span class="n">embedded_x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="n">offset</span> <span class="o">+</span> <span class="n">child</span><span class="o">.</span><span class="n">num_elem</span><span class="p">,</span> <span class="p">:]]</span>
+
+            <span class="c1"># else run part of the array through the corresponding nn module</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">+=</span> <span class="p">[</span>
+                    <span class="n">torch</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">control_hub</span><span class="p">(</span><span class="n">embedded_x</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span><span class="n">offset</span> <span class="o">+</span> <span class="n">child</span><span class="o">.</span><span class="n">num_elem</span><span class="p">,</span> <span class="p">:],</span> <span class="n">child</span><span class="p">),</span>
+                        <span class="n">dim</span><span class="o">=-</span><span class="mi">2</span>
+                    <span class="p">)</span>
+                <span class="p">]</span>
+
+            <span class="c1"># increase offset for indexing</span>
+            <span class="n">offset</span> <span class="o">+=</span> <span class="n">child</span><span class="o">.</span><span class="n">num_elem</span>
+
+        <span class="c1"># stack data and turn it into tensor to run through this node&#39;s nn module</span>
+        <span class="n">fuzed_data</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">cat</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">node_module</span><span class="p">(</span><span class="n">fuzed_data</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LayerManagementFramework.handle_s">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.handle_s">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_s</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">embedded_x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">TreeNode</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function realising the functionality of a S type node.</span>
+
+<span class="sd">        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.</span>
+<span class="sd">        :type embedded_x: torch.Tensor</span>
+<span class="sd">        :param children_list: Defining which components are contained in the current node</span>
+<span class="sd">        :type children_list: typing.List[TreeNode]</span>
+<span class="sd">        :return: prediction/result of a subcomponent used to derive the final result (=label)</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_tree_traversal</span><span class="p">(</span>
+            <span class="n">embedded_x</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_s</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LayerManagementFramework.handle_q">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.handle_q">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_q</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">embedded_x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">TreeNode</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function realising the functionality of a Q type node.</span>
+
+<span class="sd">        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.</span>
+<span class="sd">        :type embedded_x: torch.Tensor</span>
+<span class="sd">        :param children_list: Defining which components are contained in the current node</span>
+<span class="sd">        :type children_list: typing.List[TreeNode]</span>
+<span class="sd">        :return: prediction/result of a subcomponent used to derive the final result (=label)</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># FIRST DIRECTION TREE NODE INTERPRETATION</span>
+        <span class="n">first</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_tree_traversal</span><span class="p">(</span>
+            <span class="n">embedded_x</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_q</span>
+        <span class="p">)</span>
+
+        <span class="c1"># SECOND DIRECTION TREE NODE INTERPRETATION</span>
+        <span class="c1"># check if inverting action is required</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">pr</span><span class="o">.</span><span class="n">is_inverting_required</span><span class="p">(</span><span class="n">children_list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">first</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_tree_traversal</span><span class="p">(</span>
+            <span class="n">embedded_x</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_q</span>
+        <span class="p">)</span>
+
+        <span class="c1"># mean over first and second and return</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="n">first</span><span class="p">,</span> <span class="n">second</span><span class="p">]),</span>
+            <span class="n">dim</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LayerManagementFramework.handle_c">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.handle_c">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_c</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">embedded_x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">TreeNode</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function realising the functionality of a C type node.</span>
+
+<span class="sd">        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.</span>
+<span class="sd">        :type embedded_x: torch.Tensor</span>
+<span class="sd">        :param children_list: Defining which components are contained in the current node</span>
+<span class="sd">        :type children_list: typing.List[TreeNode]</span>
+<span class="sd">        :return: prediction/result of a subcomponent used to derive the final result (=label)</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># init variables</span>
+        <span class="n">n_c</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">children_list</span><span class="p">)</span>
+
+        <span class="c1"># copy children list</span>
+        <span class="n">group_list</span> <span class="o">=</span> <span class="n">children_list</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="c1"># init results storage</span>
+        <span class="n">results_storage</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># check if cycling is required in the first place to avoid overhead</span>
+        <span class="n">permutation_needed</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">is_permuting_required</span><span class="p">(</span><span class="n">group_list</span><span class="p">)</span>
+
+        <span class="c1"># shift over input group wise and also invert</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_c</span><span class="p">):</span>
+            <span class="c1"># do q layer for arrangement basically</span>
+            <span class="c1"># FIRST</span>
+            <span class="n">results_storage</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_tree_traversal</span><span class="p">(</span>
+                    <span class="n">embedded_x</span><span class="o">=</span><span class="n">embedded_x</span><span class="p">,</span>
+                    <span class="n">children_list</span><span class="o">=</span><span class="n">group_list</span><span class="p">,</span>
+                    <span class="n">node_module</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_c</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+            <span class="c1"># SECOND</span>
+            <span class="k">if</span> <span class="n">pr</span><span class="o">.</span><span class="n">is_inverting_required</span><span class="p">(</span><span class="n">children_list</span><span class="p">):</span>
+                <span class="n">results_storage</span> <span class="o">+=</span> <span class="p">[</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">ordered_tree_traversal</span><span class="p">(</span>
+                        <span class="n">embedded_x</span><span class="o">=</span><span class="n">embedded_x</span><span class="p">,</span>
+                        <span class="n">children_list</span><span class="o">=</span><span class="n">group_list</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                        <span class="n">node_module</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_c</span>
+                    <span class="p">)</span>
+                <span class="p">]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">permutation_needed</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="c1"># shift one position</span>
+            <span class="n">first</span> <span class="o">=</span> <span class="n">group_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">group_list</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">group_list</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="n">group_list</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">first</span>
+
+        <span class="c1"># mean over first and second and return</span>
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">results_storage</span><span class="p">),</span>
+            <span class="n">dim</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LayerManagementFramework.handle_p">
+<a class="viewcode-back" href="../../../etnn.nn.html#etnn.nn.layer_framework.LayerManagementFramework.handle_p">[docs]</a>
+    <span class="k">def</span> <span class="nf">handle_p</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">embedded_x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">children_list</span><span class="p">:</span> <span class="n">typing</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">TreeNode</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function realising the functionality of a P type node.</span>
+
+<span class="sd">        :param embedded_x: Tensor containing the input data in an embedded form meaning of dimension ``hidden_dim``.</span>
+<span class="sd">        :type embedded_x: torch.Tensor</span>
+<span class="sd">        :param children_list: Defining which components are contained in the current node</span>
+<span class="sd">        :type children_list: typing.List[TreeNode]</span>
+<span class="sd">        :return: prediction/result of a subcomponent used to derive the final result (=label)</span>
+<span class="sd">        :rtype: torch.Tensor</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># init data storage</span>
+        <span class="n">data_storage</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># evaluate if permuting in the first place is required or not</span>
+        <span class="n">permuting_needed</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">is_permuting_required</span><span class="p">(</span><span class="n">children_list</span><span class="p">)</span>
+
+        <span class="c1"># generate all permutations of this node</span>
+        <span class="k">for</span> <span class="n">node_perm</span> <span class="ow">in</span> <span class="n">permutations</span><span class="p">(</span><span class="n">children_list</span><span class="p">):</span>
+            <span class="n">data_storage</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">ordered_tree_traversal</span><span class="p">(</span>
+                    <span class="n">embedded_x</span><span class="o">=</span><span class="n">embedded_x</span><span class="p">,</span>
+                    <span class="n">children_list</span><span class="o">=</span><span class="n">node_perm</span><span class="p">,</span>
+                    <span class="n">node_module</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tree_layer_p</span>
+                <span class="p">)</span>
+            <span class="p">]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">permuting_needed</span><span class="p">:</span>
+                <span class="k">break</span>
+
+        <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">data_storage</span><span class="p">),</span>
+            <span class="n">dim</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

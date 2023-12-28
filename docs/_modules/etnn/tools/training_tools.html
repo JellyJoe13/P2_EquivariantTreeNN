@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>etnn.tools.training_tools &mdash; P2_EquivariantTreeNN  documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            P2_EquivariantTreeNN
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">Modules</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">P2_EquivariantTreeNN</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">etnn.tools.training_tools</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for etnn.tools.training_tools</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">torch</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span><span class="p">,</span> <span class="n">mean_absolute_error</span><span class="p">,</span> <span class="n">precision_score</span><span class="p">,</span> <span class="n">recall_score</span><span class="p">,</span> <span class="n">f1_score</span><span class="p">,</span> \
+    <span class="n">jaccard_score</span><span class="p">,</span> <span class="n">explained_variance_score</span><span class="p">,</span> <span class="n">r2_score</span>
+
+
+<div class="viewcode-block" id="seeding_all">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.seeding_all">[docs]</a>
+<span class="k">def</span> <span class="nf">seeding_all</span><span class="p">(</span>
+        <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">420</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Seeds torch, numpy and random so that results are exactly reproducible.</span>
+
+<span class="sd">    :param seed: seed to be set</span>
+<span class="sd">    :type seed: int</span>
+<span class="sd">    :return: Nothing</span>
+<span class="sd">    :rtype: None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Set the random seed for reproducibility</span>
+    <span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">cuda</span><span class="o">.</span><span class="n">manual_seed_all</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">deterministic</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">torch</span><span class="o">.</span><span class="n">backends</span><span class="o">.</span><span class="n">cudnn</span><span class="o">.</span><span class="n">benchmark</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+
+
+<div class="viewcode-block" id="ConfigStore">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.ConfigStore">[docs]</a>
+<span class="k">class</span> <span class="nc">ConfigStore</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for storing configuration which can be saved and loaded to/from a json file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">in_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">hidden_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">out_dim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">k</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">ds_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">num_gondolas</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">num_part_pg</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">loss_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">optimizer_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">num_max_epochs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+            <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+            <span class="n">batch_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">32</span><span class="p">,</span>
+            <span class="n">early_stop_tol</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="n">use_equal_batcher</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">seed</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">420</span><span class="p">,</span>
+            <span class="n">label_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;default&quot;</span><span class="p">,</span>  <span class="c1"># tree</span>
+            <span class="n">final_label_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="mi">1000</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">in_dim</span> <span class="o">=</span> <span class="n">in_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hidden_dim</span> <span class="o">=</span> <span class="n">hidden_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">out_dim</span> <span class="o">=</span> <span class="n">out_dim</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">k</span> <span class="o">=</span> <span class="n">k</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds_size</span> <span class="o">=</span> <span class="n">ds_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_gondolas</span> <span class="o">=</span> <span class="n">num_gondolas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_part_pg</span> <span class="o">=</span> <span class="n">num_part_pg</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_name</span> <span class="o">=</span> <span class="n">loss_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer_name</span> <span class="o">=</span> <span class="n">optimizer_name</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_max_epochs</span> <span class="o">=</span> <span class="n">num_max_epochs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_size</span> <span class="o">=</span> <span class="n">batch_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">early_stop_tol</span> <span class="o">=</span> <span class="n">early_stop_tol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">use_equal_batcher</span> <span class="o">=</span> <span class="n">use_equal_batcher</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">seed</span> <span class="o">=</span> <span class="n">seed</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">label_type</span> <span class="o">=</span> <span class="n">label_type</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">final_label_factor</span> <span class="o">=</span> <span class="n">final_label_factor</span></div>
+
+
+
+<div class="viewcode-block" id="config_to_json">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.config_to_json">[docs]</a>
+<span class="k">def</span> <span class="nf">config_to_json</span><span class="p">(</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span><span class="p">,</span>
+        <span class="n">saving_path</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Saves the configuration in a json file in the specified path.</span>
+
+<span class="sd">    :param config: configuration to save</span>
+<span class="sd">    :type config: ConfigStore</span>
+<span class="sd">    :param saving_path: Path in which to save the json</span>
+<span class="sd">    :type saving_path: str</span>
+<span class="sd">    :return: Nothing</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">saving_path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">config</span><span class="p">),</span> <span class="n">file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+
+<div class="viewcode-block" id="load_config">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.load_config">[docs]</a>
+<span class="k">def</span> <span class="nf">load_config</span><span class="p">(</span>
+        <span class="n">file_path</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ConfigStore</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load the Configuration object from a json file.</span>
+
+<span class="sd">    :param file_path: File path to json file to load from</span>
+<span class="sd">    :type file_path: str</span>
+<span class="sd">    :return: loaded configuration</span>
+<span class="sd">    :rtype: ConfigStore</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ConfigStore</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">None</span></div>
+
+
+
+<div class="viewcode-block" id="EpochControl">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.EpochControl">[docs]</a>
+<span class="k">class</span> <span class="nc">EpochControl</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Tool for saving model states and later on maybe also for tracking loss data and early stopping control.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model_save_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;model.pt&quot;</span><span class="p">,</span>
+            <span class="n">config_save_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;config.json&quot;</span><span class="p">,</span>
+            <span class="n">saving_folder_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;.&quot;</span><span class="p">,</span>
+            <span class="n">tolerance</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">is_accuracy_score</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Init function of the EpochControl object</span>
+
+<span class="sd">        :param model_save_name: specifies under which name to save the model</span>
+<span class="sd">        :type model_save_name: str</span>
+<span class="sd">        :param config_save_name: specifies under which name to save the config, default: ``config.json``</span>
+<span class="sd">        :type config_save_name: str</span>
+<span class="sd">        :param saving_folder_path: folder in which to save config and model files, default: ``.``</span>
+<span class="sd">        :type saving_folder_path: str</span>
+<span class="sd">        :param verbose: determines whether prints to console concerning the progress shall be printed or not, default:</span>
+<span class="sd">            ``True``</span>
+<span class="sd">        :type verbose: bool</span>
+<span class="sd">        :param is_accuracy_score: Provides information whether the provided score is an accuracy score or not, default:</span>
+<span class="sd">            ``False``</span>
+<span class="sd">        :type is_accuracy_score: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">saving_folder_path</span><span class="p">,</span> <span class="n">model_save_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">config_save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">saving_folder_path</span><span class="p">,</span> <span class="n">config_save_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_best_save</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_best_stop</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="n">verbose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_epochs_not_better</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span> <span class="o">=</span> <span class="n">tolerance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_accuracy_score</span> <span class="o">=</span> <span class="n">is_accuracy_score</span>
+
+<div class="viewcode-block" id="EpochControl.check_better_save">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.EpochControl.check_better_save">[docs]</a>
+    <span class="k">def</span> <span class="nf">check_better_save</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">train_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">eval_value</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function that implements logic to determine whether this model performance is considered better or not.</span>
+
+<span class="sd">        :param train_value: training score of this epoch</span>
+<span class="sd">        :type train_value: float</span>
+<span class="sd">        :param eval_value: evaluation score of this epoch</span>
+<span class="sd">        :type eval_value: float</span>
+<span class="sd">        :return: Whether this epoch&#39;s state is considered better</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># copy values</span>
+        <span class="n">working_eval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">eval_value</span><span class="p">)</span>
+
+        <span class="c1"># if accuracy values - invert scores</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_accuracy_score</span><span class="p">:</span>
+            <span class="n">working_eval</span> <span class="o">*=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_best_save</span> <span class="o">&gt;</span> <span class="n">working_eval</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_best_save</span> <span class="o">=</span> <span class="n">working_eval</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<div class="viewcode-block" id="EpochControl.should_early_stop">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.EpochControl.should_early_stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">should_early_stop</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">train_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+            <span class="n">eval_value</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function determining whether the training should stop or not.</span>
+
+<span class="sd">        :param train_value: value coming from training</span>
+<span class="sd">        :type train_value: float</span>
+<span class="sd">        :param eval_value: value coming from validation/testing</span>
+<span class="sd">        :type eval_value: float</span>
+<span class="sd">        :return: whether to stop training or not</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># copy values</span>
+        <span class="n">working_eval</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">eval_value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_accuracy_score</span><span class="p">:</span>
+            <span class="n">working_eval</span> <span class="o">*=</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_best_stop</span> <span class="o">&gt;</span> <span class="n">working_eval</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_best_stop</span> <span class="o">=</span> <span class="n">working_eval</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_epochs_not_better</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">num_epochs_not_better</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_epochs_not_better</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">tolerance</span></div>
+
+
+<div class="viewcode-block" id="EpochControl.retain_best">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.EpochControl.retain_best">[docs]</a>
+    <span class="k">def</span> <span class="nf">retain_best</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+            <span class="n">train_value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">eval_value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines based on the provided train and eval values if the current state of the model is better and shall</span>
+<span class="sd">        be saved.</span>
+
+<span class="sd">        :param model: model which parameters to be saved</span>
+<span class="sd">        :type model: torch.nn.Module</span>
+<span class="sd">        :param train_value: value score produced by the train set</span>
+<span class="sd">        :type train_value: torch.Tensor</span>
+<span class="sd">        :param eval_value: value score produced by either the valuation or test set</span>
+<span class="sd">        :type train_value: torch.Tensor</span>
+<span class="sd">        :param config: Config container that will be saved if model is saved to know which model parameters to use</span>
+<span class="sd">            when restoring model/setup, default: ``None`` meaning nothing will be saved, although not recommended.</span>
+<span class="sd">        :type config: ConfigStore</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># check if value is better, save model</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_better_save</span><span class="p">(</span><span class="n">train_value</span><span class="p">,</span> <span class="n">eval_value</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">verbose</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;++save++&quot;</span><span class="p">)</span>
+            <span class="n">torch</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">state_dict</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_save_path</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">config_to_json</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">config_save_path</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<div class="viewcode-block" id="EpochControl.retain_best_and_stop">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.EpochControl.retain_best_and_stop">[docs]</a>
+    <span class="k">def</span> <span class="nf">retain_best_and_stop</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">model</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">,</span>
+            <span class="n">train_value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">eval_value</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">config</span><span class="p">:</span> <span class="n">ConfigStore</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Determines based on the provided train and eval values if the current state of the model is better and shall</span>
+<span class="sd">        be saved. Returns a truth value if training should be stopped or not.</span>
+
+<span class="sd">        :param model: model which parameters to be saved</span>
+<span class="sd">        :type model: torch.nn.Module</span>
+<span class="sd">        :param train_value: value score produced by the train set</span>
+<span class="sd">        :type train_value: torch.Tensor</span>
+<span class="sd">        :param eval_value: value score produced by either the valuation or test set</span>
+<span class="sd">        :type train_value: torch.Tensor</span>
+<span class="sd">        :param config: Config container that will be saved if model is saved to know which model parameters to use</span>
+<span class="sd">            when restoring model/setup, default: ``None`` meaning nothing will be saved, although not recommended.</span>
+<span class="sd">        :type config: ConfigStore</span>
+<span class="sd">        :return: Truth value if training should be stopped or not.</span>
+<span class="sd">        :rtype: bool</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retain_best</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">train_value</span><span class="p">,</span> <span class="n">eval_value</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># return truth value if to stop or not</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_early_stop</span><span class="p">(</span><span class="n">train_value</span><span class="p">,</span> <span class="n">eval_value</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="AccuracyManager">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.AccuracyManager">[docs]</a>
+<span class="k">class</span> <span class="nc">AccuracyManager</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class that computes regression and classification scores and saves computed data to csv file at each step so that</span>
+<span class="sd">    no data is lost.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">storage_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">storage_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;results&quot;</span><span class="p">,</span>
+            <span class="n">is_classification</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="n">num_classes</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+            <span class="n">average</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;micro&quot;</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Init function of the AccountManager class.</span>
+
+<span class="sd">        :param storage_name: name of the file into which to store the scores</span>
+<span class="sd">        :type storage_name: str</span>
+<span class="sd">        :param storage_path: path to the folder where the file is to be created, default: ``results``</span>
+<span class="sd">        :type storage_path: str</span>
+<span class="sd">        :param is_classification: bool indicating whether classification or only regression is currently executed,</span>
+<span class="sd">            default: ``False``.</span>
+<span class="sd">        :type is_classification: bool</span>
+<span class="sd">        :param num_classes: number of classes if classification is set tot true in the conditions, default: ``10``</span>
+<span class="sd">        :type num_classes: int</span>
+<span class="sd">        :param average: average parameter to use for the sklearn score function for parameter average as most likely</span>
+<span class="sd">            multi-class classification will be used. Not needed for regression. Default: ``micro``.</span>
+<span class="sd">        :type average: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">storage_total_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">storage_path</span><span class="p">,</span> <span class="n">storage_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_classification</span> <span class="o">=</span> <span class="n">is_classification</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_classes</span> <span class="o">=</span> <span class="n">num_classes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">class_range</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">num_classes</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">average</span> <span class="o">=</span> <span class="n">average</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">regression_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;mse&quot;</span><span class="p">:</span> <span class="n">mean_squared_error</span><span class="p">,</span>
+            <span class="s2">&quot;msa&quot;</span><span class="p">:</span> <span class="n">mean_absolute_error</span><span class="p">,</span>
+            <span class="s2">&quot;explained_variance&quot;</span><span class="p">:</span> <span class="n">explained_variance_score</span><span class="p">,</span>
+            <span class="s2">&quot;r2&quot;</span><span class="p">:</span> <span class="n">r2_score</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">classification_metrics</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;precision&quot;</span><span class="p">:</span> <span class="n">precision_score</span><span class="p">,</span>
+            <span class="s2">&quot;recall&quot;</span><span class="p">:</span> <span class="n">recall_score</span><span class="p">,</span>
+            <span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="n">f1_score</span><span class="p">,</span>
+            <span class="s2">&quot;jaccard&quot;</span><span class="p">:</span> <span class="n">jaccard_score</span><span class="p">,</span>
+        <span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mode_order</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;train&quot;</span><span class="p">,</span> <span class="s2">&quot;test&quot;</span><span class="p">]</span>
+
+        <span class="c1"># open file and write header</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_total_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="c1"># write header for id and epoch</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;config_id,epoch&quot;</span><span class="p">)</span>
+
+            <span class="c1"># write losses</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;,train_loss,test_loss&quot;</span><span class="p">)</span>
+
+            <span class="c1"># write scores for train and test</span>
+            <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode_order</span><span class="p">:</span>
+                <span class="c1"># write headers for regression scores</span>
+                <span class="k">for</span> <span class="n">regression_score_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regression_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;,</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">regression_score_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># if classification, write classification scores</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classification</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">classification_score_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_metrics</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;,</span><span class="si">{</span><span class="n">mode</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">classification_score_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="AccuracyManager.calc_and_collect">
+<a class="viewcode-back" href="../../../etnn.tools.html#etnn.tools.training_tools.AccuracyManager.calc_and_collect">[docs]</a>
+    <span class="k">def</span> <span class="nf">calc_and_collect</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="n">config_id</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+            <span class="n">epoch</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+            <span class="n">train_y_true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">train_y_pred</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+            <span class="n">train_loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">test_y_true</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">test_y_pred</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+            <span class="n">test_loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function calculates and collects various metrics for a given configuration and epoch. It writes the results</span>
+<span class="sd">        to a CSV file specified by the attribute storage_total_path.</span>
+
+<span class="sd">        The function uses the attributes regression_metrics, classification_metrics, and mode_order to determine which</span>
+<span class="sd">        metrics to calculate and in which order. It also uses the attribute is_classification to check if the problem is</span>
+<span class="sd">        a classification or a regression problem.</span>
+
+<span class="sd">        The function appends a new row to the CSV file with the following format:</span>
+<span class="sd">        config_id, epoch, train_loss, test_loss, train_regression_scores,</span>
+<span class="sd">        test_regression_scores, train_classification_scores, test_classification_scores.</span>
+
+<span class="sd">        If any of the values are missing or None, they will be written as 0. If any of the modes are not provided, they</span>
+<span class="sd">        will be skipped and filled with 0s.</span>
+
+<span class="sd">        :param config_id: The identifier of the configuration.</span>
+<span class="sd">        :type config_id: str</span>
+<span class="sd">        :param epoch: The number of the epoch.</span>
+<span class="sd">        :type epoch: int</span>
+<span class="sd">        :param train_y_true: The true labels for the training set.</span>
+<span class="sd">        :type train_y_true: torch.Tensor</span>
+<span class="sd">        :param train_y_pred: The predicted labels for the training set.</span>
+<span class="sd">        :type train_y_pred: torch.Tensor</span>
+<span class="sd">        :param train_loss: The loss value for the training set. If None, it will be written as 0.</span>
+<span class="sd">        :type train_loss: torch.Tensor</span>
+<span class="sd">        :param test_y_true: The true labels for the test set.</span>
+<span class="sd">        :type test_y_true: torch.Tensor</span>
+<span class="sd">        :param test_y_pred: The predicted labels for the test set.</span>
+<span class="sd">        :type test_y_pred: torch.Tensor</span>
+<span class="sd">        :param test_loss: The loss value for the test set. If None, it will be written as 0.</span>
+<span class="sd">        :type test_loss: torch.Tensor</span>
+
+<span class="sd">        :return: Nothing currently</span>
+<span class="sd">        :rtype: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># conver the id to string if it is not one already</span>
+        <span class="n">config_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">config_id</span><span class="p">)</span>
+
+        <span class="c1"># ease latter logic</span>
+        <span class="n">y_true</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_y_true</span><span class="p">,</span>
+            <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">test_y_true</span>
+        <span class="p">}</span>
+        <span class="n">y_pred</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;train&quot;</span><span class="p">:</span> <span class="n">train_y_pred</span><span class="p">,</span>
+            <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="n">test_y_pred</span>
+        <span class="p">}</span>
+
+        <span class="c1"># append to file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_total_path</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+            <span class="c1"># write the config id and epoch to csv file</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">config_id</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="c1"># write losses</span>
+            <span class="k">for</span> <span class="n">loss</span> <span class="ow">in</span> <span class="p">[</span><span class="n">train_loss</span><span class="p">,</span> <span class="n">test_loss</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">loss</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;,</span><span class="si">{</span><span class="nb">float</span><span class="p">(</span><span class="n">loss</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;,0.&quot;</span><span class="p">)</span>
+
+            <span class="c1"># create scores for each mode</span>
+            <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode_order</span><span class="p">:</span>
+
+                <span class="c1"># in case the mode did not receive values</span>
+                <span class="k">if</span> <span class="n">y_true</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">y_pred</span><span class="p">[</span><span class="n">mode</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">num_zeros</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">regression_metrics</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classification</span><span class="o">*</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">classification_metrics</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_zeros</span><span class="p">):</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;,0.&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># write the regression scores</span>
+                <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">regression_metrics</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;,</span><span class="si">{</span><span class="n">score</span><span class="p">(</span><span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span><span class="w"> </span><span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">mode</span><span class="p">])</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+                <span class="c1"># write the classification scores if the problem is a classification problem</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_classification</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">score</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">classification_metrics</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                        <span class="n">temp_score</span> <span class="o">=</span> <span class="n">score</span><span class="p">(</span>
+                            <span class="n">y_true</span><span class="o">=</span><span class="n">y_true</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span>
+                            <span class="n">y_pred</span><span class="o">=</span><span class="n">y_pred</span><span class="p">[</span><span class="n">mode</span><span class="p">],</span>
+                            <span class="n">labels</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">class_range</span><span class="p">,</span>
+                            <span class="n">zero_division</span><span class="o">=</span><span class="mf">0.</span><span class="p">,</span>
+                            <span class="n">average</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">average</span>
+                        <span class="p">)</span>
+                        <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;,</span><span class="si">{</span><span class="n">temp_score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Johannes P. Urban, B.Sc..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
