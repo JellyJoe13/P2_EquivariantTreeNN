@@ -142,8 +142,7 @@ class LayerManagementFramework(Module):
         :return: prediction/result of a subcomponent used to derive the final result (=label)
         :rtype: torch.Tensor
         """
-        # todo(potential): get rid of recursive calling with dynamic routines
-        # todo(potential): increase efficiency
+        # todo(potential): get rid of recursive calling with dynamic routines / increase efficiency
         # node type switch to handle different nodes later on more easily
         if tree.node_type == "S":
             return self.handle_s(embedded_x, tree.children)

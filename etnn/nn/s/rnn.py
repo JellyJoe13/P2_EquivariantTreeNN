@@ -46,7 +46,7 @@ class RnnNetworkTypeS(Module):
         reshaped_shift_stack = shift_stack.reshape(-1, *shift_stack.shape[2:])
 
         # send through RNN
-        # throw away hidden representation, todo: maybe use in future somehow
+        # throw away hidden representation
         rnn_output, _ = self.rnn(reshaped_shift_stack)
 
         print(rnn_output.shape)
@@ -63,7 +63,6 @@ class RnnNetworkTypeS(Module):
         # final linear layer
         after_final_linear = self.final_layer_linear(elu_sum_seq)
 
-        # todo: check state thing, the output is ridiculously high
         if self.use_state:
             temp = self.state_layer(self.own_state)
             after_final_linear = torch.cat([after_final_linear, temp], dim=-2)

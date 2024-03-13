@@ -44,8 +44,6 @@ class ChiralNodeNetworkTypeS(Module):
             k_layer(embedded_x)
             for k_layer in self.k_layers
         ]
-        # add zero booleans?
-        # todo: why and what
         # shift stacking
         shifted_embedding_stack = [
             embedding[..., idx:embedding.shape[-2]-self.k+idx+1, :]
@@ -60,7 +58,6 @@ class ChiralNodeNetworkTypeS(Module):
         # ELU layer
         after_elu = self.final_layer_elu(summed_shifted_embedding_stack)
         # final linear layer (hidden, hidden)
-        # todo: other activation functions?
         after_final_linear = self.final_layer_linear(after_elu)
 
         # aggregate messages/elements
@@ -73,7 +70,6 @@ class ChiralNodeNetworkTypeS(Module):
             what the heck is the own representation here then? trainable parameter? null?
             @trainable parameter: would make sense - each node can get own representation 
         """
-        # todo: check state thing, the output is ridiculously high
         if self.use_state:
             temp = self.state_layer(self.own_state)
             after_final_linear = torch.cat([after_final_linear, temp], dim=-2)
