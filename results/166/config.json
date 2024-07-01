@@ -1,0 +1,20 @@
+{
+    "in_dim": 15,
+    "hidden_dim": 368,
+    "out_dim": 1,
+    "k": 2,
+    "dataset": -2,
+    "ds_size": 100000,
+    "num_gondolas": 10,
+    "num_part_pg": 5,
+    "loss_name": "mse",
+    "optimizer_name": "adam",
+    "num_max_epochs": 300,
+    "learning_rate": 0.0021182146878565,
+    "batch_size": 1024,
+    "early_stop_tol": 5,
+    "use_equal_batcher": false,
+    "seed": 420,
+    "label_type": "default",
+    "final_label_factor": 0.001
+}
